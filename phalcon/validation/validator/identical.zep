@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -18,6 +18,8 @@
  */
 
 namespace Phalcon\Validation\Validator;
+
+use Phalcon\Validation\Validator;
 
 /**
  * Phalcon\Validation\Validator\Identical
@@ -34,21 +36,17 @@ namespace Phalcon\Validation\Validator;
  *</code>
  *
  */
-class Identical extends \Phalcon\Validation\Validator implements \Phalcon\Validation\ValidatorInterface
+class Identical extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param Phalcon\Validation validation
-	 * @param string             field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, string! field)
+	public function validate(<\Phalcon\Validation> validation, string! field) -> boolean
 	{
 		var message, label, replacePairs;
 
-		if validation->getValue(field) != this->getOption("value") {
+		if validation->getValue(field) != this->getOption("accepted") {
 
 			let label = this->getOption("label");
 			if empty label {

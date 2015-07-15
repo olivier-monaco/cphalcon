@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,10 @@
 
 namespace Phalcon\Validation\Validator;
 
+use Phalcon\Validation;
+use Phalcon\Validation\Message;
+use Phalcon\Validation\Validator;
+
 /**
  * Phalcon\Validation\Validator\Alpha
  *
@@ -32,17 +36,13 @@ namespace Phalcon\Validation\Validator;
  *)));
  *</code>
  */
-class Alpha extends \Phalcon\Validation\Validator implements \Phalcon\Validation\ValidatorInterface
+class Alpha extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param  Phalcon\Validation validation
-	 * @param  string             field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, string! field) -> boolean
+	public function validate(<Validation> validation, string! field) -> boolean
 	{
 		var value, message, label, replacePairs;
 
@@ -65,7 +65,7 @@ class Alpha extends \Phalcon\Validation\Validator implements \Phalcon\Validation
 				let message = validation->getDefaultMessage("Alpha");
 			}
 
-			validation->appendMessage(new \Phalcon\Validation\Message(strtr(message, replacePairs), field, "Alpha"));
+			validation->appendMessage(new Message(strtr(message, replacePairs), field, "Alpha"));
 			return false;
 		}
 

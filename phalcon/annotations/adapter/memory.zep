@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -24,16 +24,16 @@ use Phalcon\Annotations\AdapterInterface;
 use Phalcon\Annotations\Reflection;
 
 /**
-* Phalcon\Annotations\Adapter\Memory
-*
-* Stores the parsed annotations in memory. This adapter is the suitable development/testing
-*/
+ * Phalcon\Annotations\Adapter\Memory
+ *
+ * Stores the parsed annotations in memory. This adapter is the suitable development/testing
+ */
 class Memory extends Adapter implements AdapterInterface
 {
 	/**
-	* Data
-	* @var mixed
-	*/
+	 * Data
+	 * @var mixed
+	 */
 	protected _data;
 
 	/**
@@ -53,11 +53,8 @@ class Memory extends Adapter implements AdapterInterface
 	}
 
 	/**
-	* Writes parsed annotations to memory
-	*
-	* @param string key
-	* @param Phalcon\Annotations\Reflection data
-	*/
+	 * Writes parsed annotations to memory
+	 */
 	public function write(string! key, <Reflection> data)
 	{
 		var lowercasedKey;

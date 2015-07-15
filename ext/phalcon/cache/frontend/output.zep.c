@@ -19,23 +19,6 @@
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Frontend\Output
  *
@@ -119,8 +102,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Output, __construct) {
 
 /**
  * Returns the cache lifetime
- *
- * @return integer
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Output, getLifetime) {
 
@@ -139,8 +120,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Output, getLifetime) {
 
 /**
  * Check whether if frontend is buffering output
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Output, isBuffering) {
 
@@ -155,12 +134,11 @@ PHP_METHOD(Phalcon_Cache_Frontend_Output, isBuffering) {
 PHP_METHOD(Phalcon_Cache_Frontend_Output, start) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 
 	ZEPHIR_MM_GROW();
 
 	zephir_update_property_this(this_ptr, SL("_buffering"), (1) ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false) TSRMLS_CC);
-	ZEPHIR_CALL_FUNCTION(NULL, "ob_start", &_0);
+	ZEPHIR_CALL_FUNCTION(NULL, "ob_start", NULL, 116);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();
 
@@ -174,14 +152,13 @@ PHP_METHOD(Phalcon_Cache_Frontend_Output, start) {
 PHP_METHOD(Phalcon_Cache_Frontend_Output, getContent) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_1 = NULL;
 	zval *_0;
 
 	ZEPHIR_MM_GROW();
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_buffering"), PH_NOISY_CC);
 	if (zephir_is_true(_0)) {
-		ZEPHIR_RETURN_CALL_FUNCTION("ob_get_contents", &_1);
+		ZEPHIR_RETURN_CALL_FUNCTION("ob_get_contents", NULL, 117);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
@@ -195,14 +172,13 @@ PHP_METHOD(Phalcon_Cache_Frontend_Output, getContent) {
 PHP_METHOD(Phalcon_Cache_Frontend_Output, stop) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_1 = NULL;
 	zval *_0;
 
 	ZEPHIR_MM_GROW();
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_buffering"), PH_NOISY_CC);
 	if (zephir_is_true(_0)) {
-		ZEPHIR_CALL_FUNCTION(NULL, "ob_end_clean", &_1);
+		ZEPHIR_CALL_FUNCTION(NULL, "ob_end_clean", NULL, 118);
 		zephir_check_call_status();
 	}
 	zephir_update_property_this(this_ptr, SL("_buffering"), (0) ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false) TSRMLS_CC);

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -16,6 +16,11 @@
  |          Eduar Carvajal <eduar@phalconphp.com>                         |
  +------------------------------------------------------------------------+
 */
+
+#ifndef PHALCON_MVC_VIEW_ENGINE_VOLT_SCANNER_H
+#define PHALCON_MVC_VIEW_ENGINE_VOLT_SCANNER_H
+
+#include "php_phalcon.h"
 
 #define PHVOLT_RAW_BUFFER_SIZE 256
 
@@ -123,7 +128,7 @@
 #define PHVOLT_T_QUALIFIED 355
 #define PHVOLT_T_ENCLOSED 356
 #define PHVOLT_T_RAW_FRAGMENT 357
-#define PHVOLT_T_EMPTY 358
+#define PHVOLT_T_EMPTY_STATEMENT 358
 #define PHVOLT_T_ECHO 359
 #define PHVOLT_T_ARRAY 360
 #define PHVOLT_T_ARRAYACCESS 361
@@ -132,10 +137,34 @@
 #define PHVOLT_T_RESOLVED_EXPR 364
 #define PHVOLT_T_SLICE 365
 #define PHVOLT_T_TERNARY 366
-#define PHVOLT_T_NOT_IN 369
+#define PHVOLT_T_NOT_IN 367
 
-#define PHVOLT_T_MINUS 367
-#define PHVOLT_T_PLUS 368
+#define PHVOLT_T_MINUS 368
+#define PHVOLT_T_PLUS 369
+
+#define PHVOLT_T_EMPTY 380
+#define PHVOLT_T_EVEN 381
+#define PHVOLT_T_ODD 382
+#define PHVOLT_T_NUMERIC 383
+#define PHVOLT_T_SCALAR 384
+#define PHVOLT_T_ITERABLE 385
+
+#define PHVOLT_T_ISEMPTY 386
+#define PHVOLT_T_ISEVEN 387
+#define PHVOLT_T_ISODD 388
+#define PHVOLT_T_ISNUMERIC 389
+#define PHVOLT_T_ISSCALAR 390
+#define PHVOLT_T_ISITERABLE 391
+
+#define PHVOLT_T_NOT_ISEMPTY 392
+#define PHVOLT_T_NOT_ISEVEN 393
+#define PHVOLT_T_NOT_ISODD 394
+#define PHVOLT_T_NOT_ISNUMERIC 395
+#define PHVOLT_T_NOT_ISSCALAR 396
+#define PHVOLT_T_NOT_ISITERABLE 397
+
+#define PHVOLT_T_RAW 400
+#define PHVOLT_T_ENDRAW 401
 
 /* List of tokens and their names */
 typedef struct _phvolt_token_names {
@@ -164,6 +193,7 @@ typedef struct _phvolt_scanner_state {
 	unsigned int if_level;
 	unsigned int for_level;
 	int whitespace_control;
+	int forced_raw_state;
 } phvolt_scanner_state;
 
 /* Extra information tokens */
@@ -176,3 +206,5 @@ typedef struct _phvolt_scanner_token {
 int phvolt_get_token(phvolt_scanner_state *s, phvolt_scanner_token *token);
 
 extern const phvolt_token_names phvolt_tokens[];
+
+#endif  /* PHALCON_MVC_VIEW_ENGINE_VOLT_SCANNER_H */

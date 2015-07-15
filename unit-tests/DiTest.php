@@ -4,7 +4,7 @@
   +------------------------------------------------------------------------+
   | Phalcon Framework                                                      |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+  | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -380,6 +380,18 @@ class DiTest extends PHPUnit_Framework_TestCase
 		$bag = $di->get('sessionBag', array('dummy'));
 		$this->assertTrue(true);
 	}
+
+    	/**
+     	* Prior to 2.0.0 exception message was "Service 'servicewhichdoesnotexist' wasn't found in the dependency injection container"
+     	*
+     	* @expectedException \Phalcon\Di\Exception
+     	* @expectedExceptionMessage Service 'servicewhichdoesnotexist' wasn't found in the dependency injection container
+     	*/
+    	public function testGettingNonExistentServiceShouldThrowExceptionWithExpectedMessage()
+    	{
+        	$di = new \Phalcon\DI\FactoryDefault();
+        	$di->get('servicewhichdoesnotexist');
+    	}
 
 	public function testIssue1242()
 	{

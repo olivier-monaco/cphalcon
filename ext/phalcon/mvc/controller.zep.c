@@ -17,23 +17,6 @@
 #include "kernel/memory.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Controller
  *
@@ -74,13 +57,13 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Controller) {
 
 	ZEPHIR_REGISTER_CLASS_EX(Phalcon\\Mvc, Controller, phalcon, mvc_controller, phalcon_di_injectable_ce, phalcon_mvc_controller_method_entry, ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 
+	zend_class_implements(phalcon_mvc_controller_ce TSRMLS_CC, 1, phalcon_mvc_controllerinterface_ce);
 	return SUCCESS;
 
 }
 
 /**
  * Phalcon\Mvc\Controller constructor
- *
  */
 PHP_METHOD(Phalcon_Mvc_Controller, __construct) {
 
@@ -89,7 +72,7 @@ PHP_METHOD(Phalcon_Mvc_Controller, __construct) {
 	ZEPHIR_MM_GROW();
 
 	if ((zephir_method_exists_ex(this_ptr, SS("onconstruct") TSRMLS_CC) == SUCCESS)) {
-		ZEPHIR_CALL_METHOD(NULL, this_ptr, "onconstruct", NULL);
+		ZEPHIR_CALL_METHOD(NULL, this_ptr, "onconstruct", NULL, 0);
 		zephir_check_call_status();
 	}
 	ZEPHIR_MM_RESTORE();

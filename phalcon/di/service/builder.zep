@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -38,17 +38,9 @@ class Builder
 	 * @param array argument
 	 * @return mixed
 	 */
-	private function _buildParameter(<DiInterface> dependencyInjector, int position, argument)
+	private function _buildParameter(<DiInterface> dependencyInjector, int position, array! argument)
 	{
-
 		var type, name, value, instanceArguments;
-
-		/**
-		 * All the arguments must be an array
-		 */
-		if typeof argument != "array" {
-			throw new Exception("Argument at position " . position . " must be an array");
-		}
 
 		/**
 		 * All the arguments must have a type
@@ -98,12 +90,13 @@ class Builder
 					 * Build the instance with arguments
 					 */
 					return dependencyInjector->get(name, instanceArguments);
-				} else {
-					/**
-					 * The instance parameter does not have arguments for its constructor
-					 */
-					return dependencyInjector->get(name);
 				}
+
+				/**
+				 * The instance parameter does not have arguments for its constructor
+				 */
+				return dependencyInjector->get(name);
+
 			default:
 				/**
 				 * Unknown parameter type
@@ -114,21 +107,10 @@ class Builder
 
 	/**
 	 * Resolves an array of parameters
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
-	 * @param array arguments
-	 * @return array
 	 */
-	private function _buildParameters(<DiInterface> dependencyInjector, arguments)
+	private function _buildParameters(<DiInterface> dependencyInjector, array! arguments) -> array
 	{
 		var position, argument, buildArguments;
-
-		/**
-		 * The arguments group must be an array of arrays
-		 */
-		if typeof arguments != "array" {
-			throw new Exception("Definition arguments must be an array");
-		}
 
 		let buildArguments = [];
 		for position, argument in arguments {
@@ -149,7 +131,7 @@ class Builder
 	{
 		var className, arguments, paramCalls, methodPosition, method,
 			methodName, methodCall, instance, propertyPosition, property,
-			propertyName, propertyValue, reflection;
+			propertyName, propertyValue;
 
 		/**
 		 * The class name is required
@@ -164,19 +146,9 @@ class Builder
 			 * Build the instance overriding the definition constructor parameters
 			 */
 			if count(parameters) {
-				if is_php_version("5.6") {
-					let reflection = new \ReflectionClass(className),
-						instance = reflection->newInstanceArgs(parameters);
-				} else {
-					let instance = create_instance_params(className, parameters);
-				}
+				let instance = create_instance_params(className, parameters);
 			} else {
-				if is_php_version("5.6") {
-					let reflection = new \ReflectionClass(className),
-						instance = reflection->newInstance();
-				} else {
-					let instance = create_instance(className);
-				}
+				let instance = create_instance(className);
 			}
 
 		} else {
@@ -192,12 +164,7 @@ class Builder
 				let instance = create_instance_params(className, this->_buildParameters(dependencyInjector, arguments));
 
 			} else {
-				if is_php_version("5.6") {
-					let reflection = new \ReflectionClass(className),
-						instance = reflection->newInstance();
-				} else {
-					let instance = create_instance(className);
-				}
+				let instance = create_instance(className);				
 			}
 		}
 

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -18,6 +18,8 @@
  */
 
 namespace Phalcon;
+
+use \PDO as Pdo;
 
 /**
  * Phalcon\Db
@@ -58,28 +60,59 @@ namespace Phalcon;
 abstract class Db
 {
 
-	const FETCH_ASSOC = 1;
+	const FETCH_LAZY = \Pdo::FETCH_LAZY;
 
-	const FETCH_BOTH = 2;
+	const FETCH_ASSOC = \Pdo::FETCH_ASSOC;
 
-	const FETCH_NUM = 3;
+	const FETCH_NAMED = \Pdo::FETCH_NAMED;
 
-	const FETCH_OBJ = 4;
+	const FETCH_NUM = \Pdo::FETCH_NUM;
+
+	const FETCH_BOTH = \Pdo::FETCH_BOTH;
+
+	const FETCH_OBJ = \Pdo::FETCH_OBJ;
+
+	const FETCH_BOUND = \Pdo::FETCH_BOUND;
+
+	const FETCH_COLUMN = \Pdo::FETCH_COLUMN;
+
+	const FETCH_CLASS = \Pdo::FETCH_CLASS;
+
+	const FETCH_INTO = \Pdo::FETCH_INTO;
+
+	const FETCH_FUNC = \Pdo::FETCH_FUNC;
+
+	const FETCH_GROUP = \Pdo::FETCH_GROUP;
+
+	const FETCH_UNIQUE = \Pdo::FETCH_UNIQUE;
+
+	const FETCH_KEY_PAIR = \Pdo::FETCH_KEY_PAIR;
+
+	const FETCH_CLASSTYPE = \Pdo::FETCH_CLASSTYPE;
+
+	const FETCH_SERIALIZE = \Pdo::FETCH_SERIALIZE;
+
+	const FETCH_PROPS_LATE = \Pdo::FETCH_PROPS_LATE;
 
 	/**
 	 * Enables/disables options in the Database component
-	 *
-	 * @param array options
 	 */
 	public static function setup(array! options) -> void
 	{
-		var escapeIdentifiers;
+		var escapeIdentifiers, forceCasting;
 
 		/**
 		 * Enables/Disables globally the escaping of SQL identifiers
 		 */
 		if fetch escapeIdentifiers, options["escapeSqlIdentifiers"] {
 			globals_set("db.escape_identifiers", escapeIdentifiers);
+		}
+
+		/**
+		 * Force cast bound values in the PHP userland
+		 */
+		if fetch forceCasting, options["forceCasting"] {
+			globals_set("db.force_casting", forceCasting);
 		}
 	}
 }

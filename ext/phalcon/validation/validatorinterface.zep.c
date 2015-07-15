@@ -12,23 +12,6 @@
 #include "kernel/main.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Validation\ValidatorInterface
  *
@@ -45,26 +28,24 @@ ZEPHIR_INIT_CLASS(Phalcon_Validation_ValidatorInterface) {
 /**
  * Checks if an option is defined
  *
- * @param string key
- * @return mixed
+ * @deprecated since 2.1.0
+ * @see \Phalcon\Validation\Validator::hasOption()
  */
 ZEPHIR_DOC_METHOD(Phalcon_Validation_ValidatorInterface, isSetOption);
 
 /**
+ * Checks if an option is defined
+ */
+ZEPHIR_DOC_METHOD(Phalcon_Validation_ValidatorInterface, hasOption);
+
+/**
  * Returns an option in the validator's options
- * Returns null if the option hasn't been set
- *
- * @param string key
- * @return mixed
+ * Returns null if the option hasn't set
  */
 ZEPHIR_DOC_METHOD(Phalcon_Validation_ValidatorInterface, getOption);
 
 /**
  * Executes the validation
- *
- * @param Phalcon\Validation validator
- * @param string attribute
- * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Validation_ValidatorInterface, validate);
 

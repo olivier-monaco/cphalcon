@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -39,21 +39,39 @@ use Phalcon\Filter\Exception;
  */
 class Filter implements FilterInterface
 {
+	const FILTER_EMAIL      = "email";
+
+	const FILTER_ABSINT     = "absint";
+
+	const FILTER_INT        = "int";
+
+	const FILTER_INT_CAST   = "int!";
+
+	const FILTER_STRING     = "string";
+
+	const FILTER_FLOAT      = "float";
+
+	const FILTER_FLOAT_CAST = "float!";
+
+	const FILTER_ALPHANUM   = "alphanum";
+
+	const FILTER_TRIM       = "trim";
+
+	const FILTER_STRIPTAGS  = "striptags";
+
+	const FILTER_LOWER      = "lower";
+
+	const FILTER_UPPER      = "upper";
 
 	protected _filters;
 
 	/**
 	 * Adds a user-defined filter
-	 *
-	 * @param string name
-	 * @param callable handler
-	 * @return Phalcon\Filter
 	 */
 	public function add(string! name, handler) -> <Filter>
 	{
-
-		if typeof handler != "object" {
-			throw new Exception("Filter must be an object");
+		if typeof handler != "object" && !is_callable(handler) {
+			throw new Exception("Filter must be an object or callable");
 		}
 
 		let this->_filters[name] = handler;
@@ -62,11 +80,6 @@ class Filter implements FilterInterface
 
 	/**
 	 * Sanitizes a value with a specified single or set of filters
-	 *
-	 * @param  value
-	 * @param  filters
-	 * @param  noRecursive
-	 * @return mixed
 	 */
 	public function sanitize(var value, var filters, boolean noRecursive = false)
 	{
@@ -111,10 +124,6 @@ class Filter implements FilterInterface
 
 	/**
 	 * Internal sanitize wrapper to filter_var
-	 *
-	 * @param  mixed $value
-	 * @param  string $filter
-	 * @return mixed
 	 */
 	protected function _sanitize(var value, string! filter)
 	{
@@ -125,7 +134,7 @@ class Filter implements FilterInterface
 			/**
 			 * If the filter is a closure we call it in the PHP userland
 			 */
-			if filterObject instanceof \Closure {
+			if filterObject instanceof \Closure || is_callable(filterObject) {
 				return call_user_func_array(filterObject, [value]);
 			}
 
@@ -134,43 +143,54 @@ class Filter implements FilterInterface
 
 		switch filter {
 
-			case "email":
+			case Filter::FILTER_EMAIL:
 				/**
 				 * The 'email' filter uses the filter extension
 				 */
-				return filter_var(str_replace("'", "", value), constant("FILTER_SANITIZE_EMAIL"));
+				return filter_var(value, constant("FILTER_SANITIZE_EMAIL"));
 
-			case "int":
+			case Filter::FILTER_INT:
 				/**
 				 * 'int' filter sanitizes a numeric input
 				 */
 				return filter_var(value, FILTER_SANITIZE_NUMBER_INT);
 
-			case "int!":
+			case Filter::FILTER_INT_CAST:
+
 				return intval(value);
 
-			case "string":
+			case Filter::FILTER_ABSINT:
+
+				return abs(intval(value));
+
+			case Filter::FILTER_STRING:
+
 				return filter_var(value, FILTER_SANITIZE_STRING);
 
-			case "float":
+			case Filter::FILTER_FLOAT:
 				/**
 				 * The 'float' filter uses the filter extension
 				 */
 				return filter_var(value, FILTER_SANITIZE_NUMBER_FLOAT, ["flags": FILTER_FLAG_ALLOW_FRACTION]);
 
-			case "float!":
+			case Filter::FILTER_FLOAT_CAST:
+
 				return doubleval(value);
 
-			case "alphanum":
+			case Filter::FILTER_ALPHANUM:
+
 				return preg_replace("/[^A-Za-z0-9]/", "", value);
 
-			case "trim":
+			case Filter::FILTER_TRIM:
+
 				return trim(value);
 
-			case "striptags":
+			case Filter::FILTER_STRIPTAGS:
+
 				return strip_tags(value);
 
-			case "lower":
+			case Filter::FILTER_LOWER:
+
 				if function_exists("mb_strtolower") {
 					/**
 					 * 'lower' checks for the mbstring extension to make a correct lowercase transformation
@@ -179,7 +199,8 @@ class Filter implements FilterInterface
 				}
 				return strtolower(value);
 
-			case "upper":
+			case Filter::FILTER_UPPER:
+
 				if function_exists("mb_strtoupper") {
 					/**
 					 * 'upper' checks for the mbstring extension to make a correct lowercase transformation
@@ -195,10 +216,8 @@ class Filter implements FilterInterface
 
 	/**
 	 * Return the user-defined filters in the instance
-	 *
-	 * @return object[]
 	 */
-	public function getFilters()
+	public function getFilters() -> array
 	{
 		return this->_filters;
 	}

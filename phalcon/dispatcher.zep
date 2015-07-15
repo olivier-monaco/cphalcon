@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,12 +20,12 @@
 
 namespace Phalcon;
 
-use Phalcon\Filter;
 use Phalcon\DiInterface;
+use Phalcon\FilterInterface;
 use Phalcon\DispatcherInterface;
+use Phalcon\Events\ManagerInterface;
 use Phalcon\Di\InjectionAwareInterface;
 use Phalcon\Events\EventsAwareInterface;
-use Phalcon\Events\ManagerInterface;
 
 /**
  * Phalcon\Dispatcher
@@ -88,7 +88,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Phalcon\Dispatcher constructor
-	 *
 	 */
 	public function __construct()
 	{
@@ -97,8 +96,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the dependency injector
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -107,8 +104,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Returns the internal dependency injector
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -117,8 +112,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the events manager
-	 *
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
 	public function setEventsManager(<ManagerInterface> eventsManager)
 	{
@@ -127,8 +120,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Returns the internal event manager
-	 *
-	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getEventsManager() -> <ManagerInterface>
 	{
@@ -137,8 +128,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the default action suffix
-	 *
-	 * @param string actionSuffix
 	 */
 	public function setActionSuffix(string actionSuffix)
 	{
@@ -147,8 +136,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the module where the controller is (only informative)
-	 *
-	 * @param string moduleName
 	 */
 	public function setModuleName(string moduleName)
 	{
@@ -157,8 +144,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Gets the module where the controller class is
-	 *
-	 * @return string
 	 */
 	public function getModuleName() -> string
 	{
@@ -167,8 +152,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the namespace where the controller class is
-	 *
-	 * @param string namespaceName
 	 */
 	public function setNamespaceName(string namespaceName)
 	{
@@ -177,8 +160,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Gets a namespace to be prepended to the current handler name
-	 *
-	 * @return string
 	 */
 	public function getNamespaceName() -> string
 	{
@@ -187,8 +168,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the default namespace
-	 *
-	 * @param string namespaceName
 	 */
 	public function setDefaultNamespace(string namespaceName)
 	{
@@ -197,8 +176,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Returns the default namespace
-	 *
-	 * @return string
 	 */
 	public function getDefaultNamespace() -> string
 	{
@@ -207,8 +184,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the default action name
-	 *
-	 * @param string actionName
 	 */
 	public function setDefaultAction(string actionName)
 	{
@@ -217,8 +192,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Sets the action name to be dispatched
-	 *
-	 * @param string actionName
 	 */
 	public function setActionName(string actionName)
 	{
@@ -227,8 +200,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Gets the latest dispatched action name
-	 *
-	 * @return string
 	 */
 	public function getActionName() -> string
 	{
@@ -251,10 +222,8 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Gets action params
-	 *
-	 * @return array
 	 */
-	public function getParams()
+	public function getParams() -> array
 	{
 		return this->_params;
 	}
@@ -283,25 +252,24 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 		var params, filter, paramValue, dependencyInjector;
 
 		let params = this->_params;
-		if  fetch paramValue, params[param] {
-			if filters !== null {
-				let dependencyInjector = this->_dependencyInjector;
-				if typeof dependencyInjector != "object" {
-					this->{"_throwDispatchException"}("A dependency injection object is required to access the 'filter' service", self::EXCEPTION_NO_DI);
-				}
-				let filter = <Filter> dependencyInjector->getShared("filter");
-				return filter->sanitize(paramValue, filters);
-			} else {
-				return paramValue;
-			}
+		if !fetch paramValue, params[param] {
+			return defaultValue;
 		}
-		return defaultValue;
+
+		if filters === null {
+			return paramValue;
+		}
+
+		let dependencyInjector = this->_dependencyInjector;
+		if typeof dependencyInjector != "object" {
+			this->{"_throwDispatchException"}("A dependency injection object is required to access the 'filter' service", self::EXCEPTION_NO_DI);
+		}
+		let filter = <FilterInterface> dependencyInjector->getShared("filter");
+		return filter->sanitize(paramValue, filters);
 	}
 
 	/**
 	 * Returns the current method to be/executed in the dispatcher
-	 *
-	 * @return string
 	 */
 	public function getActiveMethod() -> string
 	{
@@ -310,8 +278,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Checks if the dispatch loop is finished or has more pendent controllers/tasks to dispatch
-	 *
-	 * @return boolean
 	 */
 	public function isFinished() -> boolean
 	{
@@ -348,8 +314,8 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 		boolean hasService;
 		int numberDispatches;
 		var value, handler, dependencyInjector, namespaceName, handlerName,
-			actionName, camelizedClass, params, eventsManager,
-			handlerSuffix, actionSuffix, handlerClass, status, actionMethod,
+			actionName, params, eventsManager,
+			actionSuffix, handlerClass, status, actionMethod,
 			wasFresh = false, e;
 
 		let dependencyInjector = <DiInterface> this->_dependencyInjector;
@@ -369,8 +335,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 		let value = null,
 			handler = null,
 			numberDispatches = 0,
-
-			handlerSuffix = this->_handlerSuffix,
 			actionSuffix = this->_actionSuffix,
 
 			this->_finished = false;
@@ -387,26 +351,12 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 			let this->_finished = true;
 
-			// If the current namespace is null we used the set in this->_defaultNamespace
+			this->_resolveEmptyProperties();
+
 			let namespaceName = this->_namespaceName;
-			if !namespaceName {
-				let namespaceName = this->_defaultNamespace;
-				let this->_namespaceName = namespaceName;
-			}
-
-			// If the handler is null we use the set in this->_defaultHandler
 			let handlerName = this->_handlerName;
-			if !handlerName {
-				let handlerName = this->_defaultHandler;
-				let this->_handlerName = handlerName;
-			}
-
-			// If the action is null we use the set in this->_defaultAction
 			let actionName = this->_actionName;
-			if !actionName {
-				let actionName = this->_defaultAction;
-				let this->_actionName = actionName;
-			}
+			let handlerClass = this->getHandlerClass();
 
 			// Calling beforeDispatch
 			if typeof eventsManager == "object" {
@@ -419,24 +369,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 				if this->_finished === false {
 					continue;
 				}
-			}
-
-			// We don't camelize the classes if they are in namespaces
-			if !memstr(handlerName, "\\") {
-				let camelizedClass = camelize(handlerName);
-			} else {
-				let camelizedClass = handlerName;
-			}
-
-			// Create the complete controller class name prepending the namespace
-			if namespaceName {
-				if ends_with(namespaceName, "\\") {
-					let handlerClass = namespaceName . camelizedClass . handlerSuffix;
-				} else {
-					let handlerClass = namespaceName . "\\" . camelizedClass . handlerSuffix;
-				}
-			} else {
-				let handlerClass = camelizedClass . handlerSuffix;
 			}
 
 			// Handlers are retrieved as shared instances from the Service Container
@@ -495,6 +427,7 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 			// Check if the method exists in the handler
 			let actionMethod = actionName . actionSuffix;
+
 			if !method_exists(handler, actionMethod) {
 
 				// Call beforeNotFoundAction
@@ -612,7 +545,6 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 					continue;
 				}
 			}
-
 		}
 
 		// Call afterDispatchLoop
@@ -675,12 +607,65 @@ abstract class Dispatcher implements DispatcherInterface, InjectionAwareInterfac
 
 	/**
 	 * Check if the current executed action was forwarded by another one
-	 *
-	 * @return boolean
 	 */
 	public function wasForwarded() -> boolean
 	{
 		return this->_forwarded;
 	}
 
+	/**
+	 * Possible class name that will be located to dispatch the request
+	 */
+	public function getHandlerClass() -> string
+	{
+		var handlerSuffix, handlerName, namespaceName,
+			camelizedClass, handlerClass;
+
+		this->_resolveEmptyProperties();
+
+		let handlerSuffix = this->_handlerSuffix,
+			handlerName = this->_handlerName,
+			namespaceName = this->_namespaceName;
+
+		// We don't camelize the classes if they are in namespaces
+		if !memstr(handlerName, "\\") {
+			let camelizedClass = camelize(handlerName);
+		} else {
+			let camelizedClass = handlerName;
+		}
+
+		// Create the complete controller class name prepending the namespace
+		if namespaceName {
+			if ends_with(namespaceName, "\\") {
+				let handlerClass = namespaceName . camelizedClass . handlerSuffix;
+			} else {
+				let handlerClass = namespaceName . "\\" . camelizedClass . handlerSuffix;
+			}
+		} else {
+			let handlerClass = camelizedClass . handlerSuffix;
+		}
+
+		return handlerClass;
+	}
+
+	/**
+	 * Set empty properties to their defaults (where defaults are available)
+	 */
+	protected function _resolveEmptyProperties() -> void
+	{
+		// If the current namespace is null we used the set in this->_defaultNamespace
+		if !this->_namespaceName {
+			let this->_namespaceName = this->_defaultNamespace;
+		}
+
+		// If the handler is null we use the set in this->_defaultHandler
+		if !this->_handlerName {
+			let this->_handlerName = this->_defaultHandler;
+		}
+
+		// If the action is null we use the set in this->_defaultAction
+		if !this->_actionName {
+			let this->_actionName = this->_defaultAction;
+		}
+	}
 }

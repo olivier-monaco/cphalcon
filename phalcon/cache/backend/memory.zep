@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -42,7 +42,7 @@ use Phalcon\Cache\Exception;
  *
  *</code>
  */
-class Memory extends Backend implements BackendInterface
+class Memory extends Backend implements BackendInterface, \Serializable
 {
 
 	protected _data;
@@ -83,9 +83,9 @@ class Memory extends Backend implements BackendInterface
 	 * @param long lifetime
 	 * @param boolean stopBuffer
 	 */
-	public function save(var keyName = null, var content = null, lifetime = null, stopBuffer = true) -> void
+	public function save(var keyName = null, var content = null, lifetime = null, boolean stopBuffer = true) -> void
 	{
-		var lastKey, frontend, cachedContent, preparedContent;
+		var lastKey, frontend, cachedContent, preparedContent, isBuffering;
 
 		if keyName === null {
 			let lastKey = this->_lastKey;
@@ -108,16 +108,17 @@ class Memory extends Backend implements BackendInterface
 		let preparedContent = frontend->beforeStore(cachedContent),
 			this->_data[lastKey] = preparedContent;
 
+		let isBuffering = frontend->isBuffering();
+
 		if stopBuffer === true {
 			frontend->stop();
 		}
 
-		if frontend->isBuffering() === true {
+		if isBuffering === true {
 			echo cachedContent;
 		}
 
 		let this->_started = false;
-
 	}
 
 	/**
@@ -147,14 +148,14 @@ class Memory extends Backend implements BackendInterface
 	 */
 	public function queryKeys(var prefix = null) -> array
 	{
-		var data, keys, index;
+		var data, index, keys;
 
 		let data = this->_data;
-		let keys = [];
 		if typeof data == "array" {
 			if !prefix {
-				let keys = array_keys(data);
+				let keys = (array) array_keys(data);
 			} else {
+			    	let keys = [];
 				for index, _ in data {
 					let keys[] = index;
 				}
@@ -265,12 +266,35 @@ class Memory extends Backend implements BackendInterface
 
 	/**
 	 * Immediately invalidates all existing items.
-	 *
-	 * @return boolean
 	 */
 	public function flush() -> boolean
 	{
 		let this->_data = null;
 		return true;
+	}
+
+	/**
+	 * Required for interface \Serializable
+	 */
+	public function serialize() -> string
+	{
+		return serialize([
+			"frontend": this->_frontend
+		]);
+	}
+
+	/**
+	 * Required for interface \Serializable
+	 */
+	public function unserialize(var data)
+	{
+		var unserialized;
+
+		let unserialized = unserialize(data);
+		if typeof unserialized != "array" {
+			throw new \Exception("Unserialized data must be an array");
+		}
+
+		let this->_frontend = unserialized["frontend"];
 	}
 }

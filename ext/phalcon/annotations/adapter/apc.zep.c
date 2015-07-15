@@ -23,23 +23,6 @@
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Annotations\Adapter\Apc
  *
@@ -122,7 +105,7 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Apc, read) {
 	ZEPHIR_INIT_VAR(_2);
 	ZEPHIR_CONCAT_SVV(_2, "_PHAN", _1, key);
 	zephir_fast_strtolower(_0, _2);
-	ZEPHIR_RETURN_CALL_FUNCTION("apc_fetch", NULL, _0);
+	ZEPHIR_RETURN_CALL_FUNCTION("apc_fetch", NULL, 79, _0);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -130,9 +113,6 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Apc, read) {
 
 /**
  * Writes parsed annotations to APC
- *
- * @param string key
- * @param Phalcon\Annotations\Reflection data
  */
 PHP_METHOD(Phalcon_Annotations_Adapter_Apc, write) {
 
@@ -156,17 +136,13 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Apc, write) {
 	}
 
 
-	if (!(zephir_instance_of_ev(data, phalcon_annotations_reflection_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'data' must be an instance of 'Phalcon\\Annotations\\Reflection'", "", 0);
-		return;
-	}
 	ZEPHIR_INIT_VAR(_0);
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_prefix"), PH_NOISY_CC);
 	ZEPHIR_INIT_VAR(_2);
 	ZEPHIR_CONCAT_SVV(_2, "_PHAN", _1, key);
 	zephir_fast_strtolower(_0, _2);
 	_3 = zephir_fetch_nproperty_this(this_ptr, SL("_ttl"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_FUNCTION("apc_store", NULL, _0, data, _3);
+	ZEPHIR_RETURN_CALL_FUNCTION("apc_store", NULL, 80, _0, data, _3);
 	zephir_check_call_status();
 	RETURN_MM();
 

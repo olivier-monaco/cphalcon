@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -49,7 +49,7 @@ class Pdo implements ResultInterface
 	/**
 	 * Active fetch mode
 	 */
-	protected _fetchMode = 4;
+	protected _fetchMode = Db::FETCH_OBJ;
 
 	/**
 	 * Internal resultset
@@ -76,7 +76,7 @@ class Pdo implements ResultInterface
 	 * @param array bindTypes
 	 */
 	public function __construct(<Db\AdapterInterface> connection, <\PDOStatement> result,
-		sqlStatement=null, bindParams=null, bindTypes=null)
+		sqlStatement = null, bindParams = null, bindTypes = null)
 	{
 
 		let this->_connection = connection,
@@ -96,8 +96,6 @@ class Pdo implements ResultInterface
 	/**
 	 * Allows to execute the statement again. Some database systems don't support scrollable cursors,
 	 * So, as cursors are forward only, we need to execute the cursor again to fetch rows from the begining
-	 *
-	 * @return boolean
 	 */
 	public function execute() -> boolean
 	{
@@ -112,15 +110,13 @@ class Pdo implements ResultInterface
 	 *	$result = $connection->query("SELECT * FROM robots ORDER BY name");
 	 *	$result->setFetchMode(Phalcon\Db::FETCH_OBJ);
 	 *	while ($robot = $result->fetch()) {
-	 *		echo robot->name;
+	 *		echo $robot->name;
 	 *	}
 	 *</code>
-	 *
-	 * @return mixed
 	 */
-	public function $fetch()
-	{
-		return this->_pdoStatement->$fetch();
+	public function $fetch(var fetchStyle = null, var cursorOrientation = null, var cursorOffset = null)
+	{		
+		return this->_pdoStatement->$fetch(fetchStyle, cursorOrientation, cursorOffset);
 	}
 
 	/**
@@ -134,8 +130,6 @@ class Pdo implements ResultInterface
 	 *		print_r($robot);
 	 *	}
 	 *</code>
-	 *
-	 * @return mixed
 	 */
 	public function fetchArray()
 	{
@@ -150,23 +144,36 @@ class Pdo implements ResultInterface
 	 *	$result = $connection->query("SELECT * FROM robots ORDER BY name");
 	 *	$robots = $result->fetchAll();
 	 *</code>
-	 *
-	 * @return array
 	 */
-	public function fetchAll()
+	public function fetchAll(var fetchStyle = null, var fetchArgument = null, var ctorArgs = null) -> array
 	{
+		if typeof fetchStyle == "integer" {
+
+			if (fetchStyle & Db::FETCH_CLASS) == Db::FETCH_CLASS {
+				return this->_pdoStatement->fetchAll(fetchStyle, fetchArgument, ctorArgs);
+			}
+
+			if (fetchStyle & Db::FETCH_COLUMN) == Db::FETCH_COLUMN {
+				return this->_pdoStatement->fetchAll(fetchStyle, fetchArgument);
+			}
+
+			if (fetchStyle & Db::FETCH_FUNC) == Db::FETCH_FUNC {
+				return this->_pdoStatement->fetchAll(fetchStyle, fetchArgument);
+			}
+
+			return this->_pdoStatement->fetchAll(fetchStyle);
+		}
+
 		return this->_pdoStatement->fetchAll();
 	}
 
 	/**
-	 * Gets number of rows returned by a resulset
+	 * Gets number of rows returned by a resultset
 	 *
 	 *<code>
 	 *	$result = $connection->query("SELECT * FROM robots ORDER BY name");
-	 *	echo 'There are ', $result->numRows(), ' rows in the resulset';
+	 *	echo 'There are ', $result->numRows(), ' rows in the resultset';
 	 *</code>
-	 *
-	 * @return int
 	 */
 	public function numRows() -> int
 	{
@@ -182,7 +189,7 @@ class Pdo implements ResultInterface
 			/**
 			 * MySQL library properly returns the number of records PostgreSQL too
 			 */
-			if type == "pgsql" || type == "mysql" {
+			if type == "mysql" || type == "pgsql" {
 				let pdoStatement = this->_pdoStatement,
 					rowCount = pdoStatement->rowCount();
 			}
@@ -222,20 +229,18 @@ class Pdo implements ResultInterface
 	}
 
 	/**
-	 * Moves internal resulset cursor to another position letting us to fetch a certain row
+	 * Moves internal resultset cursor to another position letting us to fetch a certain row
 	 *
 	 *<code>
 	 *	$result = $connection->query("SELECT * FROM robots ORDER BY name");
 	 *	$result->dataSeek(2); // Move to third row on result
 	 *	$row = $result->fetch(); // Fetch third row
 	 *</code>
-	 *
-	 * @param long number
 	 */
 	public function dataSeek(long number)
 	{
 		var connection, pdo, sqlStatement, bindParams, statement;
-		%{ pdo_stmt_t *stmt; long n; }%
+		%{ { pdo_stmt_t *stmt; long n; }%
 
 		let connection = this->_connection,
 			pdo = connection->getInternalHandler(),
@@ -280,9 +285,9 @@ class Pdo implements ResultInterface
 			n++;
 		}
 
+		}
+
 		}%
-
-
 	}
 
 	/**
@@ -301,46 +306,49 @@ class Pdo implements ResultInterface
 	 *	//Return an object
 	 *	$result->setFetchMode(Phalcon\Db::FETCH_OBJ);
 	 *</code>
-	 *
-	 * @param int fetchMode
 	 */
-	public function setFetchMode(int fetchMode)
+	public function setFetchMode(int fetchMode, var colNoOrClassNameOrObject = null, var ctorargs = null) -> boolean
 	{
 		var pdoStatement;
 
 		let pdoStatement = this->_pdoStatement;
-		switch fetchMode {
 
-			case Db::FETCH_BOTH:
-				pdoStatement->setFetchMode(\Pdo::FETCH_BOTH);
-				let this->_fetchMode = \Pdo::FETCH_BOTH;
-				break;
-
-			case Db::FETCH_ASSOC:
-				pdoStatement->setFetchMode(\Pdo::FETCH_ASSOC);
-				let this->_fetchMode = \Pdo::FETCH_ASSOC;
-				break;
-
-			case Db::FETCH_NUM:
-				pdoStatement->setFetchMode(\Pdo::FETCH_NUM);
-				let this->_fetchMode = \Pdo::FETCH_NUM;
-				break;
-
-			case Db::FETCH_OBJ:
-				pdoStatement->setFetchMode(\Pdo::FETCH_OBJ);
-				let this->_fetchMode = \Pdo::FETCH_OBJ;
-				break;
+		if (fetchMode & Db::FETCH_COLUMN) == Db::FETCH_COLUMN {
+			if pdoStatement->setFetchMode(fetchMode, colNoOrClassNameOrObject) {
+				let this->_fetchMode = fetchMode;
+				return true;
+			}
+			return false;
 		}
+
+		if (fetchMode & Db::FETCH_CLASS) == Db::FETCH_CLASS {
+			if pdoStatement->setFetchMode(fetchMode, colNoOrClassNameOrObject, ctorargs) {
+				let this->_fetchMode = fetchMode;
+				return true;
+			}
+			return false;
+		}
+
+		if (fetchMode & Db::FETCH_INTO) == Db::FETCH_INTO {
+			if pdoStatement->setFetchMode(fetchMode, colNoOrClassNameOrObject) {
+				let this->_fetchMode = fetchMode;
+				return true;
+			}
+			return false;
+		}
+
+		if pdoStatement->setFetchMode(fetchMode) {
+			let this->_fetchMode = fetchMode;
+			return true;
+		}
+		return false;
 	}
 
 	/**
 	 * Gets the internal PDO result object
-	 *
-	 * @return \PDOStatement
 	 */
 	public function getInternalResult() -> <\PDOStatement>
 	{
 		return this->_pdoStatement;
 	}
-
 }

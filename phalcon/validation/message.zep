@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -42,7 +42,7 @@ class Message implements MessageInterface
 	 * @param string field
 	 * @param string type
 	 */
-	public function __construct(string! message, field=null, type=null)
+	public function __construct(string! message, field = null, type = null)
 	{
 		let this->_message = message,
 			this->_field = field,
@@ -51,9 +51,6 @@ class Message implements MessageInterface
 
 	/**
 	 * Sets message type
-	 *
-	 * @param string type
-	 * @return Phalcon\Validation\Message
 	 */
 	public function setType(string! type) -> <Message>
 	{
@@ -63,8 +60,6 @@ class Message implements MessageInterface
 
 	/**
 	 * Returns message type
-	 *
-	 * @return string
 	 */
 	public function getType() -> string
 	{
@@ -73,9 +68,6 @@ class Message implements MessageInterface
 
 	/**
 	 * Sets verbose message
-	 *
-	 * @param string message
-	 * @return Phalcon\Validation\Message
 	 */
 	public function setMessage(string! message) -> <Message>
 	{
@@ -85,8 +77,6 @@ class Message implements MessageInterface
 
 	/**
 	 * Returns verbose message
-	 *
-	 * @return string
 	 */
 	public function getMessage() -> string
 	{
@@ -95,9 +85,6 @@ class Message implements MessageInterface
 
 	/**
 	 * Sets field name related to message
-	 *
-	 * @param string field
-	 * @return Phalcon\Validation\Message
 	 */
 	public function setField(string! field) -> <Message>
 	{
@@ -117,23 +104,17 @@ class Message implements MessageInterface
 
 	/**
 	 * Magic __toString method returns verbose message
-	 *
-	 * @return string
 	 */
-	public function __toString()
+	public function __toString() -> string
 	{
 		return this->_message;
 	}
 
 	/**
 	 * Magic __set_state helps to recover messsages from serialization
-	 *
-	 * @param array message
-	 * @return Phalcon\Validation\Message
 	 */
 	public static function __set_state(array! message) -> <Message>
 	{
 		return new self(message["_message"], message["_field"], message["_type"]);
 	}
-
 }

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,12 +19,14 @@
 
 namespace Phalcon\Assets\Resource;
 
+use Phalcon\Assets\Resource as ResourceBase;
+
 /**
  * Phalcon\Assets\Resource\Css
  *
  * Represents CSS resources
  */
-class Css extends \Phalcon\Assets\Resource
+class Css extends ResourceBase
 {
 
 	/**

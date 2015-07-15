@@ -4,7 +4,7 @@
   +------------------------------------------------------------------------+
   | Phalcon Framework                                                      |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+  | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
   +------------------------------------------------------------------------+
   | This source file is subject to the New BSD License that is bundled     |
   | with this package in the file docs/LICENSE.txt.                        |
@@ -297,7 +297,7 @@ class ModelsCriteriaTest extends PHPUnit_Framework_TestCase
 		$data = array('id' => 1);
 		$criteria = \Phalcon\Mvc\Model\Criteria::fromInput($di, "Robots", $data);
 		$this->assertEquals($criteria->getParams(), array(
-			'conditions' => 'id=:id:',
+			'conditions' => 'id = :id:',
 			'bind' => array(
 				'id' => 1,
 			),
@@ -315,7 +315,7 @@ class ModelsCriteriaTest extends PHPUnit_Framework_TestCase
 		$data = array('id' => 1, 'name' => 'ol');
 		$criteria = \Phalcon\Mvc\Model\Criteria::fromInput($di, "Robots", $data);
 		$this->assertEquals($criteria->getParams(), array(
-			'conditions' => 'id=:id: AND name LIKE :name:',
+			'conditions' => 'id = :id: AND name LIKE :name:',
 			'bind' => array(
 				'id' => 1,
 				'name' => '%ol%',
@@ -325,7 +325,7 @@ class ModelsCriteriaTest extends PHPUnit_Framework_TestCase
 		$data = array('id' => 1, 'name' => 'ol', 'other' => true);
 		$criteria = \Phalcon\Mvc\Model\Criteria::fromInput($di, "Robots", $data);
 		$this->assertEquals($criteria->getParams(), array(
-			'conditions' => 'id=:id: AND name LIKE :name:',
+			'conditions' => 'id = :id: AND name LIKE :name:',
 			'bind' => array(
 				'id' => 1,
 				'name' => '%ol%',

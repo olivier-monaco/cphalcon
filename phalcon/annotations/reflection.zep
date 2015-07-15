@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -27,14 +27,17 @@ use Phalcon\Annotations\Collection;
  * Allows to manipulate the annotations reflection in an OO manner
  *
  *<code>
- * //Parse the annotations in a class
- * $reader = new \Phalcon\Annotations\Reader();
+ * use Phalcon\Annotations\Reader;
+ * use Phalcon\Annotations\Reflection;
+ *
+ * // Parse the annotations in a class
+ * $reader = new Reader();
  * $parsing = reader->parse('MyComponent');
  *
- * //Create the reflection
- * $reflection = new \Phalcon\Annotations\Reflection($parsing);
+ * // Create the reflection
+ * $reflection = new Reflection($parsing);
  *
- * //Get the annotations in the class docblock
+ * // Get the annotations in the class docblock
  * $classAnnotations = reflection->getClassAnnotations();
  *</code>
  */
@@ -63,12 +66,9 @@ class Reflection
 
 	/**
 	 * Returns the annotations found in the class docblock
-	 *
-	 * @return Phalcon\Annotations\Collection|false
 	 */
 	public function getClassAnnotations() -> <Collection> | boolean
 	{
-
 		var annotations, reflectionClass, collection;
 
 		let annotations = this->_classAnnotations;
@@ -86,16 +86,15 @@ class Reflection
 
 	/**
 	 * Returns the annotations found in the methods' docblocks
-	 *
-	 * @return Phalcon\Annotations\Collection[]
 	 */
-	public function getMethodsAnnotations()
+	public function getMethodsAnnotations() -> <Collection[]> | boolean
 	{
 		var annotations, reflectionMethods,
 			collections, methodName, reflectionMethod;
 
 		let annotations = this->_methodAnnotations;
 		if typeof annotations != "object" {
+
 			if fetch reflectionMethods, this->_reflectionData["methods"] {
 				if count(reflectionMethods) {
 					let collections = [];
@@ -106,6 +105,7 @@ class Reflection
 					return collections;
 				}
 			}
+
 			let this->_methodAnnotations = false;
 			return false;
 		}
@@ -113,11 +113,9 @@ class Reflection
 	}
 
 	/**
-	 * Returns the annotations found in the properties' docblocks
-	 *
-	 * @return Phalcon\Annotations\Collection[]
+	 * Returns the annotations found in the properties' docblocks	 
 	 */
-	public function getPropertiesAnnotations()
+	public function getPropertiesAnnotations() -> <Collection[]> | boolean
 	{
 		var annotations, reflectionProperties,
 			collections, property, reflectionProperty;
@@ -137,6 +135,7 @@ class Reflection
 			let this->_propertyAnnotations = false;
 			return false;
 		}
+
 		return annotations;
 	}
 
@@ -155,7 +154,7 @@ class Reflection
 	 *
 	 * @return array data
 	 */
-	public static function __set_state(data)
+	public static function __set_state(data) -> <Reflection>
 	{
 		var reflectionData;
 
@@ -170,5 +169,4 @@ class Reflection
 
 		return new self();
 	}
-
 }

@@ -21,23 +21,6 @@
 #include "kernel/array.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\Message
  *
@@ -85,7 +68,7 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Model_Message) {
  * Phalcon\Mvc\Model\Message constructor
  *
  * @param string message
- * @param string field
+ * @param string|array field
  * @param string type
  * @param Phalcon\Mvc\ModelInterface model
  */
@@ -131,9 +114,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, __construct) {
 
 /**
  * Sets message type
- *
- * @param string type
- * @return Phalcon\Mvc\Model\MessageInterface
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, setType) {
 
@@ -163,8 +143,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, setType) {
 
 /**
  * Returns message type
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, getType) {
 
@@ -175,9 +153,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, getType) {
 
 /**
  * Sets verbose message
- *
- * @param string message
- * @return Phalcon\Mvc\Model\MessageInterface
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, setMessage) {
 
@@ -207,8 +182,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, setMessage) {
 
 /**
  * Returns verbose message
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, getMessage) {
 
@@ -219,40 +192,22 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, getMessage) {
 
 /**
  * Sets field name related to message
- *
- * @param string field
- * @return Phalcon\Mvc\Model\MessageInterface
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, setField) {
 
-	zval *field_param = NULL;
-	zval *field = NULL;
+	zval *field;
 
-	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 0, &field_param);
+	zephir_fetch_params(0, 1, 0, &field);
 
-	if (unlikely(Z_TYPE_P(field_param) != IS_STRING && Z_TYPE_P(field_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'field' must be a string") TSRMLS_CC);
-		RETURN_MM_NULL();
-	}
-
-	if (likely(Z_TYPE_P(field_param) == IS_STRING)) {
-		zephir_get_strval(field, field_param);
-	} else {
-		ZEPHIR_INIT_VAR(field);
-		ZVAL_EMPTY_STRING(field);
-	}
 
 
 	zephir_update_property_this(this_ptr, SL("_field"), field TSRMLS_CC);
-	RETURN_THIS();
+	RETURN_THISW();
 
 }
 
 /**
  * Returns field name related to message
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, getField) {
 
@@ -263,9 +218,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, getField) {
 
 /**
  * Set the model who generates the message
- *
- * @param Phalcon\Mvc\ModelInterface model
- * @return Phalcon\Mvc\Model\Message
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, setModel) {
 
@@ -275,10 +227,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, setModel) {
 
 
 
-	if (!(zephir_instance_of_ev(model, phalcon_mvc_modelinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'model' must be an instance of 'Phalcon\\Mvc\\ModelInterface'", "", 0);
-		return;
-	}
 	zephir_update_property_this(this_ptr, SL("_model"), model TSRMLS_CC);
 	RETURN_THISW();
 
@@ -286,8 +234,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, setModel) {
 
 /**
  * Returns the model that produced the message
- *
- * @return Phalcon\Mvc\ModelInterface
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, getModel) {
 
@@ -298,8 +244,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, getModel) {
 
 /**
  * Magic __toString method returns verbose message
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, __toString) {
 
@@ -310,9 +254,6 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, __toString) {
 
 /**
  * Magic __set_state helps to re-build messages variable exporting
- *
- * @param array message
- * @return Phalcon\Mvc\Model\MessageInterface
  */
 PHP_METHOD(Phalcon_Mvc_Model_Message, __set_state) {
 
@@ -328,10 +269,10 @@ PHP_METHOD(Phalcon_Mvc_Model_Message, __set_state) {
 
 
 	object_init_ex(return_value, phalcon_mvc_model_message_ce);
-	zephir_array_fetch_string(&_0, message, SL("_message"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 186 TSRMLS_CC);
-	zephir_array_fetch_string(&_1, message, SL("_field"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 186 TSRMLS_CC);
-	zephir_array_fetch_string(&_2, message, SL("_type"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 186 TSRMLS_CC);
-	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, _0, _1, _2);
+	zephir_array_fetch_string(&_0, message, SL("_message"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 161 TSRMLS_CC);
+	zephir_array_fetch_string(&_1, message, SL("_field"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 161 TSRMLS_CC);
+	zephir_array_fetch_string(&_2, message, SL("_type"), PH_NOISY | PH_READONLY, "phalcon/mvc/model/message.zep", 161 TSRMLS_CC);
+	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 8, _0, _1, _2);
 	zephir_check_call_status();
 	RETURN_MM();
 

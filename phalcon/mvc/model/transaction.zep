@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -104,8 +104,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Sets transaction manager related to the transaction
-	 *
-	 * @param Phalcon\Mvc\Model\Transaction\ManagerInterface $manager
 	 */
 	public function setTransactionManager(<ManagerInterface> manager)
 	{
@@ -114,8 +112,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Starts the transaction
-	 *
-	 * @return boolean
 	 */
 	public function begin() -> boolean
 	{
@@ -124,8 +120,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Commits the transaction
-	 *
-	 * @return boolean
 	 */
 	public function commit() -> boolean
 	{
@@ -171,10 +165,8 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Returns the connection related to transaction
-	 *
-	 * @return Phalcon\Db\AdapterInterface
 	 */
-	public function getConnection()
+	public function getConnection() -> <\Phalcon\Db\AdapterInterface>
 	{
 		if this->_rollbackOnAbort {
 			if connection_aborted() {
@@ -186,8 +178,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Sets if is a reused transaction or new once
-	 *
-	 * @param boolean isNew
 	 */
 	public function setIsNewTransaction(boolean isNew)
 	{
@@ -196,8 +186,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Sets flag to rollback on abort the HTTP connection
-	 *
-	 * @param boolean $rollbackOnAbort
 	 */
 	public function setRollbackOnAbort(boolean rollbackOnAbort)
 	{
@@ -206,8 +194,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Checks whether transaction is managed by a transaction manager
-	 *
-	 * @return boolean
 	 */
 	public function isManaged() -> boolean
 	{
@@ -216,18 +202,14 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Returns validations messages from last save try
-	 *
-	 * @return array
 	 */
-	public function getMessages()
+	public function getMessages() -> array
 	{
 		return this->_messages;
 	}
 
 	/**
 	 * Checks whether internal connection is under an active transaction
-	 *
-	 * @return boolean
 	 */
 	public function isValid() -> boolean
 	{
@@ -236,8 +218,6 @@ class Transaction implements TransactionInterface
 
 	/**
 	 * Sets object which generates rollback action
-	 *
-	 * @param Phalcon\Mvc\ModelInterface record
 	 */
 	public function setRollbackedRecord(<ModelInterface> record)
 	{

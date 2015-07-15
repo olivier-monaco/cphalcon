@@ -11,14 +11,15 @@
 #include "kernel/globals.h"
 
 #define PHP_PHALCON_NAME        "phalcon"
-#define PHP_PHALCON_VERSION     "2.0.0b"
+#define PHP_PHALCON_VERSION     "2.0.5"
 #define PHP_PHALCON_EXTNAME     "phalcon"
-#define PHP_PHALCON_AUTHOR      "Phalcon Team and Contributors"
-#define PHP_PHALCON_ZEPVERSION  "0.5.9a"
+#define PHP_PHALCON_AUTHOR      "Phalcon Team and contributors"
+#define PHP_PHALCON_ZEPVERSION  "0.7.1b"
 #define PHP_PHALCON_DESCRIPTION "Web framework delivered as a C-extension for PHP"
 
 typedef struct _zephir_struct_db { 
 	zend_bool escape_identifiers;
+	zend_bool force_casting;
 } zephir_struct_db;
 
 typedef struct _zephir_struct_orm { 
@@ -32,6 +33,9 @@ typedef struct _zephir_struct_orm {
 	zend_bool not_null_validations;
 	zend_bool exception_on_failed_save;
 	zend_bool enable_literals;
+	zend_bool late_state_binding;
+	zend_bool cast_on_hydrate;
+	zend_bool ignore_unknown_columns;
 } zephir_struct_orm;
 
 
@@ -50,6 +54,8 @@ ZEND_BEGIN_MODULE_GLOBALS(phalcon)
 
 	/** Function cache */
 	HashTable *fcache;
+
+	zephir_fcall_cache_entry *scache[ZEPHIR_MAX_CACHE_SLOTS];
 
 	/* Cache enabled */
 	unsigned int cache_enabled;

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -18,6 +18,11 @@
  */
 
 namespace Phalcon\Validation\Validator;
+
+use Phalcon\Validation;
+use Phalcon\Validation\Validator;
+use Phalcon\Validation\Exception;
+use Phalcon\Validation\Message;
 
 /**
  * Phalcon\Validation\Validator\StringLength
@@ -35,20 +40,15 @@ namespace Phalcon\Validation\Validator;
  *      'messageMaximum' => 'We don\'t like really long names',
  *      'messageMinimum' => 'We want more than just their initials'
  *)));
- *</code>
- *
+ *</code> 
  */
-class StringLength extends \Phalcon\Validation\Validator implements \Phalcon\Validation\ValidatorInterface
+class StringLength extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param Phalcon\Validation validation
-	 * @param string field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, string! field) -> boolean
+	public function validate(<Validation> validation, string! field) -> boolean
 	{
 		var isSetMin, isSetMax, value, length, message, minimum, maximum, label, replacePairs;
 
@@ -59,7 +59,7 @@ class StringLength extends \Phalcon\Validation\Validator implements \Phalcon\Val
 			isSetMax = this->isSetOption("max");
 
 		if !isSetMin && !isSetMax {
-			throw new \Phalcon\Validation\Exception("A minimum or maximum must be set");
+			throw new Exception("A minimum or maximum must be set");
 		}
 
 		let value = validation->getValue(field);
@@ -99,7 +99,7 @@ class StringLength extends \Phalcon\Validation\Validator implements \Phalcon\Val
 					let message = validation->getDefaultMessage("TooLong");
 				}
 
-				validation->appendMessage(new \Phalcon\Validation\Message(strtr(message, replacePairs), field, "TooLong"));
+				validation->appendMessage(new Message(strtr(message, replacePairs), field, "TooLong"));
 				return false;
 			}
 		}
@@ -121,12 +121,11 @@ class StringLength extends \Phalcon\Validation\Validator implements \Phalcon\Val
 					let message = validation->getDefaultMessage("TooShort");
 				}
 
-				validation->appendMessage(new \Phalcon\Validation\Message(strtr(message, replacePairs), field, "TooShort"));
+				validation->appendMessage(new Message(strtr(message, replacePairs), field, "TooShort"));
 				return false;
 			}
 		}
 
 		return true;
 	}
-
 }

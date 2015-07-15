@@ -21,23 +21,6 @@
 #include "kernel/array.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Micro\LazyLoader
  *
@@ -57,8 +40,6 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Micro_LazyLoader) {
 
 /**
  * Phalcon\Mvc\Micro\LazyLoader constructor
- *
- * @param string definition
  */
 PHP_METHOD(Phalcon_Mvc_Micro_LazyLoader, __construct) {
 
@@ -127,13 +108,13 @@ PHP_METHOD(Phalcon_Mvc_Micro_LazyLoader, __call) {
 		_1 = zend_fetch_class(Z_STRVAL_P(_0), Z_STRLEN_P(_0), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		object_init_ex(handler, _1);
 		if (zephir_has_constructor(handler TSRMLS_CC)) {
-			ZEPHIR_CALL_METHOD(NULL, handler, "__construct", NULL);
+			ZEPHIR_CALL_METHOD(NULL, handler, "__construct", NULL, 0);
 			zephir_check_call_status();
 		}
 		zephir_update_property_this(this_ptr, SL("_handler"), handler TSRMLS_CC);
 	}
 	ZEPHIR_INIT_VAR(_2);
-	array_init_size(_2, 3);
+	zephir_create_array(_2, 2, 0 TSRMLS_CC);
 	zephir_array_fast_append(_2, handler);
 	zephir_array_fast_append(_2, method);
 	ZEPHIR_CALL_USER_FUNC_ARRAY(return_value, _2, arguments);

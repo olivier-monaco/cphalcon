@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -29,17 +29,13 @@ interface FrontendInterface
 
 	/**
 	 * Returns the cache lifetime
-	 *
-	 * @return int
 	 */
-	public function getLifetime();
+	public function getLifetime() -> int;
 
 	/**
 	 * Check whether if frontend is buffering output
-	 *
-	 * @return boolean
 	 */
-	public function isBuffering();
+	public function isBuffering() -> boolean;
 
 	/**
 	 * Starts the frontend
@@ -71,5 +67,4 @@ interface FrontendInterface
 	 * @param mixed data
 	 */
 	public function afterRetrieve(data);
-
 }

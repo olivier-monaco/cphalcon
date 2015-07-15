@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -31,7 +31,7 @@ namespace Phalcon;
  *	$acl = new \Phalcon\Acl\Adapter\Memory();
  *
  *	//Default action is deny access
- *	$acl->setDefaultAction(Phalcon\Acl::DENY);
+ *	$acl->setDefaultAction(\Phalcon\Acl::DENY);
  *
  *	//Create some roles
  *	$roleAdmins = new \Phalcon\Acl\Role('Administrators', 'Super-User role');
@@ -65,8 +65,7 @@ namespace Phalcon;
 abstract class Acl
 {
 
-	const ALLOW = true;
+	const ALLOW = 1;
 
-	const DENY = false;
-
+	const DENY = 0;
 }

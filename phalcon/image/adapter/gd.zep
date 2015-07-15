@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,11 +19,15 @@
 
 namespace Phalcon\Image\Adapter;
 
-class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterface
+use Phalcon\Image\Adapter;
+use Phalcon\Image\AdapterInterface;
+use Phalcon\Image\Exception;
+
+class Gd extends Adapter implements AdapterInterface
 {
 	protected static _checked = false;
 
-	public static function check()
+	public static function check() -> boolean
 	{
 		var version, info, matches;
 
@@ -32,7 +36,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		}
 
 		if !function_exists("gd_info") {
-			throw new \Phalcon\Image\Exception("GD is either not installed or not enabled, check your configuration");
+			throw new Exception("GD is either not installed or not enabled, check your configuration");
 		}
 
 		let version = null;
@@ -46,7 +50,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		}
 
 		if !version_compare(version, "2.0.1", ">=") {
-			throw new \Phalcon\Image\Exception("Phalcon\\Image\\Adapter\\GD requires GD version '2.0.1' or greater, you have " . version);
+			throw new Exception("Phalcon\\Image\\Adapter\\GD requires GD version '2.0.1' or greater, you have " . version);
 		}
 
 		let self::_checked = true;
@@ -94,9 +98,9 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 					break;
 				default:
 					if this->_mime {
-						throw new \Phalcon\Image\Exception("Installed GD does not support " . this->_mime . " images");
+						throw new Exception("Installed GD does not support " . this->_mime . " images");
 					} else {
-						throw new \Phalcon\Image\Exception("Installed GD does not support such images");
+						throw new Exception("Installed GD does not support such images");
 					}
 					break;
 			}
@@ -105,7 +109,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 
 		} else {
 			if !width || !height {
-				throw new \Phalcon\Image\Exception("Failed to create image from file " . this->_file);
+				throw new Exception("Failed to create image from file " . this->_file);
 			}
 
 			let this->_image = imagecreatetruecolor(width, height);
@@ -163,20 +167,20 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		}
 	}
 
-	protected function _crop(int width, int height, int offset_x, int offset_y)
+	protected function _crop(int width, int height, int offsetX, int offsetY)
 	{
 		var image, rect;
 
 		if version_compare(PHP_VERSION, "5.5.0") < 0 {
 			let image = this->_create(width, height);
-			if (imagecopyresampled(image, this->_image, 0, 0, offset_x, offset_y, width, height, width, height)) {
+			if (imagecopyresampled(image, this->_image, 0, 0, offsetX, offsetY, width, height, width, height)) {
 				imagedestroy(this->_image);
 				let this->_image = image;
 				let this->_width  = imagesx(image);
 				let this->_height = imagesy(image);
 			}
 		} else {
-			let rect = ["x": offset_x, "y": offset_y, "width": width, "height": height];
+			let rect = ["x": offsetX, "y": offsetY, "width": width, "height": height];
 			let image = imagecrop(this->_image, rect);
 			imagedestroy(this->_image);
 			let this->_image = image;
@@ -261,7 +265,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		}
 	}
 
-	protected function _reflection(int height, int opacity, boolean fade_in)
+	protected function _reflection(int height, int opacity, boolean fadeIn)
 	{
 		var reflection, line;
 		int stepping, offset, src_y, dst_y, dst_opacity;
@@ -284,7 +288,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 			let src_y = this->_height - offset - 1;
 			let dst_y = this->_height + offset;
 
-			if fade_in {
+			if fadeIn {
 				let dst_opacity = (int) round(opacity + (stepping * (height - offset)));
 			} else {
 				let dst_opacity = (int) round(opacity + (stepping * offset));
@@ -304,7 +308,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		let this->_height = imagesy(reflection);
 	}
 
-	protected function _watermark(<\Phalcon\Image\Adapter> watermark, int offset_x, int offset_y, int opacity)
+	protected function _watermark(<Adapter> watermark, int offsetX, int offsetY, int opacity)
 	{
 		var overlay, color;
 		int width, height;
@@ -327,12 +331,12 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 
 		imagealphablending(this->_image, true);
 
-		if imagecopy(this->_image, overlay, offset_x, offset_y, 0, 0, width, height) {
+		if imagecopy(this->_image, overlay, offsetX, offsetY, 0, 0, width, height) {
 			imagedestroy(overlay);
 		}
 	}
 
-	protected function _text(string text, int offset_x, int offset_y, int opacity, int r, int g, int b, int size, string fontfile)
+	protected function _text(string text, int offsetX, int offsetY, int opacity, int r, int g, int b, int size, string fontfile)
 	{
 		var space, color, angle;
 		int s0 = 0, s1 = 0, s4 = 0, s5 = 0, width, height;
@@ -351,42 +355,42 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 			}
 
 			if !s0 || !s1 || !s4 || !s5 {
-				throw new \Phalcon\Image\Exception("Call to imagettfbbox() failed");
+				throw new Exception("Call to imagettfbbox() failed");
 			}
 
 			let width  = abs(s4 - s0) + 10;
 			let height = abs(s5 - s1) + 10;
 
-			if offset_x < 0 {
-				let offset_x = this->_width - width + offset_x;
+			if offsetX < 0 {
+				let offsetX = this->_width - width + offsetX;
 			}
 
-			if offset_y < 0 {
-				let offset_y = this->_height - height + offset_y;
+			if offsetY < 0 {
+				let offsetY = this->_height - height + offsetY;
 			}
 
 			let color = imagecolorallocatealpha(this->_image, r, g, b, opacity);
 			let angle = 0;
 
-			imagettftext(this->_image, size, angle, offset_x, offset_y, color, fontfile, text);
+			imagettftext(this->_image, size, angle, offsetX, offsetY, color, fontfile, text);
 		} else {
 			let width  = (int) imagefontwidth(size) * strlen(text);
 			let height = (int) imagefontheight(size);
 
-			if offset_x < 0 {
-				let offset_x = this->_width - width + offset_x;
+			if offsetX < 0 {
+				let offsetX = this->_width - width + offsetX;
 			}
 
-			if offset_y < 0 {
-				let offset_y = this->_height - height + offset_y;
+			if offsetY < 0 {
+				let offsetY = this->_height - height + offsetY;
 			}
 
 			let color = imagecolorallocatealpha(this->_image, r, g, b, opacity);
-			imagestring(this->_image, size, offset_x, offset_y, text, color);
+			imagestring(this->_image, size, offsetX, offsetY, text, color);
 		}
 	}
 
-	protected function _mask(<\Phalcon\Image\Adapter> mask)
+	protected function _mask(<Adapter> mask)
 	{
 		var maskImage, newimage, tempImage, color, index, r, g, b;
 		int mask_width, mask_height, x, y, alpha;
@@ -485,7 +489,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 
 				let x2 = x + amount;
 				let y2 = y + amount;
-				imagefilledrectangle(this->_image, x1, y1, x2, y2, color);
+				imagefilledrectangle(this->_image, x, y, x2, y2, color);
 
 				let y += amount;
 			}
@@ -497,9 +501,9 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 	{
 		var ext;
 
-		let ext = pathinfo(file, PATHINFO_EXTENSION);
+		let ext = strtolower(pathinfo(file, PATHINFO_EXTENSION));
 
-		if strcasecmp(ext, "gif") == 0 {
+		if strcmp(ext, "gif") == 0 {
 			let this->_type = 1;
 			let this->_mime = image_type_to_mime_type(this->_type);
 			imagegif(this->_image, file);
@@ -514,7 +518,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 		if strcmp(ext, "png") == 0 {
 			let this->_type = 3;
 			let this->_mime = image_type_to_mime_type(this->_type);
-			imagejpeg(this->_image, file);
+			imagepng(this->_image, file);
 			return true;
 		}
 		if strcmp(ext, "wbmp") == 0 {
@@ -530,13 +534,14 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 			return true;
 		}
 
-		throw new \Phalcon\Image\Exception("Installed GD does not support '" . ext . "' images");
+		throw new Exception("Installed GD does not support '" . ext . "' images");
 	}
 
 	protected function _render(string ext, int quality)
 	{
+		let ext = strtolower(ext);
                 ob_start();
-		if strcasecmp(ext, "gif") == 0 {
+		if strcmp(ext, "gif") == 0 {
 			imagegif(this->_image);
 			return ob_get_clean();
 		}
@@ -545,7 +550,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 			return ob_get_clean();
 		}
 		if strcmp(ext, "png") == 0 {
-			imagejpeg(this->_image);
+			imagepng(this->_image);
 			return ob_get_clean();
 		}
 		if strcmp(ext, "wbmp") == 0 {
@@ -557,7 +562,7 @@ class Gd extends \Phalcon\Image\Adapter implements \Phalcon\Image\AdapterInterfa
 			return ob_get_clean();
 		}
 
-		throw new \Phalcon\Image\Exception("Installed GD does not support '" . ext . "' images");
+		throw new Exception("Installed GD does not support '" . ext . "' images");
 	}
 
 	protected function _create(int width, int height)

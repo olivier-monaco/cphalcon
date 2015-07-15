@@ -21,23 +21,6 @@
 #include "kernel/exception.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Config\Adapter\Json
  *
@@ -67,13 +50,11 @@ ZEPHIR_INIT_CLASS(Phalcon_Config_Adapter_Json) {
 
 /**
  * Phalcon\Config\Adapter\Json constructor
- *
- * @param string filePath
  */
 PHP_METHOD(Phalcon_Config_Adapter_Json, __construct) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
+	zephir_fcall_cache_entry *_0 = NULL;
 	zval *filePath_param = NULL, *_1, *_2;
 	zval *filePath = NULL;
 
@@ -97,7 +78,7 @@ PHP_METHOD(Phalcon_Config_Adapter_Json, __construct) {
 	ZEPHIR_INIT_VAR(_2);
 	zephir_file_get_contents(_2, filePath TSRMLS_CC);
 	zephir_json_decode(_1, &(_1), _2, zephir_get_intval(ZEPHIR_GLOBAL(global_true))  TSRMLS_CC);
-	ZEPHIR_CALL_PARENT(NULL, phalcon_config_adapter_json_ce, this_ptr, "__construct", &_0, _1);
+	ZEPHIR_CALL_PARENT(NULL, phalcon_config_adapter_json_ce, this_ptr, "__construct", &_0, 21, _1);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();
 

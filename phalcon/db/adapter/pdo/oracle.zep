@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -23,6 +23,7 @@ namespace Phalcon\Db\Adapter\Pdo;
 use Phalcon\Db\Column;
 use Phalcon\Db\RawValue;
 use Phalcon\Db\AdapterInterface;
+use Phalcon\Db\Adapter\Pdo as PdoAdapter;
 
 /**
  * Phalcon\Db\Adapter\Pdo\Oracle
@@ -40,7 +41,7 @@ use Phalcon\Db\AdapterInterface;
  *
  * </code>
  */
-class Oracle extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
+class Oracle extends PdoAdapter implements AdapterInterface
 {
 
 	protected _type = "oci";
@@ -82,12 +83,8 @@ class Oracle extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * Returns an array of Phalcon\Db\Column objects describing a table
 	 *
 	 * <code>print_r($connection->describeColumns("posts")); ?></code>
-	 *
-	 * @param string table
-	 * @param string schema
-	 * @return Phalcon\Db\Column[]
 	 */
-	public function describeColumns(string! table, schema = null) -> <Column[]>
+	public function describeColumns(string! table, string schema = null) -> <Column[]>
 	{
 		var columns, oldColumn, field, definition, columnSize,
 			columnPrecision, columnScale, columnType, columnName;
@@ -220,19 +217,14 @@ class Oracle extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * //Getting the generated id
 	 * $id = $connection->lastInsertId();
 	 *</code>
-	 *
-	 * @param string sequenceName
-	 * @return int
 	 */
-	public function lastInsertId(sequenceName = null) -> int
+	public function lastInsertId(string sequenceName = null) -> int
 	{
 		return this->fetchAll("SELECT " . sequenceName . ".CURRVAL FROM dual", \Phalcon\Db::FETCH_NUM)[0];
 	}
 
 	/**
 	 * Check whether the database system requires an explicit value for identity columns
-	 *
-	 * @return boolean
 	 */
 	public function useExplicitIdValue() -> boolean
 	{
@@ -241,8 +233,6 @@ class Oracle extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 
 	/**
 	 * Return the default identity value to insert in an identity column
-	 *
-	 * @return Phalcon\Db\RawValue
 	 */
 	public function getDefaultIdValue() -> <RawValue>
 	{
@@ -251,8 +241,6 @@ class Oracle extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 
 	/**
 	 * Check whether the database system requires a sequence to produce auto-numeric values
-	 *
-	 * @return boolean
 	 */
 	public function supportSequences() -> boolean
 	{

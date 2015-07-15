@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,7 @@
 
 namespace Phalcon\Di;
 
+use Phalcon\Di;
 use Phalcon\DiInterface;
 use Phalcon\Events\ManagerInterface;
 use Phalcon\Di\InjectionAwareInterface;
@@ -31,7 +32,7 @@ use Phalcon\Session\BagInterface;
  *
  * This class allows to access services in the services container by just only accessing a public property
  * with the same name of a registered service
- * 
+ *
  * @property \Phalcon\Mvc\Dispatcher|\Phalcon\Mvc\DispatcherInterface $dispatcher;
  * @property \Phalcon\Mvc\Router|\Phalcon\Mvc\RouterInterface $router
  * @property \Phalcon\Mvc\Url|\Phalcon\Mvc\UrlInterface $url
@@ -43,7 +44,7 @@ use Phalcon\Session\BagInterface;
  * @property \Phalcon\Flash\Session $flashSession
  * @property \Phalcon\Session\Adapter\Files|\Phalcon\Session\Adapter|\Phalcon\Session\AdapterInterface $session
  * @property \Phalcon\Events\Manager $eventsManager
- * @property \Phalcon\Db $db
+ * @property \Phalcon\Db\AdapterInterface $db
  * @property \Phalcon\Security $security
  * @property \Phalcon\Crypt $crypt
  * @property \Phalcon\Tag $tag
@@ -63,50 +64,41 @@ abstract class Injectable implements InjectionAwareInterface, EventsAwareInterfa
 	/**
 	 * Dependency Injector
 	 *
-	 * @var Phalcon\DiInteface
+	 * @var \Phalcon\DiInterface
 	 */
 	protected _dependencyInjector;
 
 	/**
 	 * Events Manager
 	 *
-	 * @var Phalcon\Events\ManagerInterface
+	 * @var \Phalcon\Events\ManagerInterface
 	 */
 	protected _eventsManager;
 
 	/**
 	 * Sets the dependency injector
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
-		if typeof dependencyInjector != "object" {
-			throw new Exception("Dependency Injector is invalid");
-		}
 		let this->_dependencyInjector = dependencyInjector;
 	}
 
 	/**
 	 * Returns the internal dependency injector
-	 *
-	 * @return Phalcon\DiInterface
 	 */
-	public function getDI() -> <\Phalcon\DiInterface>
+	public function getDI() -> <DiInterface>
 	{
 		var dependencyInjector;
 
 		let dependencyInjector = this->_dependencyInjector;
 		if typeof dependencyInjector != "object" {
-			let dependencyInjector = \Phalcon\Di::getDefault();
+			let dependencyInjector = Di::getDefault();
 		}
 		return dependencyInjector;
 	}
 
 	/**
 	 * Sets the event manager
-	 *
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
 	public function setEventsManager(<ManagerInterface> eventsManager)
 	{
@@ -115,8 +107,6 @@ abstract class Injectable implements InjectionAwareInterface, EventsAwareInterfa
 
 	/**
 	 * Returns the internal event manager
-	 *
-	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getEventsManager() -> <ManagerInterface>
 	{
@@ -125,8 +115,6 @@ abstract class Injectable implements InjectionAwareInterface, EventsAwareInterfa
 
 	/**
 	 * Magic method __get
-	 *
-	 * @param string propertyName
 	 */
 	public function __get(string! propertyName)
 	{

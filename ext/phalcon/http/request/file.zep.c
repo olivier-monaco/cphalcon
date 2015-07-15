@@ -21,23 +21,6 @@
 #include "kernel/exception.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Http\Request\File
  *
@@ -109,14 +92,11 @@ PHP_METHOD(Phalcon_Http_Request_File, getExtension) {
 
 /**
  * Phalcon\Http\Request\File constructor
- *
- * @param array file
  */
 PHP_METHOD(Phalcon_Http_Request_File, __construct) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_2 = NULL, *_4 = NULL;
-	zval *file_param = NULL, *key = NULL, *name, *tempName, *size, *type, *error, _0 = zval_used_for_init, *_1 = NULL, *_3 = NULL;
+	zval *file_param = NULL, *key = NULL, *name, *tempName, *size, *type, *error, _0 = zval_used_for_init, *_1 = NULL, *_2 = NULL;
 	zval *file = NULL;
 
 	ZEPHIR_MM_GROW();
@@ -134,14 +114,14 @@ PHP_METHOD(Phalcon_Http_Request_File, __construct) {
 		zephir_update_property_this(this_ptr, SL("_name"), name TSRMLS_CC);
 		ZEPHIR_SINIT_VAR(_0);
 		ZVAL_STRING(&_0, "PATHINFO_EXTENSION", 0);
-		ZEPHIR_CALL_FUNCTION(&_1, "defined", &_2, &_0);
+		ZEPHIR_CALL_FUNCTION(&_1, "defined", NULL, 227, &_0);
 		zephir_check_call_status();
 		if (zephir_is_true(_1)) {
 			ZEPHIR_SINIT_NVAR(_0);
 			ZVAL_LONG(&_0, 4);
-			ZEPHIR_CALL_FUNCTION(&_3, "pathinfo", &_4, name, &_0);
+			ZEPHIR_CALL_FUNCTION(&_2, "pathinfo", NULL, 69, name, &_0);
 			zephir_check_call_status();
-			zephir_update_property_this(this_ptr, SL("_extension"), _3 TSRMLS_CC);
+			zephir_update_property_this(this_ptr, SL("_extension"), _2 TSRMLS_CC);
 		}
 	}
 	if (zephir_array_isset_string_fetch(&tempName, file, SS("tmp_name"), 1 TSRMLS_CC)) {
@@ -165,8 +145,6 @@ PHP_METHOD(Phalcon_Http_Request_File, __construct) {
 
 /**
  * Returns the file size of the uploaded file
- *
- * @return int
  */
 PHP_METHOD(Phalcon_Http_Request_File, getSize) {
 
@@ -177,8 +155,6 @@ PHP_METHOD(Phalcon_Http_Request_File, getSize) {
 
 /**
  * Returns the real name of the uploaded file
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Http_Request_File, getName) {
 
@@ -189,8 +165,6 @@ PHP_METHOD(Phalcon_Http_Request_File, getName) {
 
 /**
  * Returns the temporal name of the uploaded file
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Http_Request_File, getTempName) {
 
@@ -202,8 +176,6 @@ PHP_METHOD(Phalcon_Http_Request_File, getTempName) {
 /**
  * Returns the mime type reported by the browser
  * This mime type is not completely secure, use getRealType() instead
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Http_Request_File, getType) {
 
@@ -214,8 +186,6 @@ PHP_METHOD(Phalcon_Http_Request_File, getType) {
 
 /**
  * Gets the real mime type of the upload file using finfo
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Http_Request_File, getRealType) {
 
@@ -226,15 +196,15 @@ PHP_METHOD(Phalcon_Http_Request_File, getRealType) {
 
 	ZEPHIR_SINIT_VAR(_0);
 	ZVAL_LONG(&_0, 16);
-	ZEPHIR_CALL_FUNCTION(&finfo, "finfo_open", NULL, &_0);
+	ZEPHIR_CALL_FUNCTION(&finfo, "finfo_open", NULL, 228, &_0);
 	zephir_check_call_status();
 	if (Z_TYPE_P(finfo) != IS_RESOURCE) {
 		RETURN_MM_STRING("", 1);
 	}
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_tmp"), PH_NOISY_CC);
-	ZEPHIR_CALL_FUNCTION(&mime, "finfo_file", NULL, finfo, _1);
+	ZEPHIR_CALL_FUNCTION(&mime, "finfo_file", NULL, 229, finfo, _1);
 	zephir_check_call_status();
-	ZEPHIR_CALL_FUNCTION(NULL, "finfo_close", NULL, finfo);
+	ZEPHIR_CALL_FUNCTION(NULL, "finfo_close", NULL, 230, finfo);
 	zephir_check_call_status();
 	RETURN_CCTOR(mime);
 
@@ -242,23 +212,20 @@ PHP_METHOD(Phalcon_Http_Request_File, getRealType) {
 
 /**
  * Checks whether the file has been uploaded via Post.
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Http_Request_File, isUploadedFile) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_2 = NULL;
 	zend_bool _0;
 	int ZEPHIR_LAST_CALL_STATUS;
 	zval *tmp = NULL, *_1 = NULL;
 
 	ZEPHIR_MM_GROW();
 
-	ZEPHIR_CALL_METHOD(&tmp, this_ptr, "gettempname", NULL);
+	ZEPHIR_CALL_METHOD(&tmp, this_ptr, "gettempname", NULL, 0);
 	zephir_check_call_status();
 	_0 = Z_TYPE_P(tmp) == IS_STRING;
 	if (_0) {
-		ZEPHIR_CALL_FUNCTION(&_1, "is_uploaded_file", &_2, tmp);
+		ZEPHIR_CALL_FUNCTION(&_1, "is_uploaded_file", NULL, 231, tmp);
 		zephir_check_call_status();
 		_0 = zephir_is_true(_1);
 	}
@@ -268,14 +235,10 @@ PHP_METHOD(Phalcon_Http_Request_File, isUploadedFile) {
 
 /**
  * Moves the temporary file to a destination within the application
- *
- * @param string destination
- * @return boolean
  */
 PHP_METHOD(Phalcon_Http_Request_File, moveTo) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_1 = NULL;
 	zval *destination_param = NULL, *_0;
 	zval *destination = NULL;
 
@@ -296,7 +259,7 @@ PHP_METHOD(Phalcon_Http_Request_File, moveTo) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_tmp"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_FUNCTION("move_uploaded_file", &_1, _0, destination);
+	ZEPHIR_RETURN_CALL_FUNCTION("move_uploaded_file", NULL, 232, _0, destination);
 	zephir_check_call_status();
 	RETURN_MM();
 

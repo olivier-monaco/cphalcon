@@ -18,23 +18,6 @@
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Frontend\Base64
  *
@@ -103,8 +86,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, __construct) {
 
 /**
  * Returns the cache lifetime
- *
- * @return integer
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Base64, getLifetime) {
 
@@ -123,8 +104,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, getLifetime) {
 
 /**
  * Check whether if frontend is buffering output
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Base64, isBuffering) {
 
@@ -134,7 +113,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, isBuffering) {
 }
 
 /**
- * Starts output frontend. Actually, does nothing
+ * Starts output frontend. Actually, does nothing in this adapter
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Base64, start) {
 
@@ -172,7 +151,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, stop) {
 PHP_METHOD(Phalcon_Cache_Frontend_Base64, beforeStore) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 	zval *data;
 
 	ZEPHIR_MM_GROW();
@@ -180,7 +158,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, beforeStore) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("base64_encode", &_0, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("base64_encode", NULL, 112, data);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -195,7 +173,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, beforeStore) {
 PHP_METHOD(Phalcon_Cache_Frontend_Base64, afterRetrieve) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 	zval *data;
 
 	ZEPHIR_MM_GROW();
@@ -203,7 +180,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Base64, afterRetrieve) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("base64_decode", &_0, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("base64_decode", NULL, 113, data);
 	zephir_check_call_status();
 	RETURN_MM();
 

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -18,9 +18,6 @@
  */
 
 namespace Phalcon\Mvc\Router;
-
-use Phalcon\Mvc\Router\Route;
-use Phalcon\Mvc\Router\Group;
 
 /**
  * Phalcon\Mvc\Router\Group
@@ -60,7 +57,7 @@ use Phalcon\Mvc\Router\Group;
  *</code>
  *
  */
-class Group
+class Group implements GroupInterface
 {
 
 	protected _prefix;
@@ -75,12 +72,9 @@ class Group
 
 	/**
 	 * Phalcon\Mvc\Router\Group constructor
-	 *
-	 * @param array paths
 	 */
-	public function __construct(paths = null)
+	public function __construct(var paths = null)
 	{
-
 		if typeof paths == "array" {
 			let this->_paths = paths;
 		} else {
@@ -96,11 +90,8 @@ class Group
 
 	/**
 	 * Set a hostname restriction for all the routes in the group
-	 *
-	 * @param string hostname
-	 * @return Phalcon\Mvc\Router\Group
 	 */
-	public function setHostname(string hostname) -> <Group>
+	public function setHostname(string hostname) -> <GroupInterface>
 	{
 		let this->_hostname = hostname;
 		return this;
@@ -108,8 +99,6 @@ class Group
 
 	/**
 	 * Returns the hostname restriction
-	 *
-	 * @return string
 	 */
 	public function getHostname() -> string
 	{
@@ -118,11 +107,8 @@ class Group
 
 	/**
 	 * Set a common uri prefix for all the routes in this group
-	 *
-	 * @param string prefix
-	 * @return Phalcon\Mvc\Router\Group
 	 */
-	public function setPrefix(string prefix) -> <Group>
+	public function setPrefix(string prefix) -> <GroupInterface>
 	{
 		let this->_prefix = prefix;
 		return this;
@@ -130,8 +116,6 @@ class Group
 
 	/**
 	 * Returns the common prefix for all the routes
-	 *
-	 * @return string
 	 */
 	public function getPrefix() -> string
 	{
@@ -139,34 +123,28 @@ class Group
 	}
 
 	/**
-	 * Set a before-match condition for the whole group
-	 *
-	 * @param callable beforeMatch
-	 * @return Phalcon\Mvc\Router\Group
+	 * Sets a callback that is called if the route is matched.
+	 * The developer can implement any arbitrary conditions here
+	 * If the callback returns false the route is treated as not matched
 	 */
-	public function beforeMatch(beforeMatch) -> <Group>
+	 public function beforeMatch(callable beforeMatch) -> <GroupInterface>
 	{
 		let this->_beforeMatch = beforeMatch;
 		return this;
 	}
 
 	/**
-	 * Returns the before-match condition if any
-	 *
-	 * @return string
+	 * Returns the 'before match' callback if any
 	 */
-	public function getBeforeMatch() -> string
+	public function getBeforeMatch() -> callable
 	{
 		return this->_beforeMatch;
 	}
 
 	/**
 	 * Set common paths for all the routes in the group
-	 *
-	 * @param array paths
-	 * @return Phalcon\Mvc\Router\Group
 	 */
-	public function setPaths(var paths) -> <Group>
+	public function setPaths(var paths) -> <GroupInterface>
 	{
 		let this->_paths = paths;
 		return this;
@@ -174,46 +152,149 @@ class Group
 
 	/**
 	 * Returns the common paths defined for this group
-	 *
-	 * @return array|string
 	 */
-	public function getPaths()
+	public function getPaths() -> array | string
 	{
 		return this->_paths;
 	}
 
 	/**
 	 * Returns the routes added to the group
-	 *
-	 * @return Phalcon\Mvc\Router\Route[]
 	 */
-	public function getRoutes()
+	public function getRoutes() -> <RouteInterface[]>
 	{
 		return this->_routes;
 	}
 
 	/**
-	 * Adds a route applying the common attributes
+	 * Adds a route to the router on any HTTP method
 	 *
-	 * @param string patten
-	 * @param array paths
-	 * @param array httpMethods
+	 *<code>
+	 * router->add('/about', 'About::index');
+	 *</code>
+	 */
+	public function add(string! pattern, var paths = null, var httpMethods = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, httpMethods);
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is GET
+	 *
+	 * @param string pattern
+	 * @param string/array paths
 	 * @return Phalcon\Mvc\Router\Route
 	 */
-	protected function _addRoute(string! pattern, paths = null, httpMethods = null) -> <Route>
+	public function addGet(string! pattern, var paths = null) -> <RouteInterface>
 	{
-		var mergedPaths, route, defaultPaths;
+		return this->_addRoute(pattern, paths, "GET");
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is POST
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addPost(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "POST");
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is PUT
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addPut(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "PUT");
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is PATCH
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addPatch(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "PATCH");
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is DELETE
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addDelete(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "DELETE");
+	}
+
+	/**
+	 * Add a route to the router that only match if the HTTP method is OPTIONS
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addOptions(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "OPTIONS");
+	}
+
+	/**
+	 * Adds a route to the router that only match if the HTTP method is HEAD
+	 *
+	 * @param string pattern
+	 * @param string/array paths
+	 * @return Phalcon\Mvc\Router\Route
+	 */
+	public function addHead(string! pattern, var paths = null) -> <RouteInterface>
+	{
+		return this->_addRoute(pattern, paths, "HEAD");
+	}
+
+	/**
+	 * Removes all the pre-defined routes
+	 */
+	public function clear() -> void
+	{
+		let this->_routes = [];
+	}
+
+	/**
+	 * Adds a route applying the common attributes
+	 */
+	protected function _addRoute(string! pattern, var paths = null, var httpMethods = null) -> <RouteInterface>
+	{
+		var mergedPaths, route, defaultPaths, processedPaths;
 
 		/**
 		 * Check if the paths need to be merged with current paths
 		 */
 		let defaultPaths = this->_paths;
+
 		if typeof defaultPaths == "array" {
-			if typeof paths == "array" {
+
+			if typeof paths == "string" {
+				let processedPaths = Route::getRoutePaths(paths);
+			} else {
+				let processedPaths = paths;
+			}
+
+			if typeof processedPaths == "array" {
 				/**
 				 * Merge the paths with the default paths
 				 */
-				let mergedPaths = array_merge(defaultPaths, paths);
+				let mergedPaths = array_merge(defaultPaths, processedPaths);
 			} else {
 				let mergedPaths = defaultPaths;
 			}
@@ -226,116 +307,8 @@ class Group
 		 */
 		let route = new Route(this->_prefix . pattern, mergedPaths, httpMethods),
 			this->_routes[] = route;
+
 		route->setGroup(this);
 		return route;
-	}
-
-	/**
-	 * Adds a route to the router on any HTTP method
-	 *
-	 *<code>
-	 * router->add('/about', 'About::index');
-	 *</code>
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @param string httpMethods
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function add(string! pattern, paths = null, httpMethods = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, httpMethods);
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is GET
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addGet(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "GET");
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is POST
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addPost(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "POST");
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is PUT
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addPut(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "PUT");
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is PATCH
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addPatch(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "PATCH");
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is DELETE
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addDelete(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "DELETE");
-	}
-
-	/**
-	 * Add a route to the router that only match if the HTTP method is OPTIONS
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addOptions(string! pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "OPTIONS");
-	}
-
-	/**
-	 * Adds a route to the router that only match if the HTTP method is HEAD
-	 *
-	 * @param string pattern
-	 * @param string/array paths
-	 * @return Phalcon\Mvc\Router\Route
-	 */
-	public function addHead(string pattern, paths = null) -> <Route>
-	{
-		return this->_addRoute(pattern, paths, "HEAD");
-	}
-
-	/**
-	 * Removes all the pre-defined routes
-	 */
-	public function clear()
-	{
-		let this->_routes = [];
 	}
 }

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,6 +20,7 @@
 namespace Phalcon\Paginator\Adapter;
 
 use Phalcon\Paginator\Exception;
+use Phalcon\Paginator\Adapter;
 use Phalcon\Paginator\AdapterInterface;
 
 /**
@@ -44,13 +45,8 @@ use Phalcon\Paginator\AdapterInterface;
  *</code>
  *
  */
-class NativeArray implements AdapterInterface
+class NativeArray extends Adapter implements AdapterInterface
 {
-
-	/**
-	 * Number of rows to show in the paginator. By default is null
-	 */
-	protected _limitRows = null;
 
 	/**
 	 * Configuration of the paginator
@@ -58,44 +54,27 @@ class NativeArray implements AdapterInterface
 	protected _config = null;
 
 	/**
-	 * Current page in paginate
-	 */
-	protected _page = null;
-
-	/**
 	 * Phalcon\Paginator\Adapter\NativeArray constructor
-	 *
-	 * @param array config
 	 */
 	public function __construct(array config)
 	{
 		var page, limit;
 
 		let this->_config = config;
+
 		if fetch limit, config["limit"] {
 			let this->_limitRows = limit;
 		}
+
 		if fetch page, config["page"] {
 			let this->_page = page;
 		}
 	}
 
 	/**
-	 * Set the current page number
-	 *
-	 * @param int page
-	 */
-	public function setCurrentPage(int page)
-	{
-		let this->_page = page;
-	}
-
-	/**
 	 * Returns a slice of the resultset to show in the pagination
-	 *
-	 * @return stdClass
 	 */
-	public function getPaginate() -> <stdClass>
+	public function getPaginate() -> <\stdClass>
 	{
 		var config, items, page;
 		int show, pageNumber, totalPages, number, before, next;
@@ -118,8 +97,7 @@ class NativeArray implements AdapterInterface
 			let pageNumber = 1;
 		}
 
-		let page = new \stdClass(),
-			number = count(items),
+		let number = count(items),
 			roundedTotal = number / floatval(show),
 			totalPages = (int) roundedTotal;
 
@@ -130,7 +108,7 @@ class NativeArray implements AdapterInterface
 			let totalPages++;
 		}
 
-		let page->items = array_slice(items, show * (pageNumber - 1), show);
+		let items = array_slice(items, show * (pageNumber - 1), show);
 
 		//Fix next
 		if pageNumber < totalPages {
@@ -138,7 +116,6 @@ class NativeArray implements AdapterInterface
 		} else {
 			let next = totalPages;
 		}
-		let page->next = next;
 
 		if pageNumber > 1 {
 			let before = pageNumber - 1;
@@ -146,14 +123,17 @@ class NativeArray implements AdapterInterface
 			let before = 1;
 		}
 
-		let page->first = 1,
+		let page = new \stdClass(),
+			page->items = items,
+			page->first = 1,
 			page->before =  before,
 			page->current = pageNumber,
 			page->last = totalPages,
+			page->next = next,
 			page->total_pages = totalPages,
-			page->total_items = number;
+			page->total_items = number,
+			page->limit = this->_limitRows;
 
 		return page;
 	}
-
 }

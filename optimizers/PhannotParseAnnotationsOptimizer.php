@@ -4,7 +4,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -66,8 +66,15 @@ class PhannotParseAnnotationsOptimizer extends OptimizerAbstract
 
 		$symbolVariable->setDynamicTypes('array');
 
-		$resolvedParams = $call->getReadOnlyResolvedParams($expression['parameters'], $context, $expression);
-		$context->codePrinter->output('phannot_parse_annotations(' . $symbolVariable->getName() . ', ' . $resolvedParams[0] . ', ' . $resolvedParams[1] . ', ' . $resolvedParams[2] . ' TSRMLS_CC);');
+		$resolvedParams = $call->getResolvedParams($expression['parameters'], $context, $expression);
+
+		$call->addCallStatusFlag($context);
+
+		$context->codePrinter->output('ZEPHIR_LAST_CALL_STATUS = phannot_parse_annotations(' . $symbolVariable->getName() . ', ' . $resolvedParams[0] . ', ' . $resolvedParams[1] . ', ' . $resolvedParams[2] . ' TSRMLS_CC);');
+
+		$call->checkTempParameters($context);
+		$call->addCallStatusOrJump($context);
+
 		return new CompiledExpression('variable', $symbolVariable->getRealName(), $expression);
 	}
 

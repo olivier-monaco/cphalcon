@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -29,7 +29,7 @@ use Phalcon\Mvc\UrlInterface;
 /**
  * Phalcon\Mvc\Url
  *
- * This components aids in the generation of: URIs, URLs and Paths
+ * This components helps in the generation of: URIs, URLs and Paths
  *
  *<code>
  *
@@ -56,8 +56,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Sets the DependencyInjector container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -66,8 +64,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the DependencyInjector container
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -76,14 +72,11 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Sets a prefix for all the URIs to be generated
-     *
+	 *
 	 *<code>
 	 *	$url->setBaseUri('/invo/');
 	 *	$url->setBaseUri('/invo/index.php/');
 	 *</code>
-	 *
-	 * @param string baseUri
-	 * @return Phalcon\Mvc\Url
 	 */
 	public function setBaseUri(string! baseUri) -> <Url>
 	{
@@ -96,13 +89,10 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Sets a prefix for all static URLs generated
-     *
+	 *
 	 *<code>
 	 *	$url->setStaticBaseUri('/invo/');
 	 *</code>
-	 *
-	 * @param string staticBaseUri
-	 * @return Phalcon\Mvc\Url
 	 */
 	public function setStaticBaseUri(string! staticBaseUri) -> <Url>
 	{
@@ -112,8 +102,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the prefix for all the generated urls. By default /
-	 *
-	 * @return string
 	 */
 	public function getBaseUri() -> string
 	{
@@ -126,6 +114,7 @@ class Url implements UrlInterface, InjectionAwareInterface
 			} else {
 				let uri = null;
 			}
+
 			if !uri {
 				let baseUri = "/";
 			} else {
@@ -138,8 +127,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the prefix for all the generated static urls. By default /
-	 *
-	 * @return string
 	 */
 	public function getStaticBaseUri() -> string
 	{
@@ -157,9 +144,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 	 *<code>
 	 *	$url->setBasePath('/var/www/htdocs/');
 	 *</code>
-	 *
-	 * @param string basePath
-	 * @return Phalcon\Mvc\Url
 	 */
 	public function setBasePath(string! basePath) -> <Url>
 	{
@@ -169,8 +153,6 @@ class Url implements UrlInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the base path
-	 *
-	 * @return string
 	 */
 	public function getBasePath() -> string
 	{
@@ -181,28 +163,20 @@ class Url implements UrlInterface, InjectionAwareInterface
 	 * Generates a URL
 	 *
 	 *<code>
-	 *
 	 * //Generate a URL appending the URI to the base URI
 	 * echo $url->get('products/edit/1');
 	 *
 	 * //Generate a URL for a predefined route
-	 * echo $url->get(array('for' => 'blog-post', 'title' => 'some-cool-stuff', 'year' => '2012'));
-	 *
+	 * echo $url->get(array('for' => 'blog-post', 'title' => 'some-cool-stuff', 'year' => '2015'));
 	 *</code>
-	 *
-	 * @param string|array uri
-	 * @param array|object args Optional arguments to be appended to the query string
-	 * @param bool $local
-	 * @return string
 	 */
-	public function get(var uri = null, args = null, boolean local = null)
+	public function get(var uri = null, var args = null, var local = null, var baseUri = null) -> string
 	{
-		var baseUri, router, dependencyInjector, routeName, route, matched, queryString;
+		var router, dependencyInjector, routeName, route, queryString;
 
 		if local == null {
-			if typeof uri == "string" && strstr(uri, ":") {
-				let matched = preg_match("/^[^:\\/?#]++:/", uri);
-				if matched {
+			if typeof uri == "string" && (memstr(uri, "//") || memstr(uri, ":")) {
+				if preg_match("#^(//)|([a-z0-9]+://)|([a-z0-9]+:)#i", uri) {
 					let local = false;
 				} else {
 					let local = true;
@@ -212,7 +186,9 @@ class Url implements UrlInterface, InjectionAwareInterface
 			}
 		}
 
-		let baseUri = this->getBaseUri();
+		if typeof baseUri != "string" {
+			let baseUri = this->getBaseUri();
+		}
 
 		if typeof uri == "array" {
 
@@ -220,7 +196,7 @@ class Url implements UrlInterface, InjectionAwareInterface
 				throw new Exception("It's necessary to define the route name with the parameter 'for'");
 			}
 
-			let router =  <RouterInterface> this->_router;
+			let router = <RouterInterface> this->_router;
 
 			/**
 			 * Check if the router has not previously set
@@ -251,13 +227,13 @@ class Url implements UrlInterface, InjectionAwareInterface
 		}
 
 		if local {
-			let uri = baseUri . uri;
+			let uri = baseUri . uri;			
 		}
 
 		if args {
 			let queryString = http_build_query(args);
 			if typeof queryString == "string" && strlen(queryString) {
-				if strpos(queryString, "?") !== false {
+				if strpos(uri, "?") !== false {
 					let uri .= "&" . queryString;
 				} else {
 					let uri .= "?" . queryString;
@@ -271,21 +247,23 @@ class Url implements UrlInterface, InjectionAwareInterface
 	/**
 	 * Generates a URL for a static resource
 	 *
-	 * @param string|array uri
-	 * @return string
+	 *<code>
+	 * // Generate a URL for a static resource
+	 * echo $url->getStatic("img/logo.png");
+	 *
+	 * // Generate a URL for a static predefined route
+	 * echo $url->getStatic(array('for' => 'logo-cdn'));
+	 *</code>
 	 */
-	public function getStatic(uri = null) -> string
+	public function getStatic(var uri = null) -> string
 	{
-		return this->getStaticBaseUri() . uri;
+		return this->get(uri, null, null, this->getStaticBaseUri());
 	}
 
 	/**
 	 * Generates a local path
-	 *
-	 * @param string path
-	 * @return string
 	 */
-	public function path(path = null) -> string
+	public function path(string path = null) -> string
 	{
 		return this->_basePath . path;
 	}

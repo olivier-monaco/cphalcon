@@ -4,7 +4,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -63,7 +63,7 @@ class PhalconReplacePathsOptimizer extends OptimizerAbstract
 
 		$context->headersManager->add('phalcon/mvc/url/utils', HeadersManager::POSITION_LAST);
 
-		$resolvedParams = $call->getReadOnlyResolvedParams($expression['parameters'], $context, $expression);
+		$resolvedParams = $call->getResolvedParams($expression['parameters'], $context, $expression);
 		$context->codePrinter->output('phalcon_replace_paths(' . $symbolVariable->getName() . ', ' . $resolvedParams[0] . ', ' . $resolvedParams[1] . ', ' . $resolvedParams[2] . ' TSRMLS_CC);');
 		return new CompiledExpression('variable', $symbolVariable->getRealName(), $expression);
 	}

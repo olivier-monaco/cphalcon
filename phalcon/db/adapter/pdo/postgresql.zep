@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -23,6 +23,8 @@ namespace Phalcon\Db\Adapter\Pdo;
 use Phalcon\Db\Column;
 use Phalcon\Db\AdapterInterface;
 use Phalcon\Db\RawValue;
+use Phalcon\Db\Adapter\Pdo as PdoAdapter;
+use Phalcon\Db\Exception;
 
 /**
  * Phalcon\Db\Adapter\Pdo\Postgresql
@@ -41,7 +43,7 @@ use Phalcon\Db\RawValue;
  *
  * </code>
  */
-class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
+class Postgresql extends PdoAdapter implements AdapterInterface
 {
 
 	protected _type = "pgsql";
@@ -89,12 +91,8 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * <code>
 	 * print_r($connection->describeColumns("posts"));
 	 * </code>
-	 *
-	 * @param string table
-	 * @param string schema
-	 * @return Phalcon\Db\Column[]
 	 */
-	public function describeColumns(string table, string schema = null)
+	public function describeColumns(string table, string schema = null) -> <Column[]>
 	{
 		var columns, columnType, field, definition,
 			oldColumn, columnName, charSize, numericSize, numericScale;
@@ -128,6 +126,16 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				if memstr(columnType, "smallint(1)") {
 					let definition["type"] = Column::TYPE_BOOLEAN,
 						definition["bindType"] = Column::BIND_PARAM_BOOL;
+					break;
+				}
+
+				/**
+				 * Bigint
+				 */
+				if memstr(columnType, "bigint") {
+					let definition["type"] = Column::TYPE_BIGINTEGER,
+						definition["isNumeric"] = true,
+						definition["bindType"] = Column::BIND_PARAM_INT;
 					break;
 				}
 
@@ -221,6 +229,22 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				}
 
 				/**
+				 * Jsonb
+				 */
+				if memstr(columnType, "jsonb") {
+					let definition["type"] = Column::TYPE_JSONB;
+					break;
+				}
+
+				/**
+				 * Json
+				 */
+				if memstr(columnType, "json") {
+					let definition["type"] = Column::TYPE_JSON;
+					break;
+				}
+
+				/**
 				 * UUID
 				 */
 				if memstr(columnType, "uuid") {
@@ -274,7 +298,7 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 			}
 
 			/**
-			 * Check if the column is default values
+			 * Check if the column has default values
 			 */
 			if typeof field[9] != "null" {
 				let definition["default"] = preg_replace("/^'|'?::[[:alnum:][:space:]]+$/", "", field[9]);
@@ -295,9 +319,81 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	}
 
 	/**
+	 * Creates a table
+	 */
+	public function createTable(string! tableName, string! schemaName, array! definition) -> boolean
+	{
+		var sql,queries,query,exception,columns;
+
+		if !fetch columns, definition["columns"] {
+			throw new Exception("The table must contain at least one column");
+		}
+
+		if !count(columns) {
+			throw new Exception("The table must contain at least one column");
+		}
+
+		let sql = this->_dialect->createTable(tableName, schemaName, definition);
+
+		let queries = explode(";",sql);
+
+		if count(queries) > 1 {
+			try {
+				this->{"begin"}();
+				for query in queries {
+					if empty query {
+						continue;
+					}
+					this->{"query"}(query . ";");
+				}
+				return this->{"commit"}();
+			} catch \Exception, exception {
+
+				this->{"rollback"}();
+				 throw exception;
+			 }
+		} else {
+			return this->{"execute"}(queries[0] . ";");
+		}
+		return true;
+	}
+
+	/**
+	 * Modifies a table column based on a definition
+	 */
+	public function modifyColumn(string! tableName, string! schemaName, <\Phalcon\Db\ColumnInterface> column, <\Phalcon\Db\ColumnInterface> currentColumn = null) -> boolean
+	{
+		var sql,queries,query,exception;
+
+		let sql = this->_dialect->modifyColumn(tableName, schemaName, column, currentColumn);
+		let queries = explode(";",sql);
+
+		if count(queries) > 1 {
+			try {
+
+				this->{"begin"}();
+				for query in queries {
+					if empty query {
+						continue;
+					}
+					this->{"query"}(query . ";");
+				}
+				return this->{"commit"}();
+
+			} catch \Exception, exception {
+
+				this->{"rollback"}();
+				 throw exception;
+			 }
+
+		} else {
+			return !empty sql ? this->{"execute"}(queries[0] . ";") : true;
+		}
+		return true;
+	}
+
+	/**
 	 * Check whether the database system requires an explicit value for identity columns
-	 *
-	 * @return boolean
 	 */
 	public function useExplicitIdValue() -> boolean
 	{
@@ -315,18 +411,14 @@ class Postgresql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 *     array("id", "name", "year")
 	 * );
 	 *</code>
-	 *
-	 * @return Phalcon\Db\RawValue
 	 */
 	public function getDefaultIdValue() -> <RawValue>
 	{
-		return new RawValue("default");
+		return new RawValue("DEFAULT");
 	}
 
 	/**
 	 * Check whether the database system requires a sequence to produce auto-numeric values
-	 *
-	 * @return boolean
 	 */
 	public function supportSequences() -> boolean
 	{

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -22,7 +22,6 @@ namespace Phalcon\Validation\Validator;
 use Phalcon\Validation;
 use Phalcon\Validation\Message;
 use Phalcon\Validation\Validator;
-use Phalcon\Validation\ValidatorInterface;
 
 /**
  * Phalcon\Validation\Validator\Numericality
@@ -37,15 +36,11 @@ use Phalcon\Validation\ValidatorInterface;
  *)));
  *</code>
  */
-class Numericality extends Validator implements ValidatorInterface
+class Numericality extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param  Phalcon\Validation validation
-	 * @param  string             field
-	 * @return boolean
 	 */
 	public function validate(<Validation> validation, string! field) -> boolean
 	{

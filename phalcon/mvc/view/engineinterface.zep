@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,9 @@
 
 namespace Phalcon\Mvc\View;
 
+use Phalcon\DiInterface;
+use Phalcon\Mvc\ViewBaseInterface;
+
 /**
  * Phalcon\Mvc\View\EngineInterface
  *
@@ -26,37 +29,18 @@ namespace Phalcon\Mvc\View;
  */
 interface EngineInterface
 {
-
 	/**
-	 * Phalcon\Mvc\View\Engine constructor
-	 *
-	 * @param Phalcon\Mvc\ViewInterface view
-	 * @param Phalcon\DiInterface dependencyInjector
+	 * Returns cached output on another view stage
 	 */
-	public function __construct(view, <\Phalcon\DiInterface> dependencyInjector=null);
-
-	/**
-	 * Returns cached ouput on another view stage
-	 *
-	 * @return array
-	 */
-	public function getContent();
+	public function getContent() -> array;
 
 	/**
 	 * Renders a partial inside another view
-	 *
-	 * @param string partialPath
-	 * @return string
 	 */
-	public function partial(partialPath);
+	public function partial(string! partialPath, var params = null) -> string;
 
 	/**
 	 * Renders a view using the template engine
-	 *
-	 * @param string path
-	 * @param array params
-	 * @param boolean mustClean
 	 */
-	public function render(string path, params, mustClean=false);
-
+	public function render(string path, var params, boolean mustClean = false);
 }

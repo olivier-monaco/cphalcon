@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -30,10 +30,8 @@ interface ResultsetInterface
 
 	/**
 	 * Returns the internal type of data retrieval that the resultset is using
-	 *
-	 * @return int
 	 */
-	public function getType();
+	public function getType() -> int;
 
 	/**
 	 * Get first row in the resultset
@@ -51,17 +49,13 @@ interface ResultsetInterface
 
 	/**
 	 * Set if the resultset is fresh or an old one cached
-	 *
-	 * @param boolean isFresh
 	 */
-	public function setIsFresh(isFresh);
+	public function setIsFresh(boolean isFresh);
 
 	/**
 	 * Tell if the resultset if fresh or an old one cached
-	 *
-	 * @return boolean
 	 */
-	public function isFresh();
+	public function isFresh() -> boolean;
 
 	/**
 	 * Returns the associated cache for the resultset
@@ -73,9 +67,6 @@ interface ResultsetInterface
 	/**
 	 * Returns a complete resultset as an array, if the resultset has a big number of rows
 	 * it could consume more memory than currently it does.
-	 *
-	 * @return array
 	 */
-	public function toArray();
-
+	public function toArray() -> array;
 }

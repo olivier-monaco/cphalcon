@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -43,10 +43,13 @@ use Phalcon\Events\ManagerInterface as EventsManagerInterface;
  * A ModelsManager is injected to a model via a Dependency Injector/Services Container such as Phalcon\DI.
  *
  * <code>
- * $di = new \Phalcon\DI();
+ * use Phalcon\DI;
+ * use Phalcon\Mvc\Model\Manager as ModelsManager;
+ *
+ * $di = new DI();
  *
  * $di->set('modelsManager', function() {
- *      return new \Phalcon\Mvc\Model\Manager();
+ *      return new ModelsManager();
  * });
  *
  * $robot = new Robots($di);
@@ -139,7 +142,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	protected _keepSnapshots;
 
 	/**
-	 *
+	 * Does the model use dynamic update, instead of updating all rows?
 	 */
 	protected _dynamicUpdate;
 
@@ -147,8 +150,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets the DependencyInjector container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -157,8 +158,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the DependencyInjector container
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -167,8 +166,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets a global events manager
-	 *
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
 	public function setEventsManager(<EventsManagerInterface> eventsManager) -> <Manager>
 	{
@@ -178,8 +175,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the internal event manager
-	 *
-	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getEventsManager() -> <EventsManagerInterface>
 	{
@@ -188,9 +183,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets a custom events manager for a specific model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
 	public function setCustomEventsManager(<ModelInterface> model, <EventsManagerInterface> eventsManager)
 	{
@@ -199,9 +191,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns a custom events manager related to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getCustomEventsManager(<ModelInterface> model) -> <EventsManagerInterface> | boolean
 	{
@@ -217,9 +206,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Initializes a model in the model manager
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return boolean
 	 */
 	public function initialize(<ModelInterface> model) -> boolean
 	{
@@ -264,9 +250,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Check whether a model is already initialized
-	 *
-	 * @param string modelName
-	 * @return bool
 	 */
 	public function isInitialized(string! modelName) -> boolean
 	{
@@ -275,8 +258,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Get last initialized model
-	 *
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
 	public function getLastInitialized() -> <ModelInterface>
 	{
@@ -285,10 +266,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Loads a model throwing an exception if it doesn't exist
-	 *
-	 * @param  string modelName
-	 * @param  boolean newInstance
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
 	public function load(string! modelName, boolean newInstance = false) -> <ModelInterface>
 	{
@@ -301,6 +278,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			if newInstance {
 				return new {modelName}(this->_dependencyInjector, this);
 			}
+			model->reset();
 			return model;
 		}
 
@@ -319,9 +297,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets the mapped source for a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string source
 	 */
 	public function setModelSource(<ModelInterface> model, string! source) -> void
 	{
@@ -330,9 +305,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the mapped source for a model
-	 *
-	 * @param Phalcon\Mvc\Model model
-	 * @return string
 	 */
 	public function getModelSource(<ModelInterface> model) -> string
 	{
@@ -354,9 +326,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets the mapped schema for a model
-	 *
-	 * @param Phalcon\Mvc\Model model
-	 * @param string schema
 	 */
 	public function setModelSchema(<ModelInterface> model, string! schema) -> void
 	{
@@ -365,9 +334,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the mapped schema for a model
-	 *
-	 * @param Phalcon\Mvc\Model model
-	 * @return string
 	 */
 	public function getModelSchema(<ModelInterface> model) -> string
 	{
@@ -383,9 +349,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets both write and read connection service for a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string connectionService
 	 */
 	public function setConnectionService(<ModelInterface> model, string! connectionService) -> void
 	{
@@ -397,9 +360,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets write connection service for a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string connectionService
 	 */
 	public function setWriteConnectionService(<ModelInterface> model, string! connectionService) -> void
 	{
@@ -408,9 +368,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets read connection service for a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string connectionService
 	 */
 	public function setReadConnectionService(<ModelInterface> model, string! connectionService) -> void
 	{
@@ -419,54 +376,26 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the connection to read data related to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Db\AdapterInterface
 	 */
 	public function getReadConnection(<ModelInterface> model) -> <AdapterInterface>
 	{
-		var connectionServices, dependencyInjector, service = null, connection;
-
-		let connectionServices = this->_readConnectionServices;
-
-		/**
-		 * Check if the model has a custom connection service
-		 */
-		if typeof connectionServices == "array" {
-			fetch service, connectionServices[get_class_lower(model)];
-		}
-
-		let dependencyInjector = <DiInterface> this->_dependencyInjector;
-		if typeof dependencyInjector != "object" {
-			throw new Exception("A dependency injector container is required to obtain the services related to the ORM");
-		}
-
-		/**
-		 * Request the connection service from the DI
-		 */
-		if service {
-			let connection = <AdapterInterface> dependencyInjector->getShared(service);
-		} else {
-			let connection = <AdapterInterface> dependencyInjector->getShared("db");
-		}
-		if typeof connection != "object" {
-			throw new Exception("Invalid injected connection service");
-		}
-
-		return connection;
+		return this->_getConnection(model, this->_readConnectionServices);
 	}
 
 	/**
 	 * Returns the connection to write data related to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Db\AdapterInterface
 	 */
 	public function getWriteConnection(<ModelInterface> model) -> <AdapterInterface>
 	{
-		var connectionServices, dependencyInjector, service = null, connection;
+		return this->_getConnection(model, this->_writeConnectionServices);
+	}
 
-		let connectionServices = this->_writeConnectionServices;
+	/**
+	 * Returns the connection to read or write data related to a model depending on the connection services.
+	 */
+	protected function _getConnection(<ModelInterface> model, connectionServices) -> <AdapterInterface>
+	{
+		var dependencyInjector, service = null, connection;
 
 		/**
 		 * Check if the model has a custom connection service
@@ -488,6 +417,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		} else {
 			let connection = <AdapterInterface> dependencyInjector->getShared("db");
 		}
+
 		if typeof connection != "object" {
 			throw new Exception("Invalid injected connection service");
 		}
@@ -497,46 +427,39 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns the connection service name used to read data related to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string
 	 */
 	public function getReadConnectionService(<ModelInterface> model) -> string
 	{
-		var connectionServices, connection;
-		let connectionServices = this->_readConnectionServices;
-		if typeof connectionServices == "array" {
-			if fetch connection, connectionServices[get_class_lower(model)] {
-				return connection;
-			}
-		}
-		return "db";
+		return this->_getConnectionService(model, this->_readConnectionServices);
 	}
 
 	/**
 	 * Returns the connection service name used to write data related to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string
 	 */
 	public function getWriteConnectionService(<ModelInterface> model) -> string
 	{
-		var connectionServices, connection;
-		let connectionServices = this->_writeConnectionServices;
+		return this->_getConnectionService(model, this->_writeConnectionServices);
+	}
+
+	/**
+	 * Returns the connection service name used to read or write data related to a model depending on the connection services
+	 */
+	public function _getConnectionService(<ModelInterface> model, connectionServices) -> string
+	{
+		var connection;
+
 		if typeof connectionServices == "array" {
 			if fetch connection, connectionServices[get_class_lower(model)] {
 				return connection;
 			}
 		}
+
 		return "db";
 	}
 
 	/**
 	 * Receives events generated in the models and dispatches them to a events-manager if available
 	 * Notify the behaviors that are listening in the model
-	 *
-	 * @param string eventName
-	 * @param Phalcon\Mvc\ModelInterface model
 	 */
 	public function notifyEvent(string! eventName, <ModelInterface> model)
 	{
@@ -562,7 +485,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 					}
 				}
 			}
-
 		}
 
 		/**
@@ -596,13 +518,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	 * Dispatch a event to the listeners and behaviors
 	 * This method expects that the endpoint listeners/behaviors returns true
 	 * meaning that a least one was implemented
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string eventName
-	 * @param array data
-	 * @return boolean
 	 */
-	public function missingMethod(<ModelInterface> model, string! eventName, var data) -> boolean
+	public function missingMethod(<ModelInterface> model, string! eventName, var data)
 	{
 		var behaviors, modelsBehaviors, result, eventsManager, behavior;
 
@@ -624,7 +541,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 					}
 				}
 			}
-
 		}
 
 		/**
@@ -635,14 +551,11 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			return eventsManager->fire("model:" . eventName, model, data);
 		}
 
-		return false;
+		return null;
 	}
 
 	/**
 	 * Binds a behavior to a model
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\Mvc\Model\BehaviorInterface behavior
 	 */
 	public function addBehavior(<ModelInterface> model, <\Phalcon\Mvc\Model\BehaviorInterface> behavior)
 	{
@@ -670,9 +583,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets if a model must keep snapshots
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param boolean keepSnapshots
 	 */
 	public function keepSnapshots(<ModelInterface> model, boolean keepSnapshots) -> void
 	{
@@ -681,9 +591,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks if a model is keeping snapshots for the queried records
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return boolean
 	 */
 	public function isKeepingSnapshots(<ModelInterface> model) -> boolean
 	{
@@ -699,9 +606,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Sets if a model must use dynamic update instead of the all-field update
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param boolean dynamicUpdate
 	 */
 	public function useDynamicUpdate(<ModelInterface> model, boolean dynamicUpdate)
 	{
@@ -713,9 +617,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks if a model is using dynamic update instead of all-field update
-	 *
-	 * @param Phalcon\Mvc\Model model
-	 * @return boolean
 	 */
 	public function isUsingDynamicUpdate(<ModelInterface> model) -> boolean
 	{
@@ -740,7 +641,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	 * @return  Phalcon\Mvc\Model\Relation
 	 */
 	public function addHasOne(<ModelInterface> model, var fields, string! referencedModel,
-		var referencedFields, var options=null) -> <Relation>
+		var referencedFields, var options = null) -> <Relation>
 	{
 		var entityName, referencedEntity, relation,
 			keyRelation, relations, alias, lowerAlias, singleRelations;
@@ -778,6 +679,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		 * Check an alias for the relation
 		 */
 		if fetch alias, options["alias"] {
+			if typeof alias != "string" {
+				throw new Exception("Relation alias must be a string");
+			}
 			let lowerAlias = strtolower(alias);
 		} else {
 			let lowerAlias = referencedEntity;
@@ -860,6 +764,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		 * Check an alias for the relation
 		 */
 		if fetch alias, options["alias"] {
+			if typeof alias != "string" {
+				throw new Exception("Relation alias must be a string");
+			}
 			let lowerAlias = strtolower(alias);
 		} else {
 			let lowerAlias = referencedEntity;
@@ -942,6 +849,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		 * Check an alias for the relation
 		 */
 		if fetch alias, options["alias"] {
+			if typeof alias != "string" {
+				throw new Exception("Relation alias must be a string");
+			}
 			let lowerAlias = strtolower(alias);
 		} else {
 			let lowerAlias = referencedEntity;
@@ -1043,6 +953,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		 * Check an alias for the relation
 		 */
 		if fetch alias, options["alias"] {
+			if typeof alias != "string" {
+				throw new Exception("Relation alias must be a string");
+			}
 			let lowerAlias = strtolower(alias);
 		} else {
 			let lowerAlias = referencedEntity;
@@ -1085,14 +998,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks whether a model has a belongsTo relation with another model
-	 *
-	 * @param 	string modelName
-	 * @param 	string modelRelation
-	 * @return 	boolean
 	 */
 	public function existsBelongsTo(string! modelName, string! modelRelation) -> boolean
 	{
-
 		var entityName, keyRelation;
 
 		let entityName = strtolower(modelName);
@@ -1114,14 +1022,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks whether a model has a hasMany relation with another model
-	 *
-	 * @param 	string modelName
-	 * @param 	string modelRelation
-	 * @return 	boolean
 	 */
 	public function existsHasMany(string! modelName, string! modelRelation) -> boolean
 	{
-
 		var entityName, keyRelation;
 
 		let entityName = strtolower(modelName);
@@ -1143,14 +1046,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks whether a model has a hasOne relation with another model
-	 *
-	 * @param 	string modelName
-	 * @param 	string modelRelation
-	 * @return 	boolean
 	 */
 	public function existsHasOne(string! modelName, string! modelRelation) -> boolean
 	{
-
 		var entityName, keyRelation;
 
 		let entityName = strtolower(modelName);
@@ -1172,10 +1070,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Checks whether a model has a hasManyToMany relation with another model
-	 *
-	 * @param 	string modelName
-	 * @param 	string modelRelation
-	 * @return 	boolean
 	 */
 	public function existsHasManyToMany(string! modelName, string! modelRelation) -> boolean
 	{
@@ -1200,12 +1094,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns a relation by its alias
-	 *
-	 * @param string modelName
-	 * @param string alias
-	 * @return Phalcon\Mvc\Model\Relation|false
 	 */
-	public function getRelationByAlias(string! modelName, string! alias)
+	public function getRelationByAlias(string! modelName, string! alias) -> <Relation> | boolean
 	{
 		var aliases, relation;
 		let aliases = this->_aliases;
@@ -1218,65 +1108,104 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	}
 
 	/**
+	 * Merge two arrays of find parameters
+	 */
+	protected final function _mergeFindParameters(var findParamsOne, var findParamsTwo) -> array
+	{
+		var key, value, findParams;
+
+		//var_dump(findParamsOne);
+		//var_dump(findParamsTwo);
+
+		if typeof findParamsOne == "string" && typeof findParamsTwo == "string" {
+			return ["(" . findParamsOne . ") AND " . findParamsTwo];
+		}
+
+		let findParams = [];
+		if typeof findParamsOne == "array"  {
+
+			for key, value in findParamsOne {
+
+				if key === 0 || key === "conditions" {
+					if !isset findParams[0] {
+						let findParams[0] = value;
+					} else {
+						let findParams[0] = "(" . findParams[0] . ") AND " . value;
+					}
+					continue;
+				}
+
+				let findParams[key] = value;
+			}
+		} else {
+			if typeof findParamsOne == "string" {
+				let findParams = ["conditions": findParamsOne];
+			}
+		}
+
+		if typeof findParamsTwo == "array"  {
+
+			for key, value in findParamsTwo {
+
+				if key === 0 || key === "conditions" {
+					if !isset findParams[0] {
+						let findParams[0] = value;
+					} else {
+						let findParams[0] = "(" . findParams[0] . ") AND " . value;
+					}
+					continue;
+				}
+
+				if key === "bind" || key === "bindTypes" {
+					if !isset findParams[key] {
+						if typeof value == "array" {
+							let findParams[key] = value;
+						}
+					} else {
+						if typeof value == "array" {
+							let findParams[key] = array_merge(findParams[key], value);
+						}
+					}
+					continue;
+				}
+
+				let findParams[key] = value;
+			}
+		} else {
+			if typeof findParamsTwo == "string" {
+				if !isset findParams[0] {
+					let findParams[0] = findParamsTwo;
+				} else {
+					let findParams[0] = "(" . findParams[0] . ") AND " . findParamsTwo;
+				}
+			}
+		}
+
+		return findParams;
+	}
+
+	/**
 	 * Helper method to query records based on a relation definition
 	 *
-	 * @param Phalcon\Mvc\Model\RelationInterface relation
-	 * @param string method
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @param array parameters
 	 * @return Phalcon\Mvc\Model\Resultset\Simple|Phalcon\Mvc\Model\Resultset\Simple|false
 	 */
-	public function getRelationRecords(<RelationInterface> relation, string! method, <ModelInterface> record, var parameters=null)
+	public function getRelationRecords(<RelationInterface> relation, string! method, <ModelInterface> record, var parameters = null)
 	{
-		var preConditions, placeholders, referencedModel, intermediateModel,
+		var placeholders, referencedModel, intermediateModel,
 			intermediateFields, joinConditions, fields, builder, extraParameters,
 			conditions, refPosition, field, referencedFields, findParams,
 			findArguments, retrieveMethod, uniqueKey, records, arguments;
 		boolean reusable;
 
 		/**
-		 * Re-use conditions
-		 */
-		let preConditions = null;
-
-		if typeof parameters == "array" {
-			if fetch preConditions, parameters[0] {
-				unset parameters[0];
-			} else {
-				if fetch preConditions, parameters["conditions"] {
-					unset parameters["conditions"];
-				}
-			}
-		} else {
-			if typeof parameters == "string" {
-				let preConditions = parameters;
-			}
-		}
-
-		/**
 		 * Re-use bound parameters
 		 */
-		if typeof parameters == "array" {
-			if fetch placeholders, parameters["bind"] {
-				unset parameters["bind"];
-			} else {
-				let placeholders = [];
-			}
-		} else {
-			let placeholders = [];
-		}
+		let placeholders = [];
 
 		/**
 		 * Returns parameters that must be always used when the related records are obtained
 		 */
 		let extraParameters = relation->getParams();
-		if typeof extraParameters == "array" {
-			if typeof parameters == "array" {
-				let parameters = array_merge(parameters, extraParameters);
-			} else {
-				let parameters = extraParameters;
-			}
-		}
 
 		/**
 		 * Perform the query on the referenced model
@@ -1298,8 +1227,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			 */
 			let fields = relation->getFields();
 			if typeof fields != "array" {
-				let conditions[] = "[" . intermediateModel . "].[" . intermediateFields . "] = ?0",
-					placeholders[] = record->readAttribute(fields);
+				let conditions[] = "[" . intermediateModel . "].[" . intermediateFields . "] = :APR0:",
+					placeholders["APR0"] = record->readAttribute(fields);
 			} else {
 				throw new Exception("Not supported");
 			}
@@ -1317,17 +1246,10 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			}
 
 			/**
-			 * Add extra conditions passed by the programmer
-			 */
-			if !empty preConditions {
-				let conditions[] = preConditions;
-			}
-
-			/**
 			 * We don't trust the user or the database so we use bound parameters
 			 * Create a query builder
 			 */
-			let builder = this->createBuilder(parameters);
+			let builder = this->createBuilder(this->_mergeFindParameters(extraParameters, parameters));
 
 			builder->from(referencedModel);
 			builder->innerJoin(intermediateModel, join(" AND ", joinConditions));
@@ -1340,19 +1262,15 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			return builder->getQuery()->execute();
 		}
 
-		if preConditions !== null {
-			let conditions = [preConditions];
-		} else {
-			let conditions = [];
-		}
+		let conditions = [];
 
 		/**
 		 * Appends conditions created from the fields defined in the relation
 		 */
 		let fields = relation->getFields();
 		if typeof fields != "array" {
-			let conditions[] = "[". relation->getReferencedFields() . "] = ?0",
-				placeholders[] = record->readAttribute(fields);
+			let conditions[] = "[". relation->getReferencedFields() . "] = :APR0:",
+				placeholders["APR0"] = record->readAttribute(fields);
 		} else {
 
 			/**
@@ -1360,8 +1278,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			 */
 			let referencedFields = relation->getReferencedFields();
 			for refPosition, field in relation->getReferencedFields() {
-				let conditions[] = "[". referencedFields[refPosition] . "] = ?" . refPosition,
-					placeholders[] = record->readAttribute(field);
+				let conditions[] = "[". referencedFields[refPosition] . "] = :APR" . refPosition . ":",
+					placeholders["APR" . refPosition] = record->readAttribute(field);
 			}
 		}
 
@@ -1375,10 +1293,12 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			"di"        : record->{"getDi"}()
 		];
 
-		if typeof parameters == "array" {
-			let findArguments = array_merge(findParams, parameters);
+		let findArguments = this->_mergeFindParameters(findParams, parameters);
+
+		if typeof extraParameters == "array" {
+			let findParams = this->_mergeFindParameters(findArguments, extraParameters);
 		} else {
-			let findArguments = findParams;
+			let findParams = findArguments;
 		}
 
 		/**
@@ -1403,7 +1323,7 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 			let retrieveMethod = method;
 		}
 
-		let arguments = [findArguments];
+		let arguments = [findParams];
 
 		/**
 		 * Find first results could be reusable
@@ -1435,10 +1355,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns a reusable object from the internal list
-	 *
-	 * @param string modelName
-	 * @param string key
-	 * @return object
 	 */
 	public function getReusableRecords(string! modelName, string! key)
 	{
@@ -1451,19 +1367,14 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Stores a reusable record in the internal list
-	 *
-	 * @param string modelName
-	 * @param string key
-	 * @param mixed records
 	 */
-	public function setReusableRecords(string! modelName, string! key, records)
+	public function setReusableRecords(string! modelName, string! key, var records)
 	{
 		let this->_reusable[key] = records;
 	}
 
 	/**
 	 * Clears the internal reusable list
-	 *
 	 */
 	public function clearReusableObjects()
 	{
@@ -1472,18 +1383,10 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets belongsTo related records from a model
-	 *
-	 * @param string method
-	 * @param string modelName
-	 * @param string modelRelation
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @param array parameters
-	 * @return Phalcon\Mvc\Model\ResultsetInterface
 	 */
-	public function getBelongsToRecords(string! method, string! modelName, modelRelation, <ModelInterface> record, parameters = null)
+	public function getBelongsToRecords(string! method, string! modelName, var modelRelation, <ModelInterface> record, parameters = null)
 		-> <ResultsetInterface> | boolean
 	{
-
 		var belongsTo, keyRelation, relations;
 
 		let belongsTo = this->_hasMany;
@@ -1510,18 +1413,10 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets hasMany related records from a model
-	 *
-	 * @param string method
-	 * @param string modelName
-	 * @param string modelRelation
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @param array parameters
-	 * @return Phalcon\Mvc\Model\ResultsetInterface
 	 */
-	public function getHasManyRecords(string! method, string! modelName, modelRelation, <ModelInterface> record, parameters = null)
+	public function getHasManyRecords(string! method, string! modelName, var modelRelation, <ModelInterface> record, parameters = null)
 		-> <ResultsetInterface> | boolean
 	{
-
 		var hasMany, keyRelation, relations;
 
 		let hasMany = this->_hasMany;
@@ -1548,15 +1443,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets belongsTo related records from a model
-	 *
-	 * @param string method
-	 * @param string modelName
-	 * @param string modelRelation
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @param array parameters
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
-	public function getHasOneRecords(string! method, string! modelName, modelRelation, <ModelInterface> record, parameters = null)
+	public function getHasOneRecords(string! method, string! modelName, var modelRelation, <ModelInterface> record, parameters = null)
 		-> <ModelInterface> | boolean
 	{
 		var hasOne, keyRelation, relations;
@@ -1589,11 +1477,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 	 *<code>
 	 *	$relations = $modelsManager->getBelongsTo(new Robots());
 	 *</code>
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Mvc\Model\RelationInterface[]
 	 */
-	public function getBelongsTo(<ModelInterface> model) -> array
+	public function getBelongsTo(<ModelInterface> model) -> <RelationInterface[]> | array
 	{
 		var belongsToSingle, relations;
 		let belongsToSingle = this->_belongsToSingle;
@@ -1607,11 +1492,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets hasMany relations defined on a model
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Mvc\Model\RelationInterface[]
 	 */
-	public function getHasMany(<ModelInterface> model) -> array
+	public function getHasMany(<ModelInterface> model) -> <RelationInterface[]> | array
 	{
 		var hasManySingle, relations;
 		let hasManySingle = this->_hasManySingle;
@@ -1626,9 +1508,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets hasOne relations defined on a model
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface $model
-	 * @return array
 	 */
 	public function getHasOne(<ModelInterface> model) -> array
 	{
@@ -1644,11 +1523,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets hasManyToMany relations defined on a model
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @return Phalcon\Mvc\Model\RelationInterface[]
 	 */
-	public function getHasManyToMany(<ModelInterface> model) -> array
+	public function getHasManyToMany(<ModelInterface> model) -> <RelationInterface[]> | array
 	{
 		var hasManyToManySingle, relations;
 		let hasManyToManySingle = this->_hasManyToManySingle;
@@ -1662,22 +1538,16 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Gets hasOne relations defined on a model
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getHasOneAndHasMany(<ModelInterface> model) -> array
+	public function getHasOneAndHasMany(<ModelInterface> model) -> <RelationInterface[]>
 	{
 		return array_merge(this->getHasOne(model), this->getHasMany(model));
 	}
 
 	/**
 	 * Query all the relationships defined on a model
-	 *
-	 * @param string $modelName
-	 * @return Phalcon\Mvc\Model\RelationInterface[]
 	 */
-	public function getRelations(string! modelName) -> array
+	public function getRelations(string! modelName) -> <RelationInterface[]>
 	{
 		var entityName, allRelations, relations,
 			belongsTo, relation, hasOne, hasMany;
@@ -1726,14 +1596,9 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Query the first relationship defined between two models
-	 *
-	 * @param string first
-	 * @param string second
-	 * @return Phalcon\Mvc\Model\RelationInterface[]
 	 */
-	public function getRelationsBetween(string! first, string! second)
+	public function getRelationsBetween(string! first, string! second) -> <RelationInterface[]> | boolean
 	{
-
 		var keyRelation, belongsTo, hasMany, hasOne, relations;
 
 		let keyRelation = strtolower(first) . "$" . strtolower(second);
@@ -1773,9 +1638,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Creates a Phalcon\Mvc\Model\Query without execute it
-	 *
-	 * @param string phql
-	 * @return Phalcon\Mvc\Model\QueryInterface
 	 */
 	public function createQuery(string! phql) -> <QueryInterface>
 	{
@@ -1789,19 +1651,13 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		/**
 		 * Create a query
 		 */
-		let query = new \Phalcon\Mvc\Model\Query(phql);
-		query->setDI(dependencyInjector);
+		let query = <QueryInterface> dependencyInjector->get("Phalcon\\Mvc\\Model\\Query", [phql, dependencyInjector]);
 		let this->_lastQuery = query;
 		return query;
 	}
 
 	/**
 	 * Creates a Phalcon\Mvc\Model\Query and execute it
-	 *
-	 * @param string phql
-	 * @param array placeholders
-	 * @param array types
-	 * @return Phalcon\Mvc\Model\QueryInterface
 	 */
 	public function executeQuery(string! phql, var placeholders = null, var types = null) -> <QueryInterface>
 	{
@@ -1813,22 +1669,27 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		}
 
 		/**
-		 * Create a query
+		 * Gets Query instance from DI container
 		 */
-		let query = new \Phalcon\Mvc\Model\Query(phql, dependencyInjector);
+		let query = <QueryInterface> dependencyInjector->get("Phalcon\\Mvc\\Model\\Query", [phql, dependencyInjector]);
 		let this->_lastQuery = query;
+
+		if typeof placeholders == "array" {
+			query->setBindParams(placeholders);
+		}
+
+		if typeof types == "array" {
+			query->setBindTypes(types);
+		}
 
 		/**
 		 * Execute the query
 		 */
-		return query->execute(placeholders, types);
+		return query->execute();
 	}
 
 	/**
 	 * Creates a Phalcon\Mvc\Model\Query\Builder
-	 *
-	 * @param string|array params
-	 * @return Phalcon\Mvc\Model\Query\BuilderInterface
 	 */
 	public function createBuilder(var params = null) -> <BuilderInterface>
 	{
@@ -1840,15 +1701,13 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 		}
 
 		/**
-		 * Create a query builder
+		 * Gets Builder instance from DI container
 		 */
-		return new Builder(params, dependencyInjector);
+		return <BuilderInterface> dependencyInjector->get("Phalcon\\Mvc\\Model\\Query\\Builder", [params, dependencyInjector]);
 	}
 
 	/**
 	 * Returns the lastest query created or executed in the models manager
-	 *
-	 * @return Phalcon\Mvc\Model\QueryInterface
 	 */
 	public function getLastQuery() -> <QueryInterface>
 	{
@@ -1857,9 +1716,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Registers shorter aliases for namespaces in PHQL statements
-	 *
-	 * @param string alias
-	 * @param string namespace
 	 */
 	public function registerNamespaceAlias(string alias, string namespaceName) -> void
 	{
@@ -1868,9 +1724,6 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns a real namespace from its alias
-	 *
-	 * @param string alias
-	 * @return string
 	 */
 	public function getNamespaceAlias(string! alias) -> string
 	{
@@ -1884,10 +1737,8 @@ class Manager implements ManagerInterface, InjectionAwareInterface, EventsAwareI
 
 	/**
 	 * Returns all the registered namespace aliases
-	 *
-	 * @return array
 	 */
-	public function getNamespaceAliases()
+	public function getNamespaceAliases() -> array
 	{
 		return this->_namespaceAliases;
 	}

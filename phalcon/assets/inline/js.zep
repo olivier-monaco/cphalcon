@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,12 +19,14 @@
 
 namespace Phalcon\Assets\Inline;
 
+use Phalcon\Assets\Inline as InlineBase;
+
 /**
  * Phalcon\Assets\Inline\Js
  *
- * Represents inline Javascript
+ * Represents an inline Javascript
  */
-class Js extends \Phalcon\Assets\Inline
+class Js extends InlineBase
 {
 
 	/**
@@ -34,12 +36,11 @@ class Js extends \Phalcon\Assets\Inline
 	 * @param boolean filter
 	 * @param array attributes
 	 */
-	public function __construct(string content, boolean filter = true, attributes = null)
+	public function __construct(string content, boolean filter = true, var attributes = null)
 	{
 		if attributes == null {
 			let attributes = ["type": "text/javascript"];
 		}
 		parent::__construct("js", content, filter, attributes);
 	}
-
 }

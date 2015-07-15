@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,6 +20,7 @@
 namespace Phalcon\Paginator\Adapter;
 
 use Phalcon\Mvc\Model\Query\Builder;
+use Phalcon\Paginator\Adapter;
 use Phalcon\Paginator\AdapterInterface;
 use Phalcon\Paginator\Exception;
 
@@ -41,7 +42,7 @@ use Phalcon\Paginator\Exception;
  *  ));
  *</code>
  */
-class QueryBuilder implements AdapterInterface
+class QueryBuilder extends Adapter implements AdapterInterface
 {
 	/**
 	 * Configuration of paginator by model
@@ -54,19 +55,7 @@ class QueryBuilder implements AdapterInterface
 	protected _builder;
 
 	/**
-	 * Number of rows to be shown in the paginator. By default is null
-	 */
-	protected _limitRows;
-
-	/**
-	 * Current page in paginate
-	 */
-	protected _page = 1;
-
-	/**
 	 * Phalcon\Paginator\Adapter\QueryBuilder
-	 *
-	 * @param array config
 	 */
 	public function __construct(array config)
 	{
@@ -76,72 +65,30 @@ class QueryBuilder implements AdapterInterface
 
 		if !fetch builder, config["builder"] {
 			throw new Exception("Parameter 'builder' is required");
-		} else {
-			let this->_builder = builder;
 		}
 
 		if !fetch limit, config["limit"] {
 			throw new Exception("Parameter 'limit' is required");
-		} else {
-			let this->_limitRows = limit;
 		}
+
+		this->setQueryBuilder(builder);
+		this->setLimit(limit);
 
 		if fetch page, config["page"] {
-			let this->_page = page;
+			this->setCurrentPage(page);
 		}
-	}
-
-	/**
-	 * Set the current page number
-	 *
-	 * @param int page
-	 */
-	public function setCurrentPage(int currentPage) -> <QueryBuilder>
-	{
-		let this->_page = currentPage;
-		return this;
 	}
 
 	/**
 	 * Get the current page number
-	 *
-	 * @return int page
 	 */
-	public function getCurrentPage () -> int
+	public function getCurrentPage() -> int
 	{
 		return this->_page;
 	}
 
 	/**
-	 * Set current rows limit
-	 *
-	 * @param int $limit
-	 *
-	 * @return Phalcon\Paginator\Adapter\QueryBuilder $this Fluent interface
-	 */
-	public function setLimit(int limitRows) -> <QueryBuilder>
-	{
-		let this->_limitRows = limitRows;
-
-		return this;
-	}
-
-	/**
-	 * Get current rows limit
-	 *
-	 * @return int $limit
-	 */
-	public function getLimit() -> int
-	{
-		return this->_limitRows;
-	}
-
-	/**
 	 * Set query builder object
-	 *
-	 * @param Phalcon\Mvc\Model\Query\BuilderInterface $builder
-	 *
-	 * @return Phalcon\Paginator\Adapter\QueryBuilder $this Fluent interface
 	 */
 	public function setQueryBuilder(<Builder> builder) -> <QueryBuilder>
 	{
@@ -152,8 +99,6 @@ class QueryBuilder implements AdapterInterface
 
 	/**
 	 * Get query builder object
-	 *
-	 * @return Phalcon\Mvc\Model\Query\BuilderInterface $builder
 	 */
 	public function getQueryBuilder() -> <Builder>
 	{
@@ -162,8 +107,6 @@ class QueryBuilder implements AdapterInterface
 
 	/**
 	 * Returns a slice of the resultset to show in the pagination
-	 *
-	 * @return stdClass
 	 */
 	public function getPaginate() -> <\stdClass>
 	{
@@ -203,21 +146,16 @@ class QueryBuilder implements AdapterInterface
 
 		let query = builder->getQuery();
 
-		let page = new \stdClass();
-		let page->first = 1;
-
 		if numberPage == 1 {
 			let before = 1;
 		} else {
 			let before = numberPage - 1;
 		}
-		let page->before = before;
 
 		/**
 		 * Execute the query an return the requested slice of data
 		 */
-		let items = query->execute(),
-			page->items = items;
+		let items = query->execute();
 
 		/**
 		 * Change the queried columns by a COUNT(*)
@@ -248,11 +186,16 @@ class QueryBuilder implements AdapterInterface
 			let next = totalPages;
 		}
 
-		let page->next = next,
-			page->last = totalPages,
+		let page = new \stdClass(),
+			page->items = items,
+			page->first = 1,
+			page->before = before,
 			page->current = numberPage,
+			page->last = totalPages,
+			page->next = next,
 			page->total_pages = totalPages,
-			page->total_items = rowcount;
+			page->total_items = rowcount,
+			page->limit = this->_limitRows;
 
 		return page;
 	}

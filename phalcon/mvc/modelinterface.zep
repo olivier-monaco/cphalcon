@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -34,9 +34,6 @@ interface ModelInterface
 
 	/**
 	 * Sets a transaction related to the Model instance
-	 *
-	 * @param Phalcon\Mvc\Model\TransactionInterface transaction
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
 	public function setTransaction(<TransactionInterface> transaction) -> <ModelInterface>;
 
@@ -56,58 +53,41 @@ interface ModelInterface
 
 	/**
 	 * Sets both read/write connection services
-	 *
-	 * @param string connectionService
 	 */
 	public function setConnectionService(string connectionService) -> void;
 
 	/**
 	 * Sets the DependencyInjection connection service used to write data
-	 *
-	 * @param string connectionService
 	 */
 	public function setWriteConnectionService(string connectionService) -> void;
 
 	/**
 	 * Sets the DependencyInjection connection service used to read data
-	 *
-	 * @param string connectionService
 	 */
 	public function setReadConnectionService(string connectionService) -> void;
 
 	/**
 	 * Returns DependencyInjection connection service used to read data
-	 *
-	 * @return string
 	 */
 	public function getReadConnectionService() -> string;
 
 	/**
 	 * Returns DependencyInjection connection service used to write data
-	 *
-	 * @return string
 	 */
 	public function getWriteConnectionService() -> string;
 
 	/**
 	 * Gets internal database connection
-	 *
-	 * @return Phalcon\Db\AdapterInterface
 	 */
 	public function getReadConnection() -> <\Phalcon\Db\AdapterInterface>;
 
 	/**
 	 * Gets internal database connection
-	 *
-	 * @return Phalcon\Db\AdapterInterface
 	 */
 	public function getWriteConnection() -> <\Phalcon\Db\AdapterInterface>;
 
 	/**
 	 * Sets the dirty state of the object using one of the DIRTY_STATE_* constants
-	 *
-	 * @param int dirtyState
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
 	public function setDirtyState(int dirtyState) -> <\Phalcon\Mvc\ModelInterface>;
 
@@ -148,7 +128,7 @@ interface ModelInterface
 	 * @param int dirtyState
 	 * @return Phalcon\Mvc\ModelInterface
 	 */
-	public static function cloneResult(<ModelInterface> base, data, dirtyState = 0);
+	public static function cloneResult(<ModelInterface> base, array! data, dirtyState = 0);
 
 	/**
 	 * Returns an hydrated result based on the data and the column map
@@ -242,8 +222,6 @@ interface ModelInterface
 
 	/**
 	 * Appends a customized message on the validation process
-	 *
-	 * @param Phalcon\Mvc\Model\MessageInterface message
 	 */
 	public function appendMessage(<MessageInterface> message);
 
@@ -312,26 +290,8 @@ interface ModelInterface
 
 	/**
 	 * Skips the current operation forcing a success state
-	 *
-	 * @param boolean skip
 	 */
-	public function skipOperation(boolean skip);
-
-	/**
-	 * Reads an attribute value by its name
-	 *
-	 * @param string attribute
-	 * @return mixed
-	 */
-	public function readAttribute(attribute);
-
-	/**
-	 * Writes an attribute value by its name
-	 *
-	 * @param string attribute
-	 * @param mixed value
-	 */
-	public function writeAttribute(attribute, value);
+	public function skipOperation(boolean skip);	
 
 	/**
 	 * Returns related records based on defined relations
@@ -350,4 +310,9 @@ interface ModelInterface
 	 * @param array columnMap
 	 */
 	public function setSnapshotData(array! data, columnMap = null);
+
+	/**
+	 * Reset a model instance data
+	 */
+	public function reset();
 }

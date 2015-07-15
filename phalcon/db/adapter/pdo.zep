@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -56,8 +56,6 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Constructor for Phalcon\Db\Adapter\Pdo
-	 *
-	 * @param array descriptor
 	 */
 	public function __construct(array! descriptor)
 	{
@@ -116,9 +114,26 @@ abstract class Pdo extends Adapter
 		 * Check if the developer has defined custom options or create one from scratch
 		 */
 		if fetch options, descriptor["options"] {
-			unset descriptor["options"] ;
+			unset descriptor["options"];
 		} else {
 			let options = [];
+		}
+
+		/**
+		 * Check if the connection must be persistent
+		 */
+		if fetch persistent, descriptor["persistent"] {
+			if persistent {
+				let options[\Pdo::ATTR_PERSISTENT] = true;
+			}
+			unset descriptor["persistent"];
+		}
+
+		/**
+		 * Remove the dialectClass from the descriptor if any
+		 */
+		if isset descriptor["dialectClass"] {
+			unset descriptor["dialectClass"];
 		}
 
 		/**
@@ -135,15 +150,6 @@ abstract class Pdo extends Adapter
 		let options[\Pdo::ATTR_ERRMODE] = \Pdo::ERRMODE_EXCEPTION;
 
 		/**
-		 * Check if the connection must be persistent
-		 */
-		if fetch persistent, descriptor["persistent"] {
-			if persistent {
-				let options[\Pdo::ATTR_PERSISTENT] = true;
-			}
-		}
-
-		/**
 		 * Create the connection using PDO
 		 */
 		let this->_pdo = new \Pdo(this->_type . ":" . dsnAttributes, username, password, options);
@@ -156,9 +162,6 @@ abstract class Pdo extends Adapter
 	 * $statement = $db->prepare('SELECT * FROM robots WHERE name = :name');
 	 * $result = $connection->executePrepared($statement, array('name' => 'Voltron'));
 	 *</code>
-	 *
-	 * @param string sqlStatement
-	 * @return \PDOStatement
 	 */
 	public function prepare(string! sqlStatement) -> <\PDOStatement>
 	{
@@ -178,13 +181,10 @@ abstract class Pdo extends Adapter
 	 * @param array dataTypes
 	 * @return \PDOStatement
 	 */
-	public function executePrepared(<\PDOStatement> statement, placeholders, dataTypes) -> <\PDOStatement>
+	public function executePrepared(<\PDOStatement> statement, array! placeholders, dataTypes) -> <\PDOStatement>
 	{
-		var wildcard, value, type, castValue, parameter;
-
-		if typeof placeholders != "array" {
-			throw new Exception("Placeholders must be an array");
-		}
+		var wildcard, value, type, castValue,
+			parameter, position, itemValue;
 
 		for wildcard, value in placeholders {
 
@@ -198,32 +198,73 @@ abstract class Pdo extends Adapter
 				}
 			}
 
-			if typeof dataTypes == "array" {
-
-				if !fetch type, dataTypes[wildcard] {
-					throw new Exception("Invalid bind type parameter (2)");
-				}
+			if typeof dataTypes == "array" && fetch type, dataTypes[wildcard] {
 
 				/**
 				 * The bind type is double so we try to get the double value
 				 */
 				if type == Column::BIND_PARAM_DECIMAL {
-					let castValue = doubleval(value), type = Column::BIND_SKIP;
+					let castValue = doubleval(value),
+						type = Column::BIND_SKIP;
 				} else {
-					let castValue = value;
+					if globals_get("db.force_casting") {
+						if typeof value != "array" {
+							switch type {
+
+								case Column::BIND_PARAM_INT:
+									let castValue = intval(value, 10);
+									break;
+
+								case Column::BIND_PARAM_STR:
+									let castValue = (string) value;
+									break;
+
+								case Column::BIND_PARAM_NULL:
+									let castValue = null;
+									break;
+
+								case Column::BIND_PARAM_BOOL:
+									let castValue = (boolean) value;
+									break;
+
+								default:
+									let castValue = value;
+									break;
+							}
+						} else {
+							let castValue = value;
+						}
+					} else {
+						let castValue = value;
+					}
 				}
 
 				/**
 				 * 1024 is ignore the bind type
 				 */
-				if type == Column::BIND_SKIP {
-					statement->bindValue(parameter, castValue);
+				if typeof castValue != "array" {					
+					if type == Column::BIND_SKIP {
+						statement->bindValue(parameter, castValue);
+					} else {
+						statement->bindValue(parameter, castValue, type);
+					}
 				} else {
-					statement->bindValue(parameter, castValue, type);
+					for position, itemValue in castValue {
+						if type == Column::BIND_SKIP {
+							statement->bindValue(parameter . position, itemValue);
+						} else {
+							statement->bindValue(parameter . position, itemValue, type);
+						}
+					}
 				}
-
 			} else {
-				statement->bindValue(parameter, value);
+				if typeof value != "array" {
+					statement->bindValue(parameter, value);
+				} else {
+					for position, itemValue in value {
+						statement->bindValue(parameter . position, itemValue);
+					}
+				}
 			}
 		}
 
@@ -240,13 +281,8 @@ abstract class Pdo extends Adapter
 	 *	$resultset = $connection->query("SELECT * FROM robots WHERE type='mechanical'");
 	 *	$resultset = $connection->query("SELECT * FROM robots WHERE type=?", array("mechanical"));
 	 *</code>
-	 *
-	 * @param  string sqlStatement
-	 * @param  array bindParams
-	 * @param  array bindTypes
-	 * @return Phalcon\Db\ResultInterface|bool
 	 */
-	public function query(string! sqlStatement, bindParams = null, bindTypes = null) -> <ResultInterface> | boolean
+	public function query(string! sqlStatement, var bindParams = null, var bindTypes = null) -> <ResultInterface> | boolean
 	{
 		var eventsManager, pdo, statement;
 
@@ -289,20 +325,15 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Sends SQL statements to the database server returning the success state.
-	 * Use this method only when the SQL statement sent to the server doesn't return any row
+	 * Use this method only when the SQL statement sent to the server doesn't return any rows
 	 *
 	 *<code>
 	 *	//Inserting data
 	 *	$success = $connection->execute("INSERT INTO robots VALUES (1, 'Astro Boy')");
 	 *	$success = $connection->execute("INSERT INTO robots VALUES (?, ?)", array(1, 'Astro Boy'));
 	 *</code>
-	 *
-	 * @param  string sqlStatement
-	 * @param  array bindParams
-	 * @param  array bindTypes
-	 * @return boolean
 	 */
-	public function execute(string! sqlStatement, bindParams = null, bindTypes = null) -> boolean
+	public function execute(string! sqlStatement, var bindParams = null, var bindTypes = null) -> boolean
 	{
 		var eventsManager, affectedRows, pdo, newStatement, statement;
 
@@ -355,8 +386,6 @@ abstract class Pdo extends Adapter
 	 *	$connection->execute("DELETE FROM robots");
 	 *	echo $connection->affectedRows(), ' were deleted';
 	 *</code>
-	 *
-	 * @return int
 	 */
 	public function affectedRows() -> int
 	{
@@ -366,8 +395,6 @@ abstract class Pdo extends Adapter
 	/**
 	 * Closes the active connection returning success. Phalcon automatically closes and destroys
 	 * active connections when the request ends
-	 *
-	 * @return boolean
 	 */
 	public function close() -> boolean
 	{
@@ -375,7 +402,6 @@ abstract class Pdo extends Adapter
 		let pdo = this->_pdo;
 		if typeof pdo == "object" {
 			let this->_pdo = null;
-			return true;
 		}
 		return true;
 	}
@@ -405,11 +431,8 @@ abstract class Pdo extends Adapter
 	 *<code>
 	 *	$escapedStr = $connection->escapeString('some dangerous value');
 	 *</code>
-	 *
-	 * @param string str
-	 * @return string
 	 */
-	public function escapeString(string! str) -> string
+	public function escapeString(string str) -> string
 	{
 		return this->_pdo->quote(str);
 	}
@@ -420,10 +443,6 @@ abstract class Pdo extends Adapter
 	 *<code>
 	 * print_r($connection->convertBoundParams('SELECT * FROM robots WHERE name = :name:', array('Bender')));
 	 *</code>
-	 *
-	 * @param string $sql
-	 * @param array $params
-	 * @return array
 	 */
 	public function convertBoundParams(string! sql, array params = []) -> array
 	{
@@ -448,7 +467,6 @@ abstract class Pdo extends Adapter
 				}
 
 				let placeHolders[] = value;
-
 			}
 
 			let boundSql = preg_replace(bindPattern, "?", sql);
@@ -492,9 +510,6 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Starts a transaction in the connection
-	 *
-	 * @param boolean nesting
-	 * @return boolean
 	 */
 	public function begin(boolean nesting = true) -> boolean
 	{
@@ -553,9 +568,6 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Rollbacks the active transaction in the connection
-	 *
-	 * @param boolean nesting
-	 * @return boolean
 	 */
 	public function rollback(boolean nesting = true) -> boolean
 	{
@@ -630,9 +642,6 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Commits the active transaction in the connection
-	 *
-	 * @param boolean nesting
-	 * @return boolean
 	 */
 	public function commit(boolean nesting = true) -> boolean
 	{
@@ -705,8 +714,6 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Returns the current transaction nesting level
-	 *
-	 * @return int
 	 */
 	public function getTransactionLevel() -> int
 	{
@@ -720,8 +727,6 @@ abstract class Pdo extends Adapter
 	 *	$connection->begin();
 	 *	var_dump($connection->isUnderTransaction()); //true
 	 *</code>
-	 *
-	 * @return boolean
 	 */
 	public function isUnderTransaction() -> boolean
 	{
@@ -735,10 +740,8 @@ abstract class Pdo extends Adapter
 
 	/**
 	 * Return internal PDO handler
-	 *
-	 * @return \PDO
 	 */
-	public function getInternalHandler()
+	public function getInternalHandler() -> <\Pdo>
 	{
 		return this->_pdo;
 	}

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,8 +19,10 @@
 
 namespace Phalcon\Db\Adapter\Pdo;
 
+use Phalcon\Db;
 use Phalcon\Db\Column;
 use Phalcon\Db\AdapterInterface;
+use Phalcon\Db\Adapter\Pdo as PdoAdapter;
 
 /**
  * Phalcon\Db\Adapter\Pdo\Mysql
@@ -29,19 +31,18 @@ use Phalcon\Db\AdapterInterface;
  *
  *<code>
  *
- *	$config = array(
- *		"host" => "192.168.0.11",
- *		"dbname" => "blog",
- *		"port" => 3306,
- *		"username" => "sigma",
- *		"password" => "secret"
- *	);
+ *$config = array(
+ *	"host" => "192.168.0.11",
+ *	"dbname" => "blog",
+ *	"port" => 3306,
+ *	"username" => "sigma",
+ *	"password" => "secret"
+ *);
  *
- *	$connection = new \Phalcon\Db\Adapter\Pdo\Mysql($config);
- *
+ *$connection = new \Phalcon\Db\Adapter\Pdo\Mysql($config);
  *</code>
  */
-class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
+class Mysql extends PdoAdapter implements AdapterInterface
 {
 
 	protected _type = "mysql";
@@ -80,12 +81,8 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * <code>
 	 * print_r($connection->describeColumns("posts"));
 	 * </code>
-	 *
-	 * @param string table
-	 * @param string schema
-	 * @return Phalcon\Db\Column[]
 	 */
-	public function describeColumns(string table, string schema=null)
+	public function describeColumns(string table, string schema = null) -> <Column[]>
 	{
 		var columns, columnType, field, definition,
 			oldColumn, sizePattern, matches, matchOne, matchTwo, columnName;
@@ -101,7 +98,7 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 		 * Get the describe
 		 * Field Indexes: 0:name, 1:type, 2:not null, 3:key, 4:default, 5:extra
 		 */
-		for field in this->fetchAll(this->_dialect->describeColumns(table, schema), \Phalcon\Db::FETCH_NUM) {
+		for field in this->fetchAll(this->_dialect->describeColumns(table, schema), Db::FETCH_NUM) {
 
 			/**
 			 * By default the bind types is two
@@ -116,10 +113,12 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 			loop {
 
 				/**
-				 * Enum are treated as char
+				 * Smallint/Bigint/Integers/Int are int
 				 */
-				if memstr(columnType, "enum") {
-					let definition["type"] = Column::TYPE_CHAR;
+				if memstr(columnType, "bigint") {
+					let definition["type"] = Column::TYPE_BIGINTEGER,
+						definition["isNumeric"] = true,
+						definition["bindType"] = Column::BIND_PARAM_INT;
 					break;
 				}
 
@@ -150,12 +149,10 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				}
 
 				/**
-				 * Decimals are floats
+				 * Enum are treated as char
 				 */
-				if memstr(columnType, "decimal") {
-					let definition["type"] = Column::TYPE_DECIMAL,
-						definition["isNumeric"] = true,
-						definition["bindType"] = Column::BIND_PARAM_DECIMAL;
+				if memstr(columnType, "enum") {
+					let definition["type"] = Column::TYPE_CHAR;
 					break;
 				}
 
@@ -168,7 +165,7 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				}
 
 				/**
-				 * Date/Datetime are varchars
+				 * Date are dates
 				 */
 				if memstr(columnType, "date") {
 					let definition["type"] = Column::TYPE_DATE;
@@ -184,12 +181,74 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				}
 
 				/**
+				 * Decimals are floats
+				 */
+				if memstr(columnType, "decimal"){
+					let definition["type"] = Column::TYPE_DECIMAL,
+						definition["isNumeric"] = true,
+						definition["bindType"] = Column::BIND_PARAM_DECIMAL;
+					break;
+				}
+
+				/**
+				 * Doubles
+				 */
+				if memstr(columnType, "double"){
+					let definition["type"] = Column::TYPE_DOUBLE,
+						definition["isNumeric"] = true,
+						definition["bindType"] = Column::BIND_PARAM_DECIMAL;
+					break;
+				}
+
+				/**
 				 * Float/Smallfloats/Decimals are float
 				 */
 				if memstr(columnType, "float") {
 					let definition["type"] = Column::TYPE_FLOAT,
 						definition["isNumeric"] = true,
-						definition["bindType"] = Column::TYPE_DECIMAL;
+						definition["bindType"] = Column::BIND_PARAM_DECIMAL;
+					break;
+				}
+
+				/**
+				 * Boolean
+				 */
+				if memstr(columnType, "bit") {
+					let definition["type"] = Column::TYPE_BOOLEAN,
+						definition["bindType"] = Column::BIND_PARAM_BOOL;
+					break;
+				}
+
+				/**
+				 * Tinyblob
+				 */
+				if memstr(columnType, "tinyblob") {
+					let definition["type"] = Column::TYPE_TINYBLOB,
+						definition["bindType"] = Column::BIND_PARAM_BOOL;
+					break;
+				}
+
+				/**
+				 * Mediumblob
+				 */
+				if memstr(columnType, "mediumblob") {
+					let definition["type"] = Column::TYPE_MEDIUMBLOB;
+					break;
+				}
+
+				/**
+				 * Longblob
+				 */
+				if memstr(columnType, "longblob") {
+					let definition["type"] = Column::TYPE_LONGBLOB;
+					break;
+				}
+
+				/**
+				 * Blob
+				 */
+				if memstr(columnType, "blob") {
+					let definition["type"] = Column::TYPE_BLOB;
 					break;
 				}
 
@@ -207,10 +266,10 @@ class Mysql extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				let matches = null;
 				if preg_match(sizePattern, columnType, matches) {
 					if fetch matchOne, matches[1] {
-						let definition["size"] = (int)matchOne;
+						let definition["size"] = (int) matchOne;
 					}
 					if fetch matchTwo, matches[2] {
-						let definition["scale"] = (int)matchTwo;
+						let definition["scale"] = (int) matchTwo;
 					}
 				}
 			}

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -79,17 +79,14 @@ abstract class MetaData implements InjectionAwareInterface
 
 	const MODELS_DEFAULT_VALUES = 12;
 
+	const MODELS_EMPTY_STRING_VALUES = 13;
+
 	const MODELS_COLUMN_MAP = 0;
 
 	const MODELS_REVERSE_COLUMN_MAP = 1;
 
 	/**
 	 * Initialize the metadata for certain table
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string|null key
-	 * @param string|null table
-	 * @param string|null schema
 	 */
 	protected final function _initialize(<ModelInterface> model, var key, var table, var schema)
 	{
@@ -105,7 +102,7 @@ abstract class MetaData implements InjectionAwareInterface
 			if !isset metaData[key] {
 
 				/**
-				 * The meta-data is read from the adapter always
+				 * The meta-data is read from the adapter always if not available in _metaData property
 				 */
 				let prefixKey = "meta-" . key,
 					data = this->{"read"}(prefixKey);
@@ -124,8 +121,7 @@ abstract class MetaData implements InjectionAwareInterface
 					} else {
 
 						/**
-						 * Get the meta-data extraction strategy
-						 * Get the meta-data
+						 * Get the meta-data extraction strategy						 
 						 */
 						let dependencyInjector = this->_dependencyInjector,
 							strategy = this->getStrategy(),
@@ -142,7 +138,6 @@ abstract class MetaData implements InjectionAwareInterface
 					 */
 					this->{"write"}(prefixKey, modelMetadata);
 				}
-
 			}
 		}
 
@@ -193,8 +188,6 @@ abstract class MetaData implements InjectionAwareInterface
 
 	/**
 	 * Sets the DependencyInjector container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -203,18 +196,14 @@ abstract class MetaData implements InjectionAwareInterface
 
 	/**
 	 * Returns the DependencyInjector container
-	 *
-	 * @return Phalcon\DiInterface
 	 */
-	public function getDI() -> <\Phalcon\DiInterface>
+	public function getDI() -> <DiInterface>
 	{
 		return this->_dependencyInjector;
 	}
 
 	/**
 	 * Set the meta-data extraction strategy
-	 *
-	 * @param Phalcon\Mvc\Model\MetaData\StrategyInterface strategy
 	 */
 	public function setStrategy(<StrategyInterface> strategy) -> void
 	{
@@ -223,8 +212,6 @@ abstract class MetaData implements InjectionAwareInterface
 
 	/**
 	 * Return the strategy to obtain the meta-data
-	 *
-	 * @return Phalcon\Mvc\Model\MetaData\StrategyInterface
 	 */
 	public function getStrategy() -> <StrategyInterface>
 	{
@@ -243,9 +230,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->readMetaData(new Robots());
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
 	public final function readMetaData(<ModelInterface> model)
 	{
@@ -266,15 +250,11 @@ abstract class MetaData implements InjectionAwareInterface
 	}
 
 	/**
-	 * Reads meta-data for certain model using a MODEL_* constant
+	 * Reads meta-data for certain model
 	 *
 	 *<code>
-	 *	print_r($metaData->writeColumnMapIndex(new Robots(), MetaData::MODELS_REVERSE_COLUMN_MAP, array('leName' => 'name')));
+	 *	print_r($metaData->readMetaDataIndex(new Robots(), 0);
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param int index
-	 * @return mixed
 	 */
 	public final function readMetaDataIndex(<ModelInterface> model, int index)
 	{
@@ -302,16 +282,12 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->writeColumnMapIndex(new Robots(), MetaData::MODELS_REVERSE_COLUMN_MAP, array('leName' => 'name')));
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param int index
-	 * @param mixed data
 	 */
 	public final function writeMetaDataIndex(<ModelInterface> model, int index, var data) -> void
 	{
-		var source, schema, key;
+		var metaData, source, schema, key;
 
-		if typeof data != "array" && typeof data != "string" &&  typeof data != "boolean" {
+		if typeof data != "array" && typeof data != "string" && typeof data != "boolean" {
 			throw new Exception("Invalid data for index");
 		}
 
@@ -327,7 +303,9 @@ abstract class MetaData implements InjectionAwareInterface
 			this->_initialize(model, key, source, schema);
 		}
 
-		let this->_metaData[key][index] = data;
+		let metaData = this->_metaData,
+			metaData[key][index] = data,
+			this->_metaData = metaData;
 	}
 
 	/**
@@ -336,9 +314,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->readColumnMap(new Robots()));
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
 	public final function readColumnMap(<ModelInterface> model)
 	{
@@ -363,9 +338,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->readColumnMapIndex(new Robots(), MetaData::MODELS_REVERSE_COLUMN_MAP));
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param int index
 	 */
 	public final function readColumnMapIndex(<ModelInterface> model, int index)
 	{
@@ -393,11 +365,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface $model
-	 * @return 	array
 	 */
-	public function getAttributes(<ModelInterface> model)
+	public function getAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_ATTRIBUTES);
@@ -413,11 +382,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getPrimaryKeyAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return	array
 	 */
-	public function getPrimaryKeyAttributes(<ModelInterface> model)
+	public function getPrimaryKeyAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_PRIMARY_KEY);
@@ -433,11 +399,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getNonPrimaryKeyAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return 	array
 	 */
-	public function getNonPrimaryKeyAttributes(<ModelInterface> model)
+	public function getNonPrimaryKeyAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_NON_PRIMARY_KEY);
@@ -453,11 +416,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getNotNullAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getNotNullAttributes(<ModelInterface> model)
+	public function getNotNullAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_NOT_NULL);
@@ -473,11 +433,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getDataTypes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getDataTypes(<ModelInterface> model)
+	public function getDataTypes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_DATA_TYPES);
@@ -493,11 +450,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getDataTypesNumeric(new Robots()));
 	 *</code>
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getDataTypesNumeric(<ModelInterface> model)
+	public function getDataTypesNumeric(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_DATA_TYPES_NUMERIC);
@@ -528,11 +482,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getBindTypes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getBindTypes(<ModelInterface> model)
+	public function getBindTypes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_DATA_TYPES_BIND);
@@ -548,11 +499,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getAutomaticCreateAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getAutomaticCreateAttributes(<ModelInterface> model)
+	public function getAutomaticCreateAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_AUTOMATIC_DEFAULT_INSERT);
@@ -568,11 +516,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getAutomaticUpdateAttributes(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getAutomaticUpdateAttributes(<ModelInterface> model)
+	public function getAutomaticUpdateAttributes(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_AUTOMATIC_DEFAULT_UPDATE);
@@ -588,11 +533,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	$metaData->setAutomaticCreateAttributes(new Robots(), array('created_at' => true));
 	 *</code>
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @param  array attributes
 	 */
-	public function setAutomaticCreateAttributes(<ModelInterface> model, attributes) -> void
+	public function setAutomaticCreateAttributes(<ModelInterface> model, array attributes) -> void
 	{
 		this->writeMetaDataIndex(model, self::MODELS_AUTOMATIC_DEFAULT_INSERT, attributes);
 	}
@@ -603,13 +545,39 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	$metaData->setAutomaticUpdateAttributes(new Robots(), array('modified_at' => true));
 	 *</code>
-	 *
-	 * @param  Phalcon\Mvc\ModelInterface model
-	 * @param  array attributes
 	 */
-	public function setAutomaticUpdateAttributes(<ModelInterface> model, attributes) -> void
+	public function setAutomaticUpdateAttributes(<ModelInterface> model, array attributes) -> void
 	{
 		this->writeMetaDataIndex(model, self::MODELS_AUTOMATIC_DEFAULT_UPDATE, attributes);
+	}
+
+	/**
+	 * Set the attributes that allow empty string values
+	 *
+	 *<code>
+	 *	$metaData->setEmptyStringAttributes(new Robots(), array('name' => true));
+	 *</code>
+	 */
+	public function setEmptyStringAttributes(<ModelInterface> model, array attributes) -> void
+	{
+		this->writeMetaDataIndex(model, self::MODELS_EMPTY_STRING_VALUES, attributes);
+	}
+
+	/**
+	 * Returns attributes allow empty strings
+	 *
+	 *<code>
+	 *	print_r($metaData->getEmptyStringAttributes(new Robots()));
+	 *</code>
+	 */
+	public function getEmptyStringAttributes(<ModelInterface> model) -> array
+	{
+		var data;
+		let data = this->readMetaDataIndex(model, self::MODELS_EMPTY_STRING_VALUES);
+		if typeof data != "array" {
+			throw new Exception("The meta-data is invalid or is corrupt");
+		}
+		return data;
 	}
 
 	/**
@@ -618,11 +586,8 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getDefaultValues(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
-	public function getDefaultValues(<ModelInterface> model)
+	public function getDefaultValues(<ModelInterface> model) -> array
 	{
 		var data;
 		let data = this->readMetaDataIndex(model, self::MODELS_DEFAULT_VALUES);
@@ -638,9 +603,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getColumnMap(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
 	public function getColumnMap(<ModelInterface> model) -> array
 	{
@@ -659,9 +621,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	print_r($metaData->getReverseColumnMap(new Robots()));
 	 *</code>
-	 *
-	 * @param	Phalcon\Mvc\ModelInterface model
-	 * @return array
 	 */
 	public function getReverseColumnMap(<ModelInterface> model) -> array
 	{
@@ -680,10 +639,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	var_dump($metaData->hasAttribute(new Robots(), 'name'));
 	 *</code>
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param string attribute
-	 * @return boolean
 	 */
 	public function hasAttribute(<ModelInterface> model, string attribute) -> boolean
 	{
@@ -695,8 +650,6 @@ abstract class MetaData implements InjectionAwareInterface
 		} else {
 			return isset this->readMetaData(model)[self::MODELS_DATA_TYPES][attribute];
 		}
-
-		return false;
 	}
 
 	/**
@@ -705,8 +658,6 @@ abstract class MetaData implements InjectionAwareInterface
 	 *<code>
 	 *	var_dump($metaData->isEmpty());
 	 *</code>
-	 *
-	 * @return boolean
 	 */
 	public function isEmpty() -> boolean
 	{
@@ -725,5 +676,4 @@ abstract class MetaData implements InjectionAwareInterface
 		let this->_metaData = [],
 			this->_columnMap = [];
 	}
-
 }

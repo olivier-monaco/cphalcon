@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -24,6 +24,7 @@ use Phalcon\Mvc\Micro\Exception;
 use Phalcon\Mvc\Router\RouteInterface;
 use Phalcon\Mvc\Micro\MiddlewareInterface;
 use Phalcon\Mvc\Micro\Collection;
+use Phalcon\Mvc\Micro\CollectionInterface;
 use Phalcon\Mvc\Micro\LazyLoader;
 use Phalcon\Http\ResponseInterface;
 use Phalcon\Di\ServiceInterface;
@@ -75,10 +76,8 @@ class Micro extends Injectable implements \ArrayAccess
 	protected _returnedValue;
 
 	/**
-	* Phalcon\Mvc\Micro constructor
-	*
-	* @param Phalcon\DiInterface $dependencyInjector
-	*/
+	 * Phalcon\Mvc\Micro constructor
+	 */
 	public function __construct(<DiInterface> dependencyInjector = null)
 	{
 		if typeof dependencyInjector == "object" {
@@ -90,8 +89,6 @@ class Micro extends Injectable implements \ArrayAccess
 
 	/**
 	 * Sets the DependencyInjector container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -363,18 +360,11 @@ class Micro extends Injectable implements \ArrayAccess
 
 	/**
 	 * Mounts a collection of handlers
-	 *
-	 * @param Phalcon\Mvc\Micro\Collection collection
-	 * @return Phalcon\Mvc\Micro
 	 */
-	public function mount(<Collection> collection) -> <Micro>
+	public function mount(<CollectionInterface> collection) -> <Micro>
 	{
 		var mainHandler, handlers, lazyHandler, prefix, methods, pattern,
 			subHandler, realHandler, prefixedPattern, route, handler, name;
-
-		if typeof collection != "object" {
-			throw new Exception("Collection is not valid");
-		}
 
 		/**
 		 * Get the main handler
@@ -436,7 +426,7 @@ class Micro extends Injectable implements \ArrayAccess
 				 */
 				let route = this->map(prefixedPattern, realHandler);
 
-				if typeof methods == "string" || typeof methods == "array" {
+				if (typeof methods == "string" && methods != "") || typeof methods == "array" {
 					route->via(methods);
 				}
 
@@ -475,8 +465,6 @@ class Micro extends Injectable implements \ArrayAccess
 
 	/**
 	 * Returns the internal router used by the application
-	 *
-	 * @return Phalcon\Mvc\RouterInterface
 	 */
 	public function getRouter() -> <RouterInterface>
 	{
@@ -514,7 +502,7 @@ class Micro extends Injectable implements \ArrayAccess
 	 * @param boolean shared
 	 * @return Phalcon\DI\ServiceInterface
 	 */
-	public function setService(var serviceName, var definition, boolean shared = false) -> <ServiceInterface>
+	public function setService(string! serviceName, var definition, boolean shared = false) -> <ServiceInterface>
 	{
 		var dependencyInjector;
 
@@ -529,9 +517,6 @@ class Micro extends Injectable implements \ArrayAccess
 
 	/**
 	 * Checks if a service is registered in the DI
-	 *
-	 * @param string serviceName
-	 * @return boolean
 	 */
 	public function hasService(string! serviceName) -> boolean
 	{

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -72,7 +72,6 @@ class Event
 	 */
 	public function __construct(string! type, source, data = null, boolean cancelable = true)
 	{
-
 		let this->_type = type,
 			this->_source = source;
 
@@ -90,17 +89,15 @@ class Event
 	 */
 	public function stop() -> void
 	{
-		if this->_cancelable {
-			let this->_stopped = true;
-		} else {
+		if !this->_cancelable {
 			throw new Exception("Trying to cancel a non-cancelable event");
 		}
+
+		let this->_stopped = true;
 	}
 
 	/**
 	 * Check whether the event is currently stopped
-	 *
-	 * @return boolean
 	 */
 	public function isStopped() -> boolean
 	{

@@ -24,23 +24,6 @@
 #include "kernel/variables.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\MetaData\Files
  *
@@ -145,7 +128,7 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Files, read) {
  */
 PHP_METHOD(Phalcon_Mvc_Model_MetaData_Files, write) {
 
-	zval *key_param = NULL, *data, *path, *_0, *_1, _2, *_3, *_4, *_5;
+	zval *key_param = NULL, *data, *path, *_0, *_1, _2, *_3, *_4 = NULL, *_5;
 	zval *key = NULL;
 
 	ZEPHIR_MM_GROW();
@@ -173,6 +156,7 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Files, write) {
 	ZEPHIR_CONCAT_VVS(path, _0, _1, ".php");
 	ZEPHIR_INIT_VAR(_3);
 	ZEPHIR_INIT_VAR(_4);
+	ZEPHIR_INIT_NVAR(_4);
 	zephir_var_export_ex(_4, &(data) TSRMLS_CC);
 	ZEPHIR_INIT_VAR(_5);
 	ZEPHIR_CONCAT_SVS(_5, "<?php return ", _4, "; ");

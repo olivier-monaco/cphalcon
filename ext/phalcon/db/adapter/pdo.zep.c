@@ -23,26 +23,8 @@
 #include "kernel/concat.h"
 #include "kernel/string.h"
 #include "ext/pdo/php_pdo_driver.h"
-#include "kernel/main.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Db\Adapter\Pdo
  *
@@ -78,12 +60,10 @@ ZEPHIR_INIT_CLASS(Phalcon_Db_Adapter_Pdo) {
 
 /**
  * Constructor for Phalcon\Db\Adapter\Pdo
- *
- * @param array descriptor
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, __construct) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
+	zephir_fcall_cache_entry *_0 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
 	zval *descriptor_param = NULL;
 	zval *descriptor = NULL;
@@ -95,9 +75,9 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, __construct) {
 
 
 
-	ZEPHIR_CALL_METHOD(NULL, this_ptr, "connect", NULL, descriptor);
+	ZEPHIR_CALL_METHOD(NULL, this_ptr, "connect", NULL, 0, descriptor);
 	zephir_check_call_status();
-	ZEPHIR_CALL_PARENT(NULL, phalcon_db_adapter_pdo_ce, this_ptr, "__construct", &_0, descriptor);
+	ZEPHIR_CALL_PARENT(NULL, phalcon_db_adapter_pdo_ce, this_ptr, "__construct", &_0, 24, descriptor);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();
 
@@ -165,11 +145,21 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, connect) {
 		ZEPHIR_INIT_NVAR(options);
 		array_init(options);
 	}
+	ZEPHIR_OBS_VAR(persistent);
+	if (zephir_array_isset_string_fetch(&persistent, descriptor, SS("persistent"), 0 TSRMLS_CC)) {
+		if (zephir_is_true(persistent)) {
+			zephir_array_update_long(&options, 12, &ZEPHIR_GLOBAL(global_true), PH_COPY | PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 127);
+		}
+		zephir_array_unset_string(&descriptor, SS("persistent"), PH_SEPARATE);
+	}
+	if (zephir_array_isset_string(descriptor, SS("dialectClass"))) {
+		zephir_array_unset_string(&descriptor, SS("dialectClass"), PH_SEPARATE);
+	}
 	ZEPHIR_OBS_VAR(dsnAttributes);
 	if (!(zephir_array_isset_string_fetch(&dsnAttributes, descriptor, SS("dsn"), 0 TSRMLS_CC))) {
 		ZEPHIR_INIT_VAR(dsnParts);
 		array_init(dsnParts);
-		zephir_is_iterable(descriptor, &_1, &_0, 0, 0, "phalcon/db/adapter/pdo.zep", 132);
+		zephir_is_iterable(descriptor, &_1, &_0, 0, 0, "phalcon/db/adapter/pdo.zep", 147);
 		for (
 		  ; zephir_hash_get_current_data_ex(_1, (void**) &_2, &_0) == SUCCESS
 		  ; zephir_hash_move_forward_ex(_1, &_0)
@@ -178,25 +168,20 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, connect) {
 			ZEPHIR_GET_HVALUE(value, _2);
 			ZEPHIR_INIT_LNVAR(_3);
 			ZEPHIR_CONCAT_VSV(_3, key, "=", value);
-			zephir_array_append(&dsnParts, _3, PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 130);
+			zephir_array_append(&dsnParts, _3, PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 145);
 		}
 		ZEPHIR_INIT_NVAR(dsnAttributes);
 		zephir_fast_join_str(dsnAttributes, SL(";"), dsnParts TSRMLS_CC);
 	}
 	ZEPHIR_INIT_VAR(_4);
 	ZVAL_LONG(_4, 2);
-	zephir_array_update_long(&options, 3, &_4, PH_COPY | PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 135);
-	if (zephir_array_isset_string_fetch(&persistent, descriptor, SS("persistent"), 1 TSRMLS_CC)) {
-		if (zephir_is_true(persistent)) {
-			zephir_array_update_long(&options, 12, &ZEPHIR_GLOBAL(global_true), PH_COPY | PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 142);
-		}
-	}
+	zephir_array_update_long(&options, 3, &_4, PH_COPY | PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 150);
 	ZEPHIR_INIT_VAR(_5);
 	object_init_ex(_5, php_pdo_get_dbh_ce());
 	_6 = zephir_fetch_nproperty_this(this_ptr, SL("_type"), PH_NOISY_CC);
 	ZEPHIR_INIT_LNVAR(_3);
 	ZEPHIR_CONCAT_VSV(_3, _6, ":", dsnAttributes);
-	ZEPHIR_CALL_METHOD(NULL, _5, "__construct", NULL, _3, username, password, options);
+	ZEPHIR_CALL_METHOD(NULL, _5, "__construct", NULL, 0, _3, username, password, options);
 	zephir_check_call_status();
 	zephir_update_property_this(this_ptr, SL("_pdo"), _5 TSRMLS_CC);
 	ZEPHIR_MM_RESTORE();
@@ -210,9 +195,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, connect) {
  * $statement = $db->prepare('SELECT * FROM robots WHERE name = :name');
  * $result = $connection->executePrepared($statement, array('name' => 'Voltron'));
  *</code>
- *
- * @param string sqlStatement
- * @return \PDOStatement
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, prepare) {
 
@@ -237,7 +219,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, prepare) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "prepare", NULL, sqlStatement);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "prepare", NULL, 0, sqlStatement);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -258,26 +240,23 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, prepare) {
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, executePrepared) {
 
-	zephir_fcall_cache_entry *_3 = NULL;
+	zval *_6 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
-	HashTable *_1;
-	HashPosition _0;
-	zval *statement, *placeholders, *dataTypes, *wildcard = NULL, *value = NULL, *type = NULL, *castValue = NULL, *parameter = NULL, **_2;
+	zephir_fcall_cache_entry *_5 = NULL, *_7 = NULL;
+	zend_bool _3;
+	HashTable *_1, *_9, *_13;
+	HashPosition _0, _8, _12;
+	zval *placeholders = NULL;
+	zval *statement, *placeholders_param = NULL, *dataTypes, *wildcard = NULL, *value = NULL, *type = NULL, *castValue = NULL, *parameter = NULL, *position = NULL, *itemValue = NULL, **_2, _4 = zval_used_for_init, **_10, *_11 = NULL, **_14;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &statement, &placeholders, &dataTypes);
+	zephir_fetch_params(1, 3, 0, &statement, &placeholders_param, &dataTypes);
+
+	placeholders = placeholders_param;
 
 
 
-	if (!(zephir_instance_of_ev(statement, zephir_get_internal_ce(SS("pdostatement") TSRMLS_CC) TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'statement' must be an instance of 'PDOStatement'", "", 0);
-		return;
-	}
-	if (Z_TYPE_P(placeholders) != IS_ARRAY) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Placeholders must be an array", "phalcon/db/adapter/pdo.zep", 186);
-		return;
-	}
-	zephir_is_iterable(placeholders, &_1, &_0, 0, 0, "phalcon/db/adapter/pdo.zep", 230);
+	zephir_is_iterable(placeholders, &_1, &_0, 0, 0, "phalcon/db/adapter/pdo.zep", 271);
 	for (
 	  ; zephir_hash_get_current_data_ex(_1, (void**) &_2, &_0) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_1, &_0)
@@ -295,33 +274,104 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, executePrepared) {
 				return;
 			}
 		}
-		if (Z_TYPE_P(dataTypes) == IS_ARRAY) {
+		_3 = Z_TYPE_P(dataTypes) == IS_ARRAY;
+		if (_3) {
 			ZEPHIR_OBS_NVAR(type);
-			if (!(zephir_array_isset_fetch(&type, dataTypes, wildcard, 0 TSRMLS_CC))) {
-				ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Invalid bind type parameter (2)", "phalcon/db/adapter/pdo.zep", 204);
-				return;
-			}
+			_3 = zephir_array_isset_fetch(&type, dataTypes, wildcard, 0 TSRMLS_CC);
+		}
+		if (_3) {
 			if (ZEPHIR_IS_LONG(type, 32)) {
 				ZEPHIR_INIT_NVAR(castValue);
 				ZVAL_DOUBLE(castValue, zephir_get_doubleval(value));
 				ZEPHIR_INIT_NVAR(type);
 				ZVAL_LONG(type, 1024);
 			} else {
-				ZEPHIR_CPY_WRT(castValue, value);
+				if (ZEPHIR_GLOBAL(db).force_casting) {
+					if (Z_TYPE_P(value) != IS_ARRAY) {
+						do {
+							if (ZEPHIR_IS_LONG(type, 1)) {
+								ZEPHIR_SINIT_NVAR(_4);
+								ZVAL_LONG(&_4, 10);
+								ZEPHIR_CALL_FUNCTION(&castValue, "intval", &_5, 25, value, &_4);
+								zephir_check_call_status();
+								break;
+							}
+							if (ZEPHIR_IS_LONG(type, 2)) {
+								zephir_get_strval(_6, value);
+								ZEPHIR_CPY_WRT(castValue, _6);
+								break;
+							}
+							if (ZEPHIR_IS_LONG(type, 0)) {
+								ZEPHIR_INIT_NVAR(castValue);
+								ZVAL_NULL(castValue);
+								break;
+							}
+							if (ZEPHIR_IS_LONG(type, 5)) {
+								ZEPHIR_INIT_NVAR(castValue);
+								ZVAL_BOOL(castValue, zephir_get_boolval(value));
+								break;
+							}
+							ZEPHIR_CPY_WRT(castValue, value);
+							break;
+						} while(0);
+
+					} else {
+						ZEPHIR_CPY_WRT(castValue, value);
+					}
+				} else {
+					ZEPHIR_CPY_WRT(castValue, value);
+				}
 			}
-			if (ZEPHIR_IS_LONG(type, 1024)) {
-				ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_3, parameter, castValue);
-				zephir_check_call_status();
+			if (Z_TYPE_P(castValue) != IS_ARRAY) {
+				if (ZEPHIR_IS_LONG(type, 1024)) {
+					ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, parameter, castValue);
+					zephir_check_call_status();
+				} else {
+					ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, parameter, castValue, type);
+					zephir_check_call_status();
+				}
 			} else {
-				ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_3, parameter, castValue, type);
-				zephir_check_call_status();
+				zephir_is_iterable(castValue, &_9, &_8, 0, 0, "phalcon/db/adapter/pdo.zep", 259);
+				for (
+				  ; zephir_hash_get_current_data_ex(_9, (void**) &_10, &_8) == SUCCESS
+				  ; zephir_hash_move_forward_ex(_9, &_8)
+				) {
+					ZEPHIR_GET_HMKEY(position, _9, _8);
+					ZEPHIR_GET_HVALUE(itemValue, _10);
+					if (ZEPHIR_IS_LONG(type, 1024)) {
+						ZEPHIR_INIT_LNVAR(_11);
+						ZEPHIR_CONCAT_VV(_11, parameter, position);
+						ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, _11, itemValue);
+						zephir_check_call_status();
+					} else {
+						ZEPHIR_INIT_LNVAR(_11);
+						ZEPHIR_CONCAT_VV(_11, parameter, position);
+						ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, _11, itemValue, type);
+						zephir_check_call_status();
+					}
+				}
 			}
 		} else {
-			ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_3, parameter, value);
-			zephir_check_call_status();
+			if (Z_TYPE_P(value) != IS_ARRAY) {
+				ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, parameter, value);
+				zephir_check_call_status();
+			} else {
+				zephir_is_iterable(value, &_13, &_12, 0, 0, "phalcon/db/adapter/pdo.zep", 267);
+				for (
+				  ; zephir_hash_get_current_data_ex(_13, (void**) &_14, &_12) == SUCCESS
+				  ; zephir_hash_move_forward_ex(_13, &_12)
+				) {
+					ZEPHIR_GET_HMKEY(position, _13, _12);
+					ZEPHIR_GET_HVALUE(itemValue, _14);
+					ZEPHIR_INIT_LNVAR(_11);
+					ZEPHIR_CONCAT_VV(_11, parameter, position);
+					ZEPHIR_CALL_METHOD(NULL, statement, "bindvalue", &_7, 0, _11, itemValue);
+					zephir_check_call_status();
+				}
+			}
 		}
 	}
-	ZEPHIR_CALL_METHOD(NULL, statement, "execute", NULL);
+	ZEPHIR_CALL_METHOD(NULL, statement, "execute", NULL, 0);
 	zephir_check_call_status();
 	RETVAL_ZVAL(statement, 1, 0);
 	RETURN_MM();
@@ -337,11 +387,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, executePrepared) {
  *	$resultset = $connection->query("SELECT * FROM robots WHERE type='mechanical'");
  *	$resultset = $connection->query("SELECT * FROM robots WHERE type=?", array("mechanical"));
  *</code>
- *
- * @param  string sqlStatement
- * @param  array bindParams
- * @param  array bindTypes
- * @return Phalcon\Db\ResultInterface|bool
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, query) {
 
@@ -379,7 +424,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, query) {
 		zephir_update_property_this(this_ptr, SL("_sqlBindTypes"), bindTypes TSRMLS_CC);
 		ZEPHIR_INIT_VAR(_2);
 		ZVAL_STRING(_2, "db:beforeQuery", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&_1, eventsManager, "fire", NULL, _2, this_ptr, bindParams);
+		ZEPHIR_CALL_METHOD(&_1, eventsManager, "fire", NULL, 0, _2, this_ptr, bindParams);
 		zephir_check_temp_parameter(_2);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_FALSE_IDENTICAL(_1)) {
@@ -389,27 +434,27 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, query) {
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
 	ZEPHIR_CPY_WRT(pdo, _0);
 	if (Z_TYPE_P(bindParams) == IS_ARRAY) {
-		ZEPHIR_CALL_METHOD(&statement, pdo, "prepare", NULL, sqlStatement);
+		ZEPHIR_CALL_METHOD(&statement, pdo, "prepare", NULL, 0, sqlStatement);
 		zephir_check_call_status();
 		if (Z_TYPE_P(statement) == IS_OBJECT) {
-			ZEPHIR_CALL_METHOD(&_1, this_ptr, "executeprepared", NULL, statement, bindParams, bindTypes);
+			ZEPHIR_CALL_METHOD(&_1, this_ptr, "executeprepared", NULL, 0, statement, bindParams, bindTypes);
 			zephir_check_call_status();
 			ZEPHIR_CPY_WRT(statement, _1);
 		}
 	} else {
-		ZEPHIR_CALL_METHOD(&statement, pdo, "query", NULL, sqlStatement);
+		ZEPHIR_CALL_METHOD(&statement, pdo, "query", NULL, 0, sqlStatement);
 		zephir_check_call_status();
 	}
 	if (Z_TYPE_P(statement) == IS_OBJECT) {
 		if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 			ZEPHIR_INIT_NVAR(_2);
 			ZVAL_STRING(_2, "db:afterQuery", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr, bindParams);
+			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr, bindParams);
 			zephir_check_temp_parameter(_2);
 			zephir_check_call_status();
 		}
 		object_init_ex(return_value, phalcon_db_result_pdo_ce);
-		ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, this_ptr, statement, sqlStatement, bindParams, bindTypes);
+		ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 26, this_ptr, statement, sqlStatement, bindParams, bindTypes);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
@@ -419,18 +464,13 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, query) {
 
 /**
  * Sends SQL statements to the database server returning the success state.
- * Use this method only when the SQL statement sent to the server doesn't return any row
+ * Use this method only when the SQL statement sent to the server doesn't return any rows
  *
  *<code>
  *	//Inserting data
  *	$success = $connection->execute("INSERT INTO robots VALUES (1, 'Astro Boy')");
  *	$success = $connection->execute("INSERT INTO robots VALUES (?, ?)", array(1, 'Astro Boy'));
  *</code>
- *
- * @param  string sqlStatement
- * @param  array bindParams
- * @param  array bindTypes
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, execute) {
 
@@ -468,7 +508,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, execute) {
 		zephir_update_property_this(this_ptr, SL("_sqlBindTypes"), bindTypes TSRMLS_CC);
 		ZEPHIR_INIT_VAR(_2);
 		ZVAL_STRING(_2, "db:beforeQuery", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&_1, eventsManager, "fire", NULL, _2, this_ptr, bindParams);
+		ZEPHIR_CALL_METHOD(&_1, eventsManager, "fire", NULL, 0, _2, this_ptr, bindParams);
 		zephir_check_temp_parameter(_2);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_FALSE_IDENTICAL(_1)) {
@@ -480,16 +520,16 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, execute) {
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
 	ZEPHIR_CPY_WRT(pdo, _0);
 	if (Z_TYPE_P(bindParams) == IS_ARRAY) {
-		ZEPHIR_CALL_METHOD(&statement, pdo, "prepare", NULL, sqlStatement);
+		ZEPHIR_CALL_METHOD(&statement, pdo, "prepare", NULL, 0, sqlStatement);
 		zephir_check_call_status();
 		if (Z_TYPE_P(statement) == IS_OBJECT) {
-			ZEPHIR_CALL_METHOD(&newStatement, this_ptr, "executeprepared", NULL, statement, bindParams, bindTypes);
+			ZEPHIR_CALL_METHOD(&newStatement, this_ptr, "executeprepared", NULL, 0, statement, bindParams, bindTypes);
 			zephir_check_call_status();
-			ZEPHIR_CALL_METHOD(&affectedRows, newStatement, "rowcount", NULL);
+			ZEPHIR_CALL_METHOD(&affectedRows, newStatement, "rowcount", NULL, 0);
 			zephir_check_call_status();
 		}
 	} else {
-		ZEPHIR_CALL_METHOD(&affectedRows, pdo, "exec", NULL, sqlStatement);
+		ZEPHIR_CALL_METHOD(&affectedRows, pdo, "exec", NULL, 0, sqlStatement);
 		zephir_check_call_status();
 	}
 	if (Z_TYPE_P(affectedRows) == IS_LONG) {
@@ -497,7 +537,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, execute) {
 		if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 			ZEPHIR_INIT_NVAR(_2);
 			ZVAL_STRING(_2, "db:afterQuery", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr, bindParams);
+			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr, bindParams);
 			zephir_check_temp_parameter(_2);
 			zephir_check_call_status();
 		}
@@ -513,8 +553,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, execute) {
  *	$connection->execute("DELETE FROM robots");
  *	echo $connection->affectedRows(), ' were deleted';
  *</code>
- *
- * @return int
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, affectedRows) {
 
@@ -526,8 +564,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, affectedRows) {
 /**
  * Closes the active connection returning success. Phalcon automatically closes and destroys
  * active connections when the request ends
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, close) {
 
@@ -537,7 +573,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, close) {
 	pdo = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
 	if (Z_TYPE_P(pdo) == IS_OBJECT) {
 		zephir_update_property_this(this_ptr, SL("_pdo"), ZEPHIR_GLOBAL(global_null) TSRMLS_CC);
-		RETURN_BOOL(1);
 	}
 	RETURN_BOOL(1);
 
@@ -563,8 +598,8 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, escapeIdentifier) {
 
 
 	if (Z_TYPE_P(identifier) == IS_ARRAY) {
-		zephir_array_fetch_long(&_0, identifier, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter/pdo.zep", 397 TSRMLS_CC);
-		zephir_array_fetch_long(&_1, identifier, 1, PH_NOISY | PH_READONLY, "phalcon/db/adapter/pdo.zep", 397 TSRMLS_CC);
+		zephir_array_fetch_long(&_0, identifier, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter/pdo.zep", 423 TSRMLS_CC);
+		zephir_array_fetch_long(&_1, identifier, 1, PH_NOISY | PH_READONLY, "phalcon/db/adapter/pdo.zep", 423 TSRMLS_CC);
 		ZEPHIR_CONCAT_SVSVS(return_value, "\"", _0, "\".\"", _1, "\"");
 		return;
 	}
@@ -579,9 +614,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, escapeIdentifier) {
  *<code>
  *	$escapedStr = $connection->escapeString('some dangerous value');
  *</code>
- *
- * @param string str
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, escapeString) {
 
@@ -592,21 +624,11 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, escapeString) {
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 1, 0, &str_param);
 
-	if (unlikely(Z_TYPE_P(str_param) != IS_STRING && Z_TYPE_P(str_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'str' must be a string") TSRMLS_CC);
-		RETURN_MM_NULL();
-	}
-
-	if (likely(Z_TYPE_P(str_param) == IS_STRING)) {
-		zephir_get_strval(str, str_param);
-	} else {
-		ZEPHIR_INIT_VAR(str);
-		ZVAL_EMPTY_STRING(str);
-	}
+	zephir_get_strval(str, str_param);
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "quote", NULL, str);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "quote", NULL, 0, str);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -618,19 +640,14 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, escapeString) {
  *<code>
  * print_r($connection->convertBoundParams('SELECT * FROM robots WHERE name = :name:', array('Bender')));
  *</code>
- *
- * @param string $sql
- * @param array $params
- * @return array
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, convertBoundParams) {
 
-	HashTable *_4;
-	HashPosition _3;
-	zephir_nts_static zephir_fcall_cache_entry *_2 = NULL, *_8 = NULL;
+	HashTable *_3;
+	HashPosition _2;
 	int setOrder, ZEPHIR_LAST_CALL_STATUS;
 	zval *params = NULL;
-	zval *sql_param = NULL, *params_param = NULL, *boundSql = NULL, *placeHolders, *bindPattern, *matches, *placeMatch = NULL, *value = NULL, *_0 = NULL, *_1 = NULL, **_5, *_6, *_7;
+	zval *sql_param = NULL, *params_param = NULL, *boundSql = NULL, *placeHolders, *bindPattern, *matches, *placeMatch = NULL, *value = NULL, *_0 = NULL, *_1 = NULL, **_4, *_5, *_6;
 	zval *sql = NULL;
 
 	ZEPHIR_MM_GROW();
@@ -665,42 +682,42 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, convertBoundParams) {
 	ZEPHIR_INIT_VAR(_0);
 	ZVAL_LONG(_0, setOrder);
 	Z_SET_ISREF_P(matches);
-	ZEPHIR_CALL_FUNCTION(&_1, "preg_match_all", &_2, bindPattern, sql, matches, _0);
+	ZEPHIR_CALL_FUNCTION(&_1, "preg_match_all", NULL, 27, bindPattern, sql, matches, _0);
 	Z_UNSET_ISREF_P(matches);
 	zephir_check_call_status();
 	if (zephir_is_true(_1)) {
-		zephir_is_iterable(matches, &_4, &_3, 0, 0, "phalcon/db/adapter/pdo.zep", 454);
+		zephir_is_iterable(matches, &_3, &_2, 0, 0, "phalcon/db/adapter/pdo.zep", 472);
 		for (
-		  ; zephir_hash_get_current_data_ex(_4, (void**) &_5, &_3) == SUCCESS
-		  ; zephir_hash_move_forward_ex(_4, &_3)
+		  ; zephir_hash_get_current_data_ex(_3, (void**) &_4, &_2) == SUCCESS
+		  ; zephir_hash_move_forward_ex(_3, &_2)
 		) {
-			ZEPHIR_GET_HVALUE(placeMatch, _5);
+			ZEPHIR_GET_HVALUE(placeMatch, _4);
 			ZEPHIR_OBS_NVAR(value);
-			zephir_array_fetch_long(&_6, placeMatch, 1, PH_READONLY, "phalcon/db/adapter/pdo.zep", 440 TSRMLS_CC);
-			if (!(zephir_array_isset_fetch(&value, params, _6, 0 TSRMLS_CC))) {
+			zephir_array_fetch_long(&_5, placeMatch, 1, PH_READONLY, "phalcon/db/adapter/pdo.zep", 459 TSRMLS_CC);
+			if (!(zephir_array_isset_fetch(&value, params, _5, 0 TSRMLS_CC))) {
 				if (zephir_array_isset_long(placeMatch, 2)) {
 					ZEPHIR_OBS_NVAR(value);
-					zephir_array_fetch_long(&_7, placeMatch, 2, PH_READONLY, "phalcon/db/adapter/pdo.zep", 442 TSRMLS_CC);
-					if (!(zephir_array_isset_fetch(&value, params, _7, 0 TSRMLS_CC))) {
-						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Matched parameter wasn't found in parameters list", "phalcon/db/adapter/pdo.zep", 443);
+					zephir_array_fetch_long(&_6, placeMatch, 2, PH_READONLY, "phalcon/db/adapter/pdo.zep", 461 TSRMLS_CC);
+					if (!(zephir_array_isset_fetch(&value, params, _6, 0 TSRMLS_CC))) {
+						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Matched parameter wasn't found in parameters list", "phalcon/db/adapter/pdo.zep", 462);
 						return;
 					}
 				} else {
-					ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Matched parameter wasn't found in parameters list", "phalcon/db/adapter/pdo.zep", 446);
+					ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Matched parameter wasn't found in parameters list", "phalcon/db/adapter/pdo.zep", 465);
 					return;
 				}
 			}
-			zephir_array_append(&placeHolders, value, PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 450);
+			zephir_array_append(&placeHolders, value, PH_SEPARATE, "phalcon/db/adapter/pdo.zep", 469);
 		}
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "?", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_FUNCTION(&boundSql, "preg_replace", &_8, bindPattern, _0, sql);
+		ZEPHIR_CALL_FUNCTION(&boundSql, "preg_replace", NULL, 28, bindPattern, _0, sql);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 	} else {
 		ZEPHIR_CPY_WRT(boundSql, sql);
 	}
-	array_init_size(return_value, 3);
+	zephir_create_array(return_value, 2, 0 TSRMLS_CC);
 	zephir_array_update_string(&return_value, SL("sql"), &boundSql, PH_COPY | PH_SEPARATE);
 	zephir_array_update_string(&return_value, SL("params"), &placeHolders, PH_COPY | PH_SEPARATE);
 	RETURN_MM();
@@ -743,7 +760,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, lastInsertId) {
 	if (Z_TYPE_P(pdo) != IS_OBJECT) {
 		RETURN_MM_BOOL(0);
 	}
-	ZEPHIR_RETURN_CALL_METHOD(pdo, "lastinsertid", NULL, sequenceName);
+	ZEPHIR_RETURN_CALL_METHOD(pdo, "lastinsertid", NULL, 0, sequenceName);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -751,9 +768,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, lastInsertId) {
 
 /**
  * Starts a transaction in the connection
- *
- * @param boolean nesting
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, begin) {
 
@@ -786,11 +800,11 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, begin) {
 		if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 			ZEPHIR_INIT_VAR(_2);
 			ZVAL_STRING(_2, "db:beginTransaction", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr);
+			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr);
 			zephir_check_temp_parameter(_2);
 			zephir_check_call_status();
 		}
-		ZEPHIR_RETURN_CALL_METHOD(pdo, "begintransaction", NULL);
+		ZEPHIR_RETURN_CALL_METHOD(pdo, "begintransaction", NULL, 0);
 		zephir_check_call_status();
 		RETURN_MM();
 	} else {
@@ -800,23 +814,23 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, begin) {
 		}
 		_4 = _3;
 		if (_4) {
-			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL);
+			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL, 0);
 			zephir_check_call_status();
 			_4 = zephir_is_true(_5);
 		}
 		if (_4) {
 			_1 = zephir_fetch_nproperty_this(this_ptr, SL("_eventsManager"), PH_NOISY_CC);
 			ZEPHIR_CPY_WRT(eventsManager, _1);
-			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL);
+			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL, 0);
 			zephir_check_call_status();
 			if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 				ZEPHIR_INIT_NVAR(_2);
 				ZVAL_STRING(_2, "db:createSavepoint", ZEPHIR_TEMP_PARAM_COPY);
-				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr, savepointName);
+				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr, savepointName);
 				zephir_check_temp_parameter(_2);
 				zephir_check_call_status();
 			}
-			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "createsavepoint", NULL, savepointName);
+			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "createsavepoint", NULL, 0, savepointName);
 			zephir_check_call_status();
 			RETURN_MM();
 		}
@@ -827,9 +841,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, begin) {
 
 /**
  * Rollbacks the active transaction in the connection
- *
- * @param boolean nesting
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, rollback) {
 
@@ -856,7 +867,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, rollback) {
 	zephir_read_property_this(&_0, this_ptr, SL("_transactionLevel"), PH_NOISY_CC);
 	transactionLevel = zephir_get_intval(_0);
 	if (!(transactionLevel)) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "There is no active transaction", "phalcon/db/adapter/pdo.zep", 574);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "There is no active transaction", "phalcon/db/adapter/pdo.zep", 586);
 		return;
 	}
 	if (transactionLevel == 1) {
@@ -865,12 +876,12 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, rollback) {
 		if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 			ZEPHIR_INIT_VAR(_2);
 			ZVAL_STRING(_2, "db:rollbackTransaction", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr);
+			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr);
 			zephir_check_temp_parameter(_2);
 			zephir_check_call_status();
 		}
 		RETURN_ON_FAILURE(zephir_property_decr(this_ptr, SL("_transactionLevel") TSRMLS_CC));
-		ZEPHIR_RETURN_CALL_METHOD(pdo, "rollback", NULL);
+		ZEPHIR_RETURN_CALL_METHOD(pdo, "rollback", NULL, 0);
 		zephir_check_call_status();
 		RETURN_MM();
 	} else {
@@ -880,24 +891,24 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, rollback) {
 		}
 		_4 = _3;
 		if (_4) {
-			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL);
+			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL, 0);
 			zephir_check_call_status();
 			_4 = zephir_is_true(_5);
 		}
 		if (_4) {
-			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL);
+			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL, 0);
 			zephir_check_call_status();
 			_1 = zephir_fetch_nproperty_this(this_ptr, SL("_eventsManager"), PH_NOISY_CC);
 			ZEPHIR_CPY_WRT(eventsManager, _1);
 			if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 				ZEPHIR_INIT_NVAR(_2);
 				ZVAL_STRING(_2, "db:rollbackSavepoint", ZEPHIR_TEMP_PARAM_COPY);
-				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr, savepointName);
+				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr, savepointName);
 				zephir_check_temp_parameter(_2);
 				zephir_check_call_status();
 			}
 			RETURN_ON_FAILURE(zephir_property_decr(this_ptr, SL("_transactionLevel") TSRMLS_CC));
-			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "rollbacksavepoint", NULL, savepointName);
+			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "rollbacksavepoint", NULL, 0, savepointName);
 			zephir_check_call_status();
 			RETURN_MM();
 		}
@@ -911,9 +922,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, rollback) {
 
 /**
  * Commits the active transaction in the connection
- *
- * @param boolean nesting
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, commit) {
 
@@ -940,7 +948,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, commit) {
 	zephir_read_property_this(&_0, this_ptr, SL("_transactionLevel"), PH_NOISY_CC);
 	transactionLevel = zephir_get_intval(_0);
 	if (!(transactionLevel)) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "There is no active transaction", "phalcon/db/adapter/pdo.zep", 651);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "There is no active transaction", "phalcon/db/adapter/pdo.zep", 660);
 		return;
 	}
 	if (transactionLevel == 1) {
@@ -949,12 +957,12 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, commit) {
 		if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 			ZEPHIR_INIT_VAR(_2);
 			ZVAL_STRING(_2, "db:commitTransaction", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr);
+			ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr);
 			zephir_check_temp_parameter(_2);
 			zephir_check_call_status();
 		}
 		RETURN_ON_FAILURE(zephir_property_decr(this_ptr, SL("_transactionLevel") TSRMLS_CC));
-		ZEPHIR_RETURN_CALL_METHOD(pdo, "commit", NULL);
+		ZEPHIR_RETURN_CALL_METHOD(pdo, "commit", NULL, 0);
 		zephir_check_call_status();
 		RETURN_MM();
 	} else {
@@ -964,24 +972,24 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, commit) {
 		}
 		_4 = _3;
 		if (_4) {
-			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL);
+			ZEPHIR_CALL_METHOD(&_5, this_ptr, "isnestedtransactionswithsavepoints", NULL, 0);
 			zephir_check_call_status();
 			_4 = zephir_is_true(_5);
 		}
 		if (_4) {
 			_1 = zephir_fetch_nproperty_this(this_ptr, SL("_eventsManager"), PH_NOISY_CC);
 			ZEPHIR_CPY_WRT(eventsManager, _1);
-			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL);
+			ZEPHIR_CALL_METHOD(&savepointName, this_ptr, "getnestedtransactionsavepointname", NULL, 0);
 			zephir_check_call_status();
 			if (Z_TYPE_P(eventsManager) == IS_OBJECT) {
 				ZEPHIR_INIT_NVAR(_2);
 				ZVAL_STRING(_2, "db:releaseSavepoint", ZEPHIR_TEMP_PARAM_COPY);
-				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, _2, this_ptr, savepointName);
+				ZEPHIR_CALL_METHOD(NULL, eventsManager, "fire", NULL, 0, _2, this_ptr, savepointName);
 				zephir_check_temp_parameter(_2);
 				zephir_check_call_status();
 			}
 			RETURN_ON_FAILURE(zephir_property_decr(this_ptr, SL("_transactionLevel") TSRMLS_CC));
-			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "releasesavepoint", NULL, savepointName);
+			ZEPHIR_RETURN_CALL_METHOD(this_ptr, "releasesavepoint", NULL, 0, savepointName);
 			zephir_check_call_status();
 			RETURN_MM();
 		}
@@ -995,8 +1003,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, commit) {
 
 /**
  * Returns the current transaction nesting level
- *
- * @return int
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, getTransactionLevel) {
 
@@ -1012,8 +1018,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, getTransactionLevel) {
  *	$connection->begin();
  *	var_dump($connection->isUnderTransaction()); //true
  *</code>
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, isUnderTransaction) {
 
@@ -1025,7 +1029,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, isUnderTransaction) {
 	ZEPHIR_OBS_VAR(pdo);
 	zephir_read_property_this(&pdo, this_ptr, SL("_pdo"), PH_NOISY_CC);
 	if (Z_TYPE_P(pdo) == IS_OBJECT) {
-		ZEPHIR_RETURN_CALL_METHOD(pdo, "intransaction", NULL);
+		ZEPHIR_RETURN_CALL_METHOD(pdo, "intransaction", NULL, 0);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
@@ -1035,8 +1039,6 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, isUnderTransaction) {
 
 /**
  * Return internal PDO handler
- *
- * @return \PDO
  */
 PHP_METHOD(Phalcon_Db_Adapter_Pdo, getInternalHandler) {
 
@@ -1058,7 +1060,7 @@ PHP_METHOD(Phalcon_Db_Adapter_Pdo, getErrorInfo) {
 	ZEPHIR_MM_GROW();
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_pdo"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "errorinfo", NULL);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "errorinfo", NULL, 0);
 	zephir_check_call_status();
 	RETURN_MM();
 

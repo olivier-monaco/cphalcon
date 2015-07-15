@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,7 @@
 
 namespace Phalcon\Mvc\View\Engine;
 
+use Phalcon\DiInterface;
 use Phalcon\Mvc\View\Engine;
 use Phalcon\Mvc\View\EngineInterface;
 use Phalcon\Mvc\View\Engine\Volt\Compiler;
@@ -27,7 +28,7 @@ use Phalcon\Mvc\View\Exception;
 /**
  * Phalcon\Mvc\View\Engine\Volt
  *
- * Designer friendly and fast template engine for PHP written in C
+ * Designer friendly and fast template engine for PHP written in Zephir/C
  */
 class Volt extends Engine implements EngineInterface
 {
@@ -36,10 +37,10 @@ class Volt extends Engine implements EngineInterface
 
 	protected _compiler;
 
+	protected _macros;
+
 	/**
 	 * Set Volt's options
-	 *
-	 * @param array options
 	 */
 	public function setOptions(array! options)
 	{
@@ -48,18 +49,14 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Return Volt's options
-	 *
-	 * @return array
 	 */
-	public function getOptions()
+	public function getOptions() -> array
 	{
 		return this->_options;
 	}
 
 	/**
 	 * Returns the Volt's compiler
-	 *
-	 * @return Phalcon\Mvc\View\Engine\Volt\Compiler
 	 */
 	public function getCompiler() -> <Compiler>
 	{
@@ -73,7 +70,7 @@ class Volt extends Engine implements EngineInterface
 			/**
 			 * Pass the IoC to the compiler only of it's an object
 			 */
-			let dependencyInjector = <\Phalcon\Di> this->_dependencyInjector;
+			let dependencyInjector = <DiInterface> this->_dependencyInjector;
 			if typeof dependencyInjector == "object" {
 				compiler->setDi(dependencyInjector);
 			}
@@ -93,10 +90,6 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Renders a view using the template engine
-	 *
-	 * @param string  $templatePath
-	 * @param array   $params
-	 * @param boolean $mustClean
 	 */
 	public function render(string! templatePath, var params, boolean mustClean = false)
 	{
@@ -134,9 +127,6 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Length filter. If an array/object is passed a count is performed otherwise a strlen/mb_strlen
-	 *
-	 * @param mixed $item
-	 * @return int
 	 */
 	public function length(var item) -> int
 	{
@@ -163,12 +153,8 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Checks if the needle is included in the haystack
-	 *
-	 * @param  mixed needle
-	 * @param  mixed haystack
-	 * @return boolean
 	 */
-	public function isIncluded(needle, haystack) -> boolean
+	public function isIncluded(var needle, var haystack) -> boolean
 	{
 		if typeof haystack == "array" {
 			return in_array(needle, haystack);
@@ -176,9 +162,9 @@ class Volt extends Engine implements EngineInterface
 
 		if typeof haystack == "string" {
 			if function_exists("mb_strpos") {
-				return mb_strpos(haystack, needle);
+				return mb_strpos(haystack, needle) !== false;
 			}
-			return strpos(haystack, needle);
+			return strpos(haystack, needle) !== false;
 		}
 
 		throw new Exception("Invalid haystack");
@@ -186,15 +172,9 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Performs a string conversion
-	 *
-	 * @param  string text
-	 * @param  string from
-	 * @param  string to
-	 * @return string
 	 */
 	public function convertEncoding(string text, string! from, string! to) -> string
 	{
-
 		/**
 		 * Try to use utf8_encode if conversion is 'latin1' to 'utf8'
 		 */
@@ -231,12 +211,9 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Extracts a slice from a string/array/traversable object value
-	 *
-	 * @param mixed value
 	 */
-	public function slice(value, start, end=null)
+	public function slice(var value, int start = 0, var end = null)
 	{
-
 		var length, slice;
 		int position;
 
@@ -246,21 +223,15 @@ class Volt extends Engine implements EngineInterface
 		if typeof value == "object" {
 
 			if end === null {
-				let length = count(value);
-			} else {
-				let length = end;
+				let end = count(value) - 1;
 			}
 
-			let position = 1, slice = [];
+			let position = 0, slice = [];
 
 			value->rewind();
-			loop {
 
-				if !value->valid() {
-					break;
-				}
-
-				if position >= start && position <= length {
+			while value->valid() {
+				if position >= start && position <= end {
 					let slice[] = value->current();
 				}
 
@@ -308,14 +279,24 @@ class Volt extends Engine implements EngineInterface
 
 	/**
 	 * Sorts an array
-	 *
-	 * @param array value
-	 * @return array
 	 */
-	public function sort(value)
+	public function sort(array value) -> array
 	{
 		asort(value);
 		return value;
 	}
 
+	/**
+	 * Checks if a macro is defined and calls it
+	 */
+	public function callMacro(string! name, array arguments)
+	{
+		var macro;
+
+		if !fetch macro, this->_macros[name] {
+			throw new Exception("Macro '" . name . "' does not exist");
+		}
+
+		return call_user_func(macro, arguments);
+	}
 }

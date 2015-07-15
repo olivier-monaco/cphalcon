@@ -14,29 +14,11 @@
 #include "kernel/main.h"
 #include "kernel/object.h"
 #include "kernel/memory.h"
-#include "kernel/exception.h"
 #include "kernel/array.h"
 #include "kernel/fcall.h"
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Backend
  *
@@ -138,10 +120,6 @@ PHP_METHOD(Phalcon_Cache_Backend, __construct) {
 	}
 
 
-	if (!(zephir_instance_of_ev(frontend, phalcon_cache_frontendinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'frontend' must be an instance of 'Phalcon\\Cache\\FrontendInterface'", "", 0);
-		return;
-	}
 	if (zephir_array_isset_string_fetch(&prefix, options, SS("prefix"), 1 TSRMLS_CC)) {
 		zephir_update_property_this(this_ptr, SL("_prefix"), prefix TSRMLS_CC);
 	}
@@ -154,7 +132,7 @@ PHP_METHOD(Phalcon_Cache_Backend, __construct) {
  * Starts a cache. The keyname allows to identify the created fragment
  *
  * @param   int|string keyName
- * @param   long lifetime
+ * @param   int lifetime
  * @return  mixed
  */
 PHP_METHOD(Phalcon_Cache_Backend, start) {
@@ -171,12 +149,12 @@ PHP_METHOD(Phalcon_Cache_Backend, start) {
 	}
 
 
-	ZEPHIR_CALL_METHOD(&existingCache, this_ptr, "get", NULL, keyName, lifetime);
+	ZEPHIR_CALL_METHOD(&existingCache, this_ptr, "get", NULL, 0, keyName, lifetime);
 	zephir_check_call_status();
 	if (Z_TYPE_P(existingCache) == IS_NULL) {
 		fresh = 1;
 		_0 = zephir_fetch_nproperty_this(this_ptr, SL("_frontend"), PH_NOISY_CC);
-		ZEPHIR_CALL_METHOD(NULL, _0, "start", NULL);
+		ZEPHIR_CALL_METHOD(NULL, _0, "start", NULL, 0);
 		zephir_check_call_status();
 	} else {
 		fresh = 0;
@@ -192,8 +170,6 @@ PHP_METHOD(Phalcon_Cache_Backend, start) {
 
 /**
  * Stops the frontend without store any cached content
- *
- * @param boolean stopBuffer
  */
 PHP_METHOD(Phalcon_Cache_Backend, stop) {
 
@@ -213,7 +189,7 @@ PHP_METHOD(Phalcon_Cache_Backend, stop) {
 
 	if (stopBuffer == 1) {
 		_0 = zephir_fetch_nproperty_this(this_ptr, SL("_frontend"), PH_NOISY_CC);
-		ZEPHIR_CALL_METHOD(NULL, _0, "stop", NULL);
+		ZEPHIR_CALL_METHOD(NULL, _0, "stop", NULL, 0);
 		zephir_check_call_status();
 	}
 	zephir_update_property_this(this_ptr, SL("_started"), (0) ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false) TSRMLS_CC);
@@ -223,8 +199,6 @@ PHP_METHOD(Phalcon_Cache_Backend, stop) {
 
 /**
  * Checks whether the last cache is fresh or cached
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Backend, isFresh) {
 
@@ -235,8 +209,6 @@ PHP_METHOD(Phalcon_Cache_Backend, isFresh) {
 
 /**
  * Checks whether the cache has starting buffering or not
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Backend, isStarted) {
 

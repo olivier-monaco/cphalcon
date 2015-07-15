@@ -12,40 +12,21 @@
 #include <Zend/zend_interfaces.h>
 
 #include "kernel/main.h"
-#include "kernel/object.h"
-#include "kernel/exception.h"
 #include "kernel/memory.h"
 #include "kernel/fcall.h"
 #include "kernel/operators.h"
 #include "kernel/concat.h"
+#include "kernel/exception.h"
 #include "kernel/hash.h"
+#include "kernel/string.h"
 #include "ext/spl/spl_exceptions.h"
 #include "kernel/array.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- |          Rack Lin <racklin@gmail.com>                                  |
- |          Vladimir Kolesnikov <vladimir@extrememember.com>              |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Db\Dialect\Sqlite
  *
- * Generates database specific SQL for the Sqlite RBDM
+ * Generates database specific SQL for the Sqlite RDBMS
  */
 ZEPHIR_INIT_CLASS(Phalcon_Db_Dialect_Sqlite) {
 
@@ -53,45 +34,33 @@ ZEPHIR_INIT_CLASS(Phalcon_Db_Dialect_Sqlite) {
 
 	zend_declare_property_string(phalcon_db_dialect_sqlite_ce, SL("_escapeChar"), "\"", ZEND_ACC_PROTECTED TSRMLS_CC);
 
-	zend_class_implements(phalcon_db_dialect_sqlite_ce TSRMLS_CC, 1, phalcon_db_dialectinterface_ce);
 	return SUCCESS;
 
 }
 
 /**
  * Gets the column name in SQLite
- *
- * @param Phalcon\Db\ColumnInterface column
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_7 = NULL, *_9 = NULL;
+	zephir_fcall_cache_entry *_7 = NULL;
 	HashTable *_4;
 	HashPosition _3;
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *column, *columnSql, *type = NULL, *typeValues = NULL, *_0 = NULL, *_1 = NULL, *_2 = NULL, *value = NULL, *valueSql, **_5, _6 = zval_used_for_init, _8, *_10 = NULL, *_11 = NULL;
+	zval *column, *columnSql, *type = NULL, *typeValues = NULL, *_0 = NULL, *_1 = NULL, *_2 = NULL, *value = NULL, *valueSql, **_5, _6 = zval_used_for_init, _8 = zval_used_for_init, *_9, *_10 = NULL;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 1, 0, &column);
 
 
 
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
-	}
-	if (Z_TYPE_P(column) != IS_OBJECT) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Column definition must be an object compatible with Phalcon\\Db\\ColumnInterface", "phalcon/db/dialect/sqlite.zep", 51);
-		return;
-	}
 	ZEPHIR_INIT_VAR(columnSql);
 	ZVAL_STRING(columnSql, "", 1);
-	ZEPHIR_CALL_METHOD(&type, column, "gettype", NULL);
+	ZEPHIR_CALL_METHOD(&type, column, "gettype", NULL, 0);
 	zephir_check_call_status();
 	if (Z_TYPE_P(type) == IS_STRING) {
 		zephir_concat_self(&columnSql, type TSRMLS_CC);
-		ZEPHIR_CALL_METHOD(&type, column, "gettypereference", NULL);
+		ZEPHIR_CALL_METHOD(&type, column, "gettypereference", NULL, 0);
 		zephir_check_call_status();
 	}
 	do {
@@ -111,7 +80,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 			if (ZEPHIR_IS_EMPTY(columnSql)) {
 				zephir_concat_self_str(&columnSql, SL("VARCHAR") TSRMLS_CC);
 			}
-			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL);
+			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL, 0);
 			zephir_check_call_status();
 			ZEPHIR_INIT_VAR(_1);
 			ZEPHIR_CONCAT_SVS(_1, "(", _0, ")");
@@ -122,9 +91,9 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 			if (ZEPHIR_IS_EMPTY(columnSql)) {
 				zephir_concat_self_str(&columnSql, SL("NUMERIC") TSRMLS_CC);
 			}
-			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL);
+			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL, 0);
 			zephir_check_call_status();
-			ZEPHIR_CALL_METHOD(&_2, column, "getscale", NULL);
+			ZEPHIR_CALL_METHOD(&_2, column, "getscale", NULL, 0);
 			zephir_check_call_status();
 			ZEPHIR_INIT_LNVAR(_1);
 			ZEPHIR_CONCAT_SVSVS(_1, "(", _0, ",", _2, ")");
@@ -141,7 +110,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 			if (ZEPHIR_IS_EMPTY(columnSql)) {
 				zephir_concat_self_str(&columnSql, SL("CHARACTER") TSRMLS_CC);
 			}
-			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL);
+			ZEPHIR_CALL_METHOD(&_0, column, "getsize", NULL, 0);
 			zephir_check_call_status();
 			ZEPHIR_INIT_LNVAR(_1);
 			ZEPHIR_CONCAT_SVS(_1, "(", _0, ")");
@@ -161,16 +130,16 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 			break;
 		}
 		if (ZEPHIR_IS_EMPTY(columnSql)) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Unrecognized SQLite data type", "phalcon/db/dialect/sqlite.zep", 117);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Unrecognized SQLite data type", "phalcon/db/dialect/sqlite.zep", 112);
 			return;
 		}
-		ZEPHIR_CALL_METHOD(&typeValues, column, "gettypevalues", NULL);
+		ZEPHIR_CALL_METHOD(&typeValues, column, "gettypevalues", NULL, 0);
 		zephir_check_call_status();
 		if (!(ZEPHIR_IS_EMPTY(typeValues))) {
 			if (Z_TYPE_P(typeValues) == IS_ARRAY) {
 				ZEPHIR_INIT_VAR(valueSql);
 				ZVAL_STRING(valueSql, "", 1);
-				zephir_is_iterable(typeValues, &_4, &_3, 0, 0, "phalcon/db/dialect/sqlite.zep", 128);
+				zephir_is_iterable(typeValues, &_4, &_3, 0, 0, "phalcon/db/dialect/sqlite.zep", 123);
 				for (
 				  ; zephir_hash_get_current_data_ex(_4, (void**) &_5, &_3) == SUCCESS
 				  ; zephir_hash_move_forward_ex(_4, &_3)
@@ -178,7 +147,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 					ZEPHIR_GET_HVALUE(value, _5);
 					ZEPHIR_SINIT_NVAR(_6);
 					ZVAL_STRING(&_6, "\"", 0);
-					ZEPHIR_CALL_FUNCTION(&_0, "addcslashes", &_7, value, &_6);
+					ZEPHIR_CALL_FUNCTION(&_0, "addcslashes", &_7, 141, value, &_6);
 					zephir_check_call_status();
 					ZEPHIR_INIT_LNVAR(_1);
 					ZEPHIR_CONCAT_SVS(_1, "\"", _0, "\", ");
@@ -188,18 +157,18 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 				ZVAL_LONG(&_6, 0);
 				ZEPHIR_SINIT_VAR(_8);
 				ZVAL_LONG(&_8, -2);
-				ZEPHIR_CALL_FUNCTION(&_2, "substr", &_9, valueSql, &_6, &_8);
-				zephir_check_call_status();
+				ZEPHIR_INIT_VAR(_9);
+				zephir_substr(_9, valueSql, 0 , -2 , 0);
 				ZEPHIR_INIT_VAR(_10);
-				ZEPHIR_CONCAT_SVS(_10, "(", _2, ")");
+				ZEPHIR_CONCAT_SVS(_10, "(", _9, ")");
 				zephir_concat_self(&columnSql, _10 TSRMLS_CC);
 			} else {
-				ZEPHIR_SINIT_NVAR(_6);
-				ZVAL_STRING(&_6, "\"", 0);
-				ZEPHIR_CALL_FUNCTION(&_11, "addcslashes", &_7, typeValues, &_6);
+				ZEPHIR_SINIT_NVAR(_8);
+				ZVAL_STRING(&_8, "\"", 0);
+				ZEPHIR_CALL_FUNCTION(&_2, "addcslashes", &_7, 141, typeValues, &_8);
 				zephir_check_call_status();
 				ZEPHIR_INIT_LNVAR(_10);
-				ZEPHIR_CONCAT_SVS(_10, "(\"", _11, "\")");
+				ZEPHIR_CONCAT_SVS(_10, "(\"", _2, "\")");
 				zephir_concat_self(&columnSql, _10 TSRMLS_CC);
 			}
 		}
@@ -211,16 +180,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, getColumnDefinition) {
 
 /**
  * Generates SQL to add a column to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\ColumnInterface column
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addColumn) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_6 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *tableName_param = NULL, *schemaName_param = NULL, *column, *sql = NULL, *defaultValue = NULL, *_1 = NULL, *_2 = NULL, *_3, _4, *_5 = NULL, *_7;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *column, *sql = NULL, *defaultValue = NULL, *_1 = NULL, *_2 = NULL, *_3, _4, *_5 = NULL, *_6;
 	zval *tableName = NULL, *schemaName = NULL, *_0 = NULL;
 
 	ZEPHIR_MM_GROW();
@@ -250,14 +214,6 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addColumn) {
 	}
 
 
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
-	}
-	if (Z_TYPE_P(column) != IS_OBJECT) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Column definition must be an object compatible with Phalcon\\Db\\ColumnInterface", "phalcon/db/dialect/sqlite.zep", 150);
-		return;
-	}
 	ZEPHIR_INIT_VAR(sql);
 	if (schemaName && Z_STRLEN_P(schemaName)) {
 		ZEPHIR_INIT_VAR(_0);
@@ -268,30 +224,30 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addColumn) {
 		ZEPHIR_CONCAT_SVS(_0, "ALTER TABLE \"", tableName, "\" ADD COLUMN ");
 		ZEPHIR_CPY_WRT(sql, _0);
 	}
-	ZEPHIR_CALL_METHOD(&_1, column, "getname", NULL);
+	ZEPHIR_CALL_METHOD(&_1, column, "getname", NULL, 0);
 	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(&_2, this_ptr, "getcolumndefinition", NULL, column);
+	ZEPHIR_CALL_METHOD(&_2, this_ptr, "getcolumndefinition", NULL, 0, column);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZEPHIR_CONCAT_SVSV(_3, "\"", _1, "\" ", _2);
 	zephir_concat_self(&sql, _3 TSRMLS_CC);
-	ZEPHIR_CALL_METHOD(&defaultValue, column, "getdefault", NULL);
+	ZEPHIR_CALL_METHOD(&defaultValue, column, "getdefault", NULL, 0);
 	zephir_check_call_status();
 	if (!(ZEPHIR_IS_EMPTY(defaultValue))) {
 		ZEPHIR_SINIT_VAR(_4);
 		ZVAL_STRING(&_4, "\"", 0);
-		ZEPHIR_CALL_FUNCTION(&_5, "addcslashes", &_6, defaultValue, &_4);
+		ZEPHIR_CALL_FUNCTION(&_5, "addcslashes", NULL, 141, defaultValue, &_4);
 		zephir_check_call_status();
-		ZEPHIR_INIT_VAR(_7);
-		ZEPHIR_CONCAT_SVS(_7, " DEFAULT \"", _5, "\"");
-		zephir_concat_self(&sql, _7 TSRMLS_CC);
+		ZEPHIR_INIT_VAR(_6);
+		ZEPHIR_CONCAT_SVS(_6, " DEFAULT \"", _5, "\"");
+		zephir_concat_self(&sql, _6 TSRMLS_CC);
 	}
-	ZEPHIR_CALL_METHOD(&_5, column, "isnotnull", NULL);
+	ZEPHIR_CALL_METHOD(&_5, column, "isnotnull", NULL, 0);
 	zephir_check_call_status();
 	if (zephir_is_true(_5)) {
 		zephir_concat_self_str(&sql, SL(" NOT NULL") TSRMLS_CC);
 	}
-	ZEPHIR_CALL_METHOD(&_5, column, "isautoincrement", NULL);
+	ZEPHIR_CALL_METHOD(&_5, column, "isautoincrement", NULL, 0);
 	zephir_check_call_status();
 	if (zephir_is_true(_5)) {
 		zephir_concat_self_str(&sql, SL(" PRIMARY KEY AUTOINCREMENT") TSRMLS_CC);
@@ -302,19 +258,14 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addColumn) {
 
 /**
  * Generates SQL to modify a column in a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\ColumnInterface column
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, modifyColumn) {
 
-	zval *tableName_param = NULL, *schemaName_param = NULL, *column;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *column, *currentColumn = NULL;
 	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &column);
+	zephir_fetch_params(1, 3, 1, &tableName_param, &schemaName_param, &column, &currentColumn);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -338,24 +289,18 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, modifyColumn) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	}
-
-
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
+	if (!currentColumn) {
+		currentColumn = ZEPHIR_GLOBAL(global_null);
 	}
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Altering a DB column is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 187);
+
+
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Altering a DB column is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 169);
 	return;
 
 }
 
 /**
  * Generates SQL to delete a column from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string columnName
- * @return 	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropColumn) {
 
@@ -387,25 +332,29 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropColumn) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	}
-	zephir_get_strval(columnName, columnName_param);
+	if (unlikely(Z_TYPE_P(columnName_param) != IS_STRING && Z_TYPE_P(columnName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'columnName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(columnName_param) == IS_STRING)) {
+		zephir_get_strval(columnName, columnName_param);
+	} else {
+		ZEPHIR_INIT_VAR(columnName);
+		ZVAL_EMPTY_STRING(columnName);
+	}
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Dropping DB column is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 200);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Dropping DB column is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 177);
 	return;
 
 }
 
 /**
  * Generates SQL to add an index to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\IndexInterface index
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addIndex) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_3 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
 	zval *tableName_param = NULL, *schemaName_param = NULL, *index, *sql, *indexType = NULL, *_0 = NULL, *_1 = NULL, *_2 = NULL;
 	zval *tableName = NULL, *schemaName = NULL;
@@ -437,15 +386,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addIndex) {
 	}
 
 
-	if (!(zephir_instance_of_ev(index, phalcon_db_indexinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'index' must be an instance of 'Phalcon\\Db\\IndexInterface'", "", 0);
-		return;
-	}
-	if (Z_TYPE_P(index) != IS_OBJECT) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Index parameter must be an object compatible with Phalcon\\Db\\IndexInterface", "phalcon/db/dialect/sqlite.zep", 216);
-		return;
-	}
-	ZEPHIR_CALL_METHOD(&indexType, index, "gettype", NULL);
+	ZEPHIR_CALL_METHOD(&indexType, index, "gettype", NULL, 0);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(sql);
 	if (!(ZEPHIR_IS_EMPTY(indexType))) {
@@ -454,21 +395,21 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addIndex) {
 		ZVAL_STRING(sql, "CREATE INDEX \"", 1);
 	}
 	if (schemaName && Z_STRLEN_P(schemaName)) {
-		ZEPHIR_CALL_METHOD(&_0, index, "getname", NULL);
+		ZEPHIR_CALL_METHOD(&_0, index, "getname", NULL, 0);
 		zephir_check_call_status();
 		ZEPHIR_INIT_VAR(_1);
 		ZEPHIR_CONCAT_VSVSVS(_1, schemaName, "\".\"", _0, "\" ON \"", tableName, "\" (");
 		zephir_concat_self(&sql, _1 TSRMLS_CC);
 	} else {
-		ZEPHIR_CALL_METHOD(&_0, index, "getname", NULL);
+		ZEPHIR_CALL_METHOD(&_0, index, "getname", NULL, 0);
 		zephir_check_call_status();
 		ZEPHIR_INIT_LNVAR(_1);
 		ZEPHIR_CONCAT_VSVS(_1, _0, "\" ON \"", tableName, "\" (");
 		zephir_concat_self(&sql, _1 TSRMLS_CC);
 	}
-	ZEPHIR_CALL_METHOD(&_2, index, "getcolumns", NULL);
+	ZEPHIR_CALL_METHOD(&_2, index, "getcolumns", NULL, 0);
 	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "getcolumnlist", &_3, _2);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "getcolumnlist", NULL, 43, _2);
 	zephir_check_call_status();
 	ZEPHIR_INIT_LNVAR(_1);
 	ZEPHIR_CONCAT_VS(_1, _0, ")");
@@ -479,16 +420,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addIndex) {
 
 /**
  * Generates SQL to delete an index from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string indexName
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropIndex) {
 
-	zval *tableName_param = NULL, *schemaName_param = NULL, *indexName_param = NULL, *sql = NULL;
-	zval *tableName = NULL, *schemaName = NULL, *indexName = NULL, *_0 = NULL;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *indexName_param = NULL;
+	zval *tableName = NULL, *schemaName = NULL, *indexName = NULL;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &indexName_param);
@@ -528,27 +464,17 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropIndex) {
 	}
 
 
-	ZEPHIR_INIT_VAR(sql);
 	if (schemaName && Z_STRLEN_P(schemaName)) {
-		ZEPHIR_INIT_VAR(_0);
-		ZEPHIR_CONCAT_SVSVS(_0, "DROP INDEX \"", schemaName, "\".\"", indexName, "\"");
-		ZEPHIR_CPY_WRT(sql, _0);
-	} else {
-		ZEPHIR_INIT_LNVAR(_0);
-		ZEPHIR_CONCAT_SVS(_0, "DROP INDEX \"", indexName, "\"");
-		ZEPHIR_CPY_WRT(sql, _0);
+		ZEPHIR_CONCAT_SVSVS(return_value, "DROP INDEX \"", schemaName, "\".\"", indexName, "\"");
+		RETURN_MM();
 	}
-	RETURN_CCTOR(sql);
+	ZEPHIR_CONCAT_SVS(return_value, "DROP INDEX \"", indexName, "\"");
+	RETURN_MM();
 
 }
 
 /**
  * Generates SQL to add the primary key to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\IndexInterface index
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addPrimaryKey) {
 
@@ -558,25 +484,37 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addPrimaryKey) {
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &index);
 
-	zephir_get_strval(tableName, tableName_param);
-	zephir_get_strval(schemaName, schemaName_param);
-
-
-	if (!(zephir_instance_of_ev(index, phalcon_db_indexinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'index' must be an instance of 'Phalcon\\Db\\IndexInterface'", "", 0);
-		return;
+	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
 	}
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Adding a primary key after table has been created is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 266);
+
+	if (likely(Z_TYPE_P(tableName_param) == IS_STRING)) {
+		zephir_get_strval(tableName, tableName_param);
+	} else {
+		ZEPHIR_INIT_VAR(tableName);
+		ZVAL_EMPTY_STRING(tableName);
+	}
+	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
+		zephir_get_strval(schemaName, schemaName_param);
+	} else {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	}
+
+
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Adding a primary key after table has been created is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 221);
 	return;
 
 }
 
 /**
  * Generates SQL to delete primary key from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropPrimaryKey) {
 
@@ -610,18 +548,13 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropPrimaryKey) {
 	}
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Removing a primary key after table has been created is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 278);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Removing a primary key after table has been created is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 229);
 	return;
 
 }
 
 /**
  * Generates SQL to add an index to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\ReferenceInterface reference
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addForeignKey) {
 
@@ -655,30 +588,21 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, addForeignKey) {
 	}
 
 
-	if (!(zephir_instance_of_ev(reference, phalcon_db_referenceinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'reference' must be an instance of 'Phalcon\\Db\\ReferenceInterface'", "", 0);
-		return;
-	}
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Adding a foreign key constraint to an existing table is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 291);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Adding a foreign key constraint to an existing table is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 237);
 	return;
 
 }
 
 /**
  * Generates SQL to delete a foreign key from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string referenceName
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropForeignKey) {
 
-	zval *tableName_param = NULL, *schemaName_param = NULL, *referenceName;
-	zval *tableName = NULL, *schemaName = NULL;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *referenceName_param = NULL;
+	zval *tableName = NULL, *schemaName = NULL, *referenceName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &referenceName);
+	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &referenceName_param);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -702,38 +626,26 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropForeignKey) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	}
+	if (unlikely(Z_TYPE_P(referenceName_param) != IS_STRING && Z_TYPE_P(referenceName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'referenceName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(referenceName_param) == IS_STRING)) {
+		zephir_get_strval(referenceName, referenceName_param);
+	} else {
+		ZEPHIR_INIT_VAR(referenceName);
+		ZVAL_EMPTY_STRING(referenceName);
+	}
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Dropping a foreign key constraint is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 304);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Dropping a foreign key constraint is not supported by SQLite", "phalcon/db/dialect/sqlite.zep", 245);
 	return;
 
 }
 
 /**
- * Generates SQL to add the table creation options
- *
- * @param	array definition
- * @return	array
- */
-PHP_METHOD(Phalcon_Db_Dialect_Sqlite, _getTableOptions) {
-
-	zval *definition;
-
-	zephir_fetch_params(0, 1, 0, &definition);
-
-
-
-	RETURN_STRING("", 1);
-
-}
-
-/**
- * Generates SQL to create a table in MySQL
- *
- * @param 	string tableName
- * @param	string schemaName
- * @param	array definition
- * @return 	string
+ * Generates SQL to create a table
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, createTable) {
 
@@ -770,26 +682,22 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, createTable) {
 
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Not implemented yet", "phalcon/db/dialect/sqlite.zep", 328);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Not implemented yet", "phalcon/db/dialect/sqlite.zep", 253);
 	return;
 
 }
 
 /**
  * Generates SQL to drop a table
- *
- * @param  string tableName
- * @param  string schemaName
- * @param  boolean ifExists
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropTable) {
 
-	zval *tableName_param = NULL, *schemaName_param = NULL, *ifExists = NULL, *sql, *table = NULL;
+	zend_bool ifExists;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *ifExists_param = NULL, *sql, *table = NULL;
 	zval *tableName = NULL, *schemaName = NULL, *_0;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 2, 1, &tableName_param, &schemaName_param, &ifExists);
+	zephir_fetch_params(1, 1, 2, &tableName_param, &schemaName_param, &ifExists_param);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -802,19 +710,21 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropTable) {
 		ZEPHIR_INIT_VAR(tableName);
 		ZVAL_EMPTY_STRING(tableName);
 	}
-	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
+	if (!schemaName_param) {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
+	}
+	if (!ifExists_param) {
+		ifExists = 1;
+	} else {
+	if (unlikely(Z_TYPE_P(ifExists_param) != IS_BOOL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'ifExists' must be a bool") TSRMLS_CC);
 		RETURN_MM_NULL();
 	}
 
-	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
-		zephir_get_strval(schemaName, schemaName_param);
-	} else {
-		ZEPHIR_INIT_VAR(schemaName);
-		ZVAL_EMPTY_STRING(schemaName);
-	}
-	if (!ifExists) {
-		ifExists = ZEPHIR_GLOBAL(global_true);
+	ifExists = Z_BVAL_P(ifExists_param);
 	}
 
 
@@ -826,7 +736,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropTable) {
 		ZEPHIR_CPY_WRT(table, tableName);
 	}
 	ZEPHIR_INIT_VAR(sql);
-	if (zephir_is_true(ifExists)) {
+	if (ifExists) {
 		ZEPHIR_CONCAT_SVS(sql, "DROP TABLE IF EXISTS \"", table, "\"");
 	} else {
 		ZEPHIR_CONCAT_SVS(sql, "DROP TABLE \"", table, "\"");
@@ -837,19 +747,15 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropTable) {
 
 /**
  * Generates SQL to create a view
- *
- * @param string viewName
- * @param array definition
- * @param string schemaName
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, createView) {
 
-	zval *viewName_param = NULL, *definition, *schemaName_param = NULL, *view = NULL, *viewSql;
+	zval *definition = NULL;
+	zval *viewName_param = NULL, *definition_param = NULL, *schemaName_param = NULL, *view = NULL, *viewSql;
 	zval *viewName = NULL, *schemaName = NULL, *_0;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &viewName_param, &definition, &schemaName_param);
+	zephir_fetch_params(1, 2, 1, &viewName_param, &definition_param, &schemaName_param);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -862,22 +768,19 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, createView) {
 		ZEPHIR_INIT_VAR(viewName);
 		ZVAL_EMPTY_STRING(viewName);
 	}
-	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
-		RETURN_MM_NULL();
-	}
+	definition = definition_param;
 
-	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
-		zephir_get_strval(schemaName, schemaName_param);
-	} else {
+	if (!schemaName_param) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
 	}
 
 
 	ZEPHIR_OBS_VAR(viewSql);
 	if (!(zephir_array_isset_string_fetch(&viewSql, definition, SS("sql"), 0 TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The index 'sql' is required in the definition array", "phalcon/db/dialect/sqlite.zep", 371);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The index 'sql' is required in the definition array", "phalcon/db/dialect/sqlite.zep", 286);
 		return;
 	}
 	if (schemaName && Z_STRLEN_P(schemaName)) {
@@ -894,20 +797,15 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, createView) {
 
 /**
  * Generates SQL to drop a view
- *
- * @param string viewName
- * @param string schemaName
- * @param boolean ifExists
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropView) {
 
 	zend_bool ifExists;
-	zval *viewName_param = NULL, *schemaName_param = NULL, *ifExists_param = NULL, *sql, *view = NULL;
+	zval *viewName_param = NULL, *schemaName_param = NULL, *ifExists_param = NULL, *view = NULL;
 	zval *viewName = NULL, *schemaName = NULL, *_0;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 2, 1, &viewName_param, &schemaName_param, &ifExists_param);
+	zephir_fetch_params(1, 1, 2, &viewName_param, &schemaName_param, &ifExists_param);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -920,21 +818,21 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropView) {
 		ZEPHIR_INIT_VAR(viewName);
 		ZVAL_EMPTY_STRING(viewName);
 	}
-	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
-		RETURN_MM_NULL();
-	}
-
-	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
-		zephir_get_strval(schemaName, schemaName_param);
-	} else {
+	if (!schemaName_param) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
 	}
 	if (!ifExists_param) {
 		ifExists = 1;
 	} else {
-		ifExists = zephir_get_boolval(ifExists_param);
+	if (unlikely(Z_TYPE_P(ifExists_param) != IS_BOOL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'ifExists' must be a bool") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	ifExists = Z_BVAL_P(ifExists_param);
 	}
 
 
@@ -945,13 +843,12 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropView) {
 	} else {
 		ZEPHIR_CPY_WRT(view, viewName);
 	}
-	ZEPHIR_INIT_VAR(sql);
 	if (ifExists) {
-		ZEPHIR_CONCAT_SVS(sql, "DROP VIEW IF EXISTS \"", view, "\"");
-	} else {
-		ZEPHIR_CONCAT_SVS(sql, "DROP VIEW \"", view, "\"");
+		ZEPHIR_CONCAT_SVS(return_value, "DROP VIEW IF EXISTS \"", view, "\"");
+		RETURN_MM();
 	}
-	RETURN_CCTOR(sql);
+	ZEPHIR_CONCAT_SVS(return_value, "DROP VIEW \"", view, "\"");
+	RETURN_MM();
 
 }
 
@@ -959,21 +856,17 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, dropView) {
  * Generates SQL checking for the existence of a schema.table
  *
  * <code>
- * echo $dialect->tableExists("posts", "blog");
- * echo $dialect->tableExists("posts");
+ *    echo $dialect->tableExists("posts", "blog");
+ *    echo $dialect->tableExists("posts");
  * </code>
- *
- * @param string tableName
- * @param string schemaName
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, tableExists) {
 
-	zval *tableName_param = NULL, *schemaName = NULL;
-	zval *tableName = NULL;
+	zval *tableName_param = NULL, *schemaName_param = NULL;
+	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &tableName_param, &schemaName);
+	zephir_fetch_params(1, 1, 1, &tableName_param, &schemaName_param);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -986,8 +879,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, tableExists) {
 		ZEPHIR_INIT_VAR(tableName);
 		ZVAL_EMPTY_STRING(tableName);
 	}
-	if (!schemaName) {
-		schemaName = ZEPHIR_GLOBAL(global_null);
+	if (!schemaName_param) {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
 	}
 
 
@@ -998,18 +894,14 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, tableExists) {
 
 /**
  * Generates SQL checking for the existence of a schema.view
- *
- * @param string viewName
- * @param string schemaName
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, viewExists) {
 
-	zval *viewName_param = NULL, *schemaName = NULL;
-	zval *viewName = NULL;
+	zval *viewName_param = NULL, *schemaName_param = NULL;
+	zval *viewName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &viewName_param, &schemaName);
+	zephir_fetch_params(1, 1, 1, &viewName_param, &schemaName_param);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -1022,8 +914,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, viewExists) {
 		ZEPHIR_INIT_VAR(viewName);
 		ZVAL_EMPTY_STRING(viewName);
 	}
-	if (!schemaName) {
-		schemaName = ZEPHIR_GLOBAL(global_null);
+	if (!schemaName_param) {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
 	}
 
 
@@ -1035,21 +930,17 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, viewExists) {
 /**
  * Generates SQL describing a table
  *
- *<code>
- *	print_r($dialect->describeColumns("posts"));
- *</code>
- *
- * @param string table
- * @param string schema
- * @return string
+ * <code>
+ *    print_r($dialect->describeColumns("posts"));
+ * </code>
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeColumns) {
 
-	zval *table_param = NULL, *schema = NULL;
-	zval *table = NULL;
+	zval *table_param = NULL, *schema_param = NULL;
+	zval *table = NULL, *schema = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &table_param, &schema);
+	zephir_fetch_params(1, 1, 1, &table_param, &schema_param);
 
 	if (unlikely(Z_TYPE_P(table_param) != IS_STRING && Z_TYPE_P(table_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'table' must be a string") TSRMLS_CC);
@@ -1062,8 +953,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeColumns) {
 		ZEPHIR_INIT_VAR(table);
 		ZVAL_EMPTY_STRING(table);
 	}
-	if (!schema) {
-		schema = ZEPHIR_GLOBAL(global_null);
+	if (!schema_param) {
+		ZEPHIR_INIT_VAR(schema);
+		ZVAL_EMPTY_STRING(schema);
+	} else {
+		zephir_get_strval(schema, schema_param);
 	}
 
 
@@ -1073,14 +967,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeColumns) {
 }
 
 /**
- * List all tables on database
+ * List all tables in database
  *
- *<code>
- *	print_r($dialect->listTables("blog"))
- *</code>
- *
- * @param       string schemaName
- * @return      array
+ * <code>
+ *     print_r($dialect->listTables("blog"))
+ * </code>
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, listTables) {
 
@@ -1094,17 +985,7 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, listTables) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	} else {
-	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
-		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
-		RETURN_MM_NULL();
-	}
-
-	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
 		zephir_get_strval(schemaName, schemaName_param);
-	} else {
-		ZEPHIR_INIT_VAR(schemaName);
-		ZVAL_EMPTY_STRING(schemaName);
-	}
 	}
 
 
@@ -1114,9 +995,6 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, listTables) {
 
 /**
  * Generates the SQL to list all views of a schema or user
- *
- * @param string schemaName
- * @return array
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, listViews) {
 
@@ -1150,18 +1028,14 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, listViews) {
 
 /**
  * Generates SQL to query indexes on a table
- *
- * @param	string table
- * @param	string schema
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeIndexes) {
 
-	zval *table_param = NULL, *schema = NULL;
-	zval *table = NULL;
+	zval *table_param = NULL, *schema_param = NULL;
+	zval *table = NULL, *schema = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &table_param, &schema);
+	zephir_fetch_params(1, 1, 1, &table_param, &schema_param);
 
 	if (unlikely(Z_TYPE_P(table_param) != IS_STRING && Z_TYPE_P(table_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'table' must be a string") TSRMLS_CC);
@@ -1174,8 +1048,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeIndexes) {
 		ZEPHIR_INIT_VAR(table);
 		ZVAL_EMPTY_STRING(table);
 	}
-	if (!schema) {
-		schema = ZEPHIR_GLOBAL(global_null);
+	if (!schema_param) {
+		ZEPHIR_INIT_VAR(schema);
+		ZVAL_EMPTY_STRING(schema);
+	} else {
+		zephir_get_strval(schema, schema_param);
 	}
 
 
@@ -1186,9 +1063,6 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeIndexes) {
 
 /**
  * Generates SQL to query indexes detail on a table
- *
- * @param string $indexName
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeIndex) {
 
@@ -1218,18 +1092,14 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeIndex) {
 
 /**
  * Generates SQL to query foreign keys on a table
- *
- * @param	string table
- * @param	string schema
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeReferences) {
 
-	zval *table_param = NULL, *schema = NULL;
-	zval *table = NULL;
+	zval *table_param = NULL, *schema_param = NULL;
+	zval *table = NULL, *schema = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &table_param, &schema);
+	zephir_fetch_params(1, 1, 1, &table_param, &schema_param);
 
 	if (unlikely(Z_TYPE_P(table_param) != IS_STRING && Z_TYPE_P(table_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'table' must be a string") TSRMLS_CC);
@@ -1242,8 +1112,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeReferences) {
 		ZEPHIR_INIT_VAR(table);
 		ZVAL_EMPTY_STRING(table);
 	}
-	if (!schema) {
-		schema = ZEPHIR_GLOBAL(global_null);
+	if (!schema_param) {
+		ZEPHIR_INIT_VAR(schema);
+		ZVAL_EMPTY_STRING(schema);
+	} else {
+		zephir_get_strval(schema, schema_param);
 	}
 
 
@@ -1254,18 +1127,14 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, describeReferences) {
 
 /**
  * Generates the SQL to describe the table creation options
- *
- * @param	string table
- * @param	string schema
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Dialect_Sqlite, tableOptions) {
 
-	zval *table_param = NULL, *schema = NULL;
-	zval *table = NULL;
+	zval *table_param = NULL, *schema_param = NULL;
+	zval *table = NULL, *schema = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &table_param, &schema);
+	zephir_fetch_params(1, 1, 1, &table_param, &schema_param);
 
 	if (unlikely(Z_TYPE_P(table_param) != IS_STRING && Z_TYPE_P(table_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'table' must be a string") TSRMLS_CC);
@@ -1278,8 +1147,11 @@ PHP_METHOD(Phalcon_Db_Dialect_Sqlite, tableOptions) {
 		ZEPHIR_INIT_VAR(table);
 		ZVAL_EMPTY_STRING(table);
 	}
-	if (!schema) {
-		schema = ZEPHIR_GLOBAL(global_null);
+	if (!schema_param) {
+		ZEPHIR_INIT_VAR(schema);
+		ZVAL_EMPTY_STRING(schema);
+	} else {
+		zephir_get_strval(schema, schema_param);
 	}
 
 

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -34,11 +34,11 @@ class Csv extends Adapter implements AdapterInterface, \ArrayAccess
 
 	/**
 	 * Phalcon\Translate\Adapter\Csv constructor
-	 *
-	 * @param array options
 	 */
 	public function __construct(array! options)
 	{
+		var data, file;
+
 		if !isset options["content"] {
 			throw new Exception("Parameter 'content' is required");
 		}
@@ -49,16 +49,14 @@ class Csv extends Adapter implements AdapterInterface, \ArrayAccess
 			"enclosure": "\""
 		], options);
 
-		var file;
 		let file = fopen(options["content"], "rb");
 
 		if typeof file !== "resource" {
 			throw new Exception("Error opening translation file '" . options["content"] . "'");
 		}
 
-		var data;
-
 		loop {
+
 			let data = fgetcsv(file, options["length"], options["delimiter"], options["enclosure"]);
 			if data === false {
 				break;
@@ -76,33 +74,20 @@ class Csv extends Adapter implements AdapterInterface, \ArrayAccess
 
 	/**
 	 * Returns the translation related to the given key
-	 *
-	 * @param string  index
-	 * @param array   placeholders
-	 * @return string
 	 */
 	public function query(string! index, placeholders = null) -> string
 	{
-		var translation, key, value;
+		var translation;
 
-		if fetch translation, this->_translate[index] {
-			if typeof placeholders === "array" {
-				if count(placeholders) {
-					for key, value in placeholders {
-						let translation = str_replace("%" . key . "%", value, translation);
-					}
-				}
-			}
-			return translation;
+		if !fetch translation, this->_translate[index] {
+			let translation = index;
 		}
-		return index;
+
+		return this->replacePlaceholders(translation, placeholders);
 	}
 
 	/**
 	 * Check whether is defined a translation key in the internal array
-	 *
-	 * @param    string index
-	 * @return   bool
 	 */
 	public function exists(string! index) -> boolean
 	{

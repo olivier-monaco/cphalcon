@@ -12,32 +12,15 @@
 #include <Zend/zend_interfaces.h>
 
 #include "kernel/main.h"
-#include "kernel/object.h"
-#include "kernel/exception.h"
 #include "kernel/fcall.h"
 #include "kernel/memory.h"
+#include "kernel/exception.h"
 #include "kernel/operators.h"
 #include "kernel/array.h"
 #include "kernel/string.h"
+#include "kernel/object.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\Validator\InclusionIn
  *
@@ -51,11 +34,11 @@
  *
  *		public function validation()
  *		{
- *			this->validate(new InclusionInValidator(array(
+ *			$this->validate(new InclusionInValidator(array(
  *				"field" => 'status',
  *				'domain' => array('A', 'I')
  *			)));
- *			if (this->validationHasFailed() == true) {
+ *			if ($this->validationHasFailed() == true) {
  *				return false;
  *			}
  *		}
@@ -67,6 +50,8 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Model_Validator_Inclusionin) {
 
 	ZEPHIR_REGISTER_CLASS_EX(Phalcon\\Mvc\\Model\\Validator, Inclusionin, phalcon, mvc_model_validator_inclusionin, phalcon_mvc_model_validator_ce, phalcon_mvc_model_validator_inclusionin_method_entry, 0);
 
+	phalcon_mvc_model_validator_inclusionin_ce->create_object = zephir_init_properties_Phalcon_Mvc_Model_Validator_Inclusionin;
+
 	zend_class_implements(phalcon_mvc_model_validator_inclusionin_ce TSRMLS_CC, 1, phalcon_mvc_model_validatorinterface_ce);
 	return SUCCESS;
 
@@ -74,59 +59,51 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Model_Validator_Inclusionin) {
 
 /**
  * Executes validator
- *
- * @param Phalcon\Mvc\ModelInterface record
- * @return boolean
  */
 PHP_METHOD(Phalcon_Mvc_Model_Validator_Inclusionin, validate) {
 
-	zval *_7;
-	zephir_nts_static zephir_fcall_cache_entry *_6 = NULL, *_9 = NULL;
+	zval *_6;
 	zend_bool _3;
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *record, *field = NULL, *domain = NULL, *value = NULL, *message = NULL, *strict = NULL, *_0 = NULL, *_1 = NULL, *_2 = NULL, *_4 = NULL, *_5 = NULL, *_8 = NULL;
+	zval *record, *field = NULL, *domain = NULL, *value = NULL, *message = NULL, *strict = NULL, *_0 = NULL, *_1 = NULL, *_2 = NULL, *_4 = NULL, *_5 = NULL, *_7 = NULL;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 1, 0, &record);
 
 
 
-	if (!(zephir_instance_of_ev(record, phalcon_mvc_modelinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'record' must be an instance of 'Phalcon\\Mvc\\ModelInterface'", "", 0);
-		return;
-	}
 	ZEPHIR_INIT_VAR(_0);
 	ZVAL_STRING(_0, "field", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&field, this_ptr, "getoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&field, this_ptr, "getoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	if (Z_TYPE_P(field) != IS_STRING) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Field name must be a string", "phalcon/mvc/model/validator/inclusionin.zep", 66);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Field name must be a string", "phalcon/mvc/model/validator/inclusionin.zep", 63);
 		return;
 	}
 	ZEPHIR_INIT_NVAR(_0);
 	ZVAL_STRING(_0, "domain", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&_1, this_ptr, "issetoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&_1, this_ptr, "issetoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	if (ZEPHIR_IS_FALSE_IDENTICAL(_1)) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "The option 'domain' is required for this validator", "phalcon/mvc/model/validator/inclusionin.zep", 73);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "The option 'domain' is required for this validator", "phalcon/mvc/model/validator/inclusionin.zep", 70);
 		return;
 	}
 	ZEPHIR_INIT_NVAR(_0);
 	ZVAL_STRING(_0, "domain", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&domain, this_ptr, "getoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&domain, this_ptr, "getoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	if (Z_TYPE_P(domain) != IS_ARRAY) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Option 'domain' must be an array", "phalcon/mvc/model/validator/inclusionin.zep", 78);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Option 'domain' must be an array", "phalcon/mvc/model/validator/inclusionin.zep", 75);
 		return;
 	}
-	ZEPHIR_CALL_METHOD(&value, record, "readattribute", NULL, field);
+	ZEPHIR_CALL_METHOD(&value, record, "readattribute", NULL, 0, field);
 	zephir_check_call_status();
 	ZEPHIR_INIT_NVAR(_0);
 	ZVAL_STRING(_0, "allowEmpty", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&_2, this_ptr, "issetoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&_2, this_ptr, "issetoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	_3 = zephir_is_true(_2);
@@ -140,48 +117,69 @@ PHP_METHOD(Phalcon_Mvc_Model_Validator_Inclusionin, validate) {
 	ZVAL_BOOL(strict, 0);
 	ZEPHIR_INIT_NVAR(_0);
 	ZVAL_STRING(_0, "strict", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&_4, this_ptr, "issetoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&_4, this_ptr, "issetoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	if (zephir_is_true(_4)) {
 		if (Z_TYPE_P(strict) != IS_BOOL) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Option 'strict' must be a boolean", "phalcon/mvc/model/validator/inclusionin.zep", 90);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "Option 'strict' must be a boolean", "phalcon/mvc/model/validator/inclusionin.zep", 87);
 			return;
 		}
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "strict", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&strict, this_ptr, "getoption", NULL, _0);
+		ZEPHIR_CALL_METHOD(&strict, this_ptr, "getoption", NULL, 0, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 	}
-	ZEPHIR_CALL_FUNCTION(&_5, "in_array", &_6, value, domain, strict);
+	ZEPHIR_CALL_FUNCTION(&_5, "in_array", NULL, 363, value, domain, strict);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_5))) {
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "message", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&message, this_ptr, "getoption", NULL, _0);
+		ZEPHIR_CALL_METHOD(&message, this_ptr, "getoption", NULL, 0, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_EMPTY(message)) {
 			ZEPHIR_INIT_NVAR(message);
 			ZVAL_STRING(message, "Value of field ':field' must be part of list: :domain", 1);
 		}
-		ZEPHIR_INIT_VAR(_7);
-		array_init_size(_7, 3);
-		zephir_array_update_string(&_7, SL(":field"), &field, PH_COPY | PH_SEPARATE);
+		ZEPHIR_INIT_VAR(_6);
+		zephir_create_array(_6, 2, 0 TSRMLS_CC);
+		zephir_array_update_string(&_6, SL(":field"), &field, PH_COPY | PH_SEPARATE);
 		ZEPHIR_INIT_NVAR(_0);
 		zephir_fast_join_str(_0, SL(", "), domain TSRMLS_CC);
-		zephir_array_update_string(&_7, SL(":domain"), &_0, PH_COPY | PH_SEPARATE);
-		ZEPHIR_CALL_FUNCTION(&_8, "strtr", &_9, message, _7);
+		zephir_array_update_string(&_6, SL(":domain"), &_0, PH_COPY | PH_SEPARATE);
+		ZEPHIR_CALL_FUNCTION(&_7, "strtr", NULL, 53, message, _6);
 		zephir_check_call_status();
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "Inclusion", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(NULL, this_ptr, "appendmessage", NULL, _8, field, _0);
+		ZEPHIR_CALL_METHOD(NULL, this_ptr, "appendmessage", NULL, 0, _7, field, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 		RETURN_MM_BOOL(0);
 	}
 	RETURN_MM_BOOL(1);
+
+}
+
+static zend_object_value zephir_init_properties_Phalcon_Mvc_Model_Validator_Inclusionin(zend_class_entry *class_type TSRMLS_DC) {
+
+		zval *_0, *_1;
+
+		ZEPHIR_MM_GROW();
+	
+	{
+		zval *this_ptr = NULL;
+		ZEPHIR_CREATE_OBJECT(this_ptr, class_type);
+		_0 = zephir_fetch_nproperty_this(this_ptr, SL("_messages"), PH_NOISY_CC);
+		if (Z_TYPE_P(_0) == IS_NULL) {
+			ZEPHIR_INIT_VAR(_1);
+			array_init(_1);
+			zephir_update_property_this(this_ptr, SL("_messages"), _1 TSRMLS_CC);
+		}
+		ZEPHIR_MM_RESTORE();
+		return Z_OBJVAL_P(this_ptr);
+	}
 
 }
 

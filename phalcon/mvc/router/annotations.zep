@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -57,14 +57,9 @@ class Annotations extends Router
 	/**
 	 * Adds a resource to the annotations handler
 	 * A resource is a class that contains routing annotations
-	 *
-	 * @param string handler
-	 * @param string prefix
-	 * @return Phalcon\Mvc\Router\Annotations
 	 */
 	public function addResource(string! handler, string! prefix = null) -> <Annotations>
 	{
-
 		let this->_handlers[] = [prefix, handler],
 			this->_processed = false;
 		return this;
@@ -74,15 +69,9 @@ class Annotations extends Router
 	 * Adds a resource to the annotations handler
 	 * A resource is a class that contains routing annotations
 	 * The class is located in a module
-	 *
-	 * @param string module
-	 * @param string handler
-	 * @param string prefix
-	 * @return Phalcon\Mvc\Router\Annotations
 	 */
 	public function addModuleResource(string! module, string! handler, string! prefix = null) -> <Annotations>
 	{
-
 		let this->_handlers[] = [prefix, handler, module],
 		this->_processed = false;
 
@@ -91,8 +80,6 @@ class Annotations extends Router
 
 	/**
 	 * Produce the routing parameters from the rewrite information
-	 *
-	 * @param string uri
 	 */
 	public function handle(string! uri = null)
 	{
@@ -231,9 +218,6 @@ class Annotations extends Router
 
 	/**
 	 * Checks for annotations in the controller docblock
-	 *
-	 * @param string handler
-	 * @param Phalcon\Annotations\Annotation
 	 */
 	public function processControllerAnnotation(string! handler, <Annotation> annotation)
 	{
@@ -258,7 +242,8 @@ class Annotations extends Router
 		<Annotation> annotation)
 	{
 		var isRoute, name, actionName, routePrefix, paths, value, uri,
-			route, methods, converts, param, convert, conversorParam, routeName;
+			route, methods, converts, param, convert, conversorParam, routeName,
+			beforeMatch;
 
 		let isRoute = false, methods = null;
 
@@ -267,24 +252,31 @@ class Annotations extends Router
 		/**
 		 * Find if the route is for adding routes
 		 */
-		if name == "Route" {
-			let isRoute = true;
-		} else {
-			if name == "Get" {
+		switch name {
+
+			case "Route":
+				let isRoute = true;
+				break;
+
+			case "Get":
 				let isRoute = true, methods = "GET";
-			} else {
-				if name == "Post" {
-					let isRoute = true, methods = "POST";
-				} else {
-					if name == "Put" {
-						let isRoute = true, methods = "PUT";
-					} else {
-						if name == "Options" {
-							let isRoute = true, methods = "OPTIONS";
-						}
-					}
-				}
-			}
+				break;
+
+			case "Post":
+				let isRoute = true, methods = "POST";
+				break;
+
+			case "Put":
+				let isRoute = true, methods = "PUT";
+				break;
+
+			case "Delete":
+				let isRoute = true, methods = "DELETE";
+				break;
+
+			case "Options":
+				let isRoute = true, methods = "OPTIONS";
+				break;
 		}
 
 		if isRoute === true {
@@ -326,7 +318,11 @@ class Annotations extends Router
 				if value != "/" {
 					let uri = routePrefix . value;
 				} else {
-					let uri = routePrefix;
+					if typeof routePrefix !== "null" {
+						let uri = routePrefix;
+					} else {
+						let uri = value;
+					}
 				}
 			} else {
 				let uri = routePrefix . actionName;
@@ -373,6 +369,14 @@ class Annotations extends Router
 				}
 			}
 
+			/**
+			 * Add the conversors
+			 */
+			let beforeMatch = annotation->getNamedArgument("beforeMatch");
+			if typeof beforeMatch == "array" || typeof beforeMatch == "string" {
+				route->beforeMatch(beforeMatch);
+			}
+
 			let routeName = annotation->getNamedArgument("name");
 			if typeof routeName == "string" {
 				route->setName(routeName);
@@ -380,13 +384,10 @@ class Annotations extends Router
 
 			return true;
 		}
-
 	}
 
 	/**
 	 * Changes the controller class suffix
-	 *
-	 * @param string controllerSuffix
 	 */
 	public function setControllerSuffix(string! controllerSuffix)
 	{
@@ -395,8 +396,6 @@ class Annotations extends Router
 
 	/**
 	 * Changes the action method suffix
-	 *
-	 * @param string actionSuffix
 	 */
 	public function setActionSuffix(string! actionSuffix)
 	{
@@ -410,6 +409,6 @@ class Annotations extends Router
 	 */
 	public function getResources()
 	{
-		return this->_handlers;
+		return (array) this->_handlers;
 	}
 }

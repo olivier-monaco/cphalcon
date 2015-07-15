@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -70,7 +70,7 @@ class Libmemcached extends Backend implements BackendInterface
 	 * @param	Phalcon\Cache\FrontendInterface frontend
 	 * @param	array options
 	 */
-	public function __construct(<FrontendInterface> frontend, options=null)
+	public function __construct(<FrontendInterface> frontend, options = null)
 	{
 		var servers;
 
@@ -91,8 +91,8 @@ class Libmemcached extends Backend implements BackendInterface
 	}
 
 	/**
-	* Create internal connection to memcached
-	*/
+	 * Create internal connection to memcached
+	 */
 	public function _connect()
 	{
 		var options, memcache, client, servers;
@@ -112,11 +112,11 @@ class Libmemcached extends Backend implements BackendInterface
 			throw new Exception("Cannot connect to Memcached server");
 		}
 
-		let client = options["client"];
-		if typeof client == "array" {
+		if fetch client, options["client"] {
+			if typeof client !== "array" {
+				throw new Exception("Client options must be instance of array");
+			}
 			memcache->setOptions(client);
-		} else {
-			throw new Exception("Client options must be instance of array");
 		}
 
 		let this->_memcache = memcache;
@@ -162,7 +162,7 @@ class Libmemcached extends Backend implements BackendInterface
 	 * @param long lifetime
 	 * @param boolean stopBuffer
 	 */
-	public function save(keyName = null, content = null, lifetime = null, stopBuffer = true)
+	public function save(keyName = null, content = null, lifetime = null, boolean stopBuffer = true)
 	{
 		var lastKey, frontend, memcache, cachedContent, preparedContent, tmp, tt1, success, options,
 			specialKey, keys, isBuffering;
@@ -246,11 +246,11 @@ class Libmemcached extends Backend implements BackendInterface
 
 		let isBuffering = frontend->isBuffering();
 
-		if !stopBuffer {
+		if stopBuffer === true {
 			frontend->stop();
 		}
 
-		if isBuffering == true {
+		if isBuffering === true {
 			echo cachedContent;
 		}
 
@@ -265,7 +265,7 @@ class Libmemcached extends Backend implements BackendInterface
 	 */
 	public function delete(keyName)
 	{
-		var memcache, prefixedKey, options, keys, specialKey;
+		var memcache, prefixedKey, options, keys, specialKey, ret;
 
 		let memcache = this->_memcache;
 		if typeof memcache != "object" {
@@ -291,7 +291,8 @@ class Libmemcached extends Backend implements BackendInterface
 		/**
 		 * Delete the key from memcached
 		 */
-		memcache->delete(prefixedKey);
+		let ret = memcache->delete(prefixedKey);
+		return ret;
 	}
 
 	/**
@@ -326,6 +327,7 @@ class Libmemcached extends Backend implements BackendInterface
 		 */
 		let keys = memcache->get(specialKey);
 		if typeof keys == "array" {
+			let keys = array_keys(keys);
 			for key in keys {
 				if prefix && !starts_with(key, prefix) {
 					unset keys[key];
@@ -437,8 +439,6 @@ class Libmemcached extends Backend implements BackendInterface
 
 	/**
 	 * Immediately invalidates all existing items.
-	 *
-	 * @return boolean
 	 */
 	public function flush() -> boolean
 	{
@@ -466,7 +466,7 @@ class Libmemcached extends Backend implements BackendInterface
 		 */
 		let keys = memcache->get(specialKey);
 		if typeof keys == "array" {
-			for key in keys {
+			for key in array_keys(keys) {
 				memcache->delete(key);
 			}
 			memcache->set(specialKey, keys);

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,11 @@
 
 namespace Phalcon\Validation\Validator;
 
+use Phalcon\Validation;
+use Phalcon\Validation\Validator;
+use Phalcon\Validation\Exception;
+use Phalcon\Validation\Message;
+
 /**
  * Phalcon\Validation\Validator\Uniqueness
  *
@@ -32,7 +37,7 @@ namespace Phalcon\Validation\Validator;
  *    'message' => ':field must be unique'
  *)));
  *</code>
- * 
+ *
  * Different attribute from the field
  *<code>
  *$validator->add('username', new UniquenessValidator(array(
@@ -41,17 +46,13 @@ namespace Phalcon\Validation\Validator;
  *)));
  *</code>
  */
-class Uniqueness extends \Phalcon\Validation\Validator implements \Phalcon\Validation\ValidatorInterface
+class Uniqueness extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param  Phalcon\Validation validation
-	 * @param  string             field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, string! field) -> boolean
+	public function validate(<Validation> validation, string! field) -> boolean
 	{
 		var attribute, value, model, except, number, message, label, replacePairs;
 
@@ -61,7 +62,7 @@ class Uniqueness extends \Phalcon\Validation\Validator implements \Phalcon\Valid
 			except = this->getOption("except");
 
 		if empty model {
-			throw new \Phalcon\Validation\Exception("Model must be set");
+			throw new Exception("Model must be set");
 		}
 
 		if empty attribute {
@@ -73,6 +74,7 @@ class Uniqueness extends \Phalcon\Validation\Validator implements \Phalcon\Valid
 		} else {
 			let number = {model}::count([attribute . "=:value:", "bind": ["value": value]]);
 		}
+
 		if number {
 
 			let label = this->getOption("label");
@@ -86,7 +88,7 @@ class Uniqueness extends \Phalcon\Validation\Validator implements \Phalcon\Valid
 				let message = validation->getDefaultMessage("Uniqueness");
 			}
 
-			validation->appendMessage(new \Phalcon\Validation\Message(strtr(message, replacePairs), field, "Uniqueness"));
+			validation->appendMessage(new Message(strtr(message, replacePairs), field, "Uniqueness"));
 			return false;
 		}
 

@@ -1,29 +1,23 @@
 
 /*
   +------------------------------------------------------------------------+
-  | Phalcon Framework                                                      |
+  | Phalcon Framework													   |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2013 Phalcon Team (http://www.phalconphp.com)       |
+  | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)	   |
   +------------------------------------------------------------------------+
-  | This source file is subject to the New BSD License that is bundled     |
-  | with this package in the file docs/LICENSE.txt.                        |
-  |                                                                        |
-  | If you did not receive a copy of the license and are unable to         |
-  | obtain it through the world-wide-web, please send an email             |
-  | to license@phalconphp.com so we can send you a copy immediately.       |
+  | This source file is subject to the New BSD License that is bundled	   |
+  | with this package in the file docs/LICENSE.txt.					       |
+  |																		   |
+  | If you did not receive a copy of the license and are unable to		   |
+  | obtain it through the world-wide-web, please send an email			   |
+  | to license@phalconphp.com so we can send you a copy immediately.	   |
   +------------------------------------------------------------------------+
-  | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
-  |          Eduar Carvajal <eduar@phalconphp.com>                         |
+  | Authors: Andres Gutierrez <andres@phalconphp.com>					   |
+  |		  Eduar Carvajal <eduar@phalconphp.com>						       |
   +------------------------------------------------------------------------+
 */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "php.h"
 #include "php_phalcon.h"
-
 #include "scanner.h"
 
 #define YYCTYPE unsigned char
@@ -34,8 +28,8 @@
 void phvolt_rtrim(phvolt_scanner_token *token) {
 
 	char *cursor, *removed_str;
-	unsigned int i;
-	unsigned char ch;
+	int i;
+	char ch;
 
 	if (token->len > 0) {
 
@@ -50,13 +44,15 @@ void phvolt_rtrim(phvolt_scanner_token *token) {
 			break;
 		}
 
-		removed_str = emalloc(i + 1);
-		memcpy(removed_str, token->value, i);
-		removed_str[i] = '\0';
+		if (i >= 0) {
+			removed_str = emalloc(i + 1);
+			memcpy(removed_str, token->value, i);
+			removed_str[i] = '\0';
 
-		efree(token->value);
-		token->value = removed_str;
-		token->len = i;
+			efree(token->value);
+			token->value = removed_str;
+			token->len = i;
+		}
 	}
 
 }
@@ -64,14 +60,13 @@ void phvolt_rtrim(phvolt_scanner_token *token) {
 void phvolt_ltrim(phvolt_scanner_token *token) {
 
 	char *cursor, *removed_str;
-	unsigned int i;
-	unsigned char ch;
+	int i;
 
 	if (token->len > 0) {
 
 		cursor = token->value;
 		for (i = 0; i < token->len; i++) {
-			ch = (*cursor);
+			char ch = (*cursor);
 			if (ch == '\t' || ch == '\n' || ch == '\r' || ch == ' ' || ch == '\v') {
 				cursor++;
 				continue;
@@ -79,13 +74,15 @@ void phvolt_ltrim(phvolt_scanner_token *token) {
 			break;
 		}
 
-		removed_str = emalloc(token->len - i + 1);
-		memcpy(removed_str, token->value + i, token->len - i);
-		removed_str[token->len - i] = '\0';
+		if (i >= 0) {
+			removed_str = emalloc(token->len - i + 1);
+			memcpy(removed_str, token->value + i, token->len - i);
+			removed_str[token->len - i] = '\0';
 
-		efree(token->value);
-		token->value = removed_str;
-		token->len = token->len - i;
+			efree(token->value);
+			token->value = removed_str;
+			token->len = token->len - i;
+		}
 	}
 
 }
@@ -147,7 +144,7 @@ int phvolt_get_token(phvolt_scanner_state *s, phvolt_scanner_token *token) {
 
 					while ((next = *(++YYCURSOR))) {
 						if (next == '#' && *(YYCURSOR + 1) == '}') {
-							YYCURSOR+=2;
+							YYCURSOR += 2;
 							token->opcode = PHVOLT_T_IGNORE;
 							return 0;
 						} else {
@@ -320,6 +317,18 @@ int phvolt_get_token(phvolt_scanner_state *s, phvolt_scanner_token *token) {
 			return 0;
 		}
 
+		'is not' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_NOTEQUALS;
+			return 0;
+		}
+
+		[i][s][ ]+[n][o][t] {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_NOTEQUALS;
+			return 0;
+		}
+
 		'is' {
 			s->statement_position++;
 			token->opcode = PHVOLT_T_IS;
@@ -341,6 +350,42 @@ int phvolt_get_token(phvolt_scanner_state *s, phvolt_scanner_token *token) {
 		'include' {
 			s->statement_position++;
 			token->opcode = PHVOLT_T_INCLUDE;
+			return 0;
+		}
+
+		'empty' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_EMPTY;
+			return 0;
+		}
+
+		'even' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_EVEN;
+			return 0;
+		}
+
+		'odd' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_ODD;
+			return 0;
+		}
+
+		'numeric' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_NUMERIC;
+			return 0;
+		}
+
+		'scalar' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_SCALAR;
+			return 0;
+		}
+
+		'iterable' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_ITERABLE;
 			return 0;
 		}
 
@@ -382,6 +427,18 @@ int phvolt_get_token(phvolt_scanner_state *s, phvolt_scanner_token *token) {
 		'break' {
 			s->statement_position++;
 			token->opcode = PHVOLT_T_BREAK;
+			return 0;
+		}
+
+		'raw' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_RAW;
+			return 0;
+		}
+
+		'endraw' {
+			s->statement_position++;
+			token->opcode = PHVOLT_T_ENDRAW;
 			return 0;
 		}
 

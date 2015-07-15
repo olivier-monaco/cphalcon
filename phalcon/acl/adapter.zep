@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,14 +20,14 @@
 namespace Phalcon\Acl;
 
 use Phalcon\Events\ManagerInterface;
+use Phalcon\Events\EventsAwareInterface;
 
 /**
  * Phalcon\Acl\Adapter
  *
  * Adapter for Phalcon\Acl adapters
  */
-
-class Adapter
+abstract class Adapter implements AdapterInterface, EventsAwareInterface
 {
 	/**
 	 * Events manager
@@ -61,14 +61,12 @@ class Adapter
 
 	/**
 	 * Active access which the list is checking if some role can access it
-	 * "@var mixed
+	 * @var mixed
 	 */
 	protected _activeAccess { get };
 
 	/**
 	 * Sets the events manager
-	 *
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
 	public function setEventsManager(<ManagerInterface> eventsManager)
 	{
@@ -77,8 +75,6 @@ class Adapter
 
 	/**
 	 * Returns the internal event manager
-	 *
-	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getEventsManager() -> <ManagerInterface>
 	{
@@ -87,8 +83,6 @@ class Adapter
 
 	/**
 	 * Sets the default access level (Phalcon\Acl::ALLOW or Phalcon\Acl::DENY)
-	 *
-	 * @param int defaultAccess
 	 */
 	public function setDefaultAction(int defaultAccess)
 	{
@@ -97,8 +91,6 @@ class Adapter
 
 	/**
 	 * Returns the default ACL access level
-	 *
-	 * @return int
 	 */
 	public function getDefaultAction() -> int
 	{

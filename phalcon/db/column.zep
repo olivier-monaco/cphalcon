@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -43,64 +43,95 @@ use Phalcon\Db\ColumnInterface;
  * //add column to existing table
  * $connection->addColumn("robots", null, $column);
  *</code>
- *
  */
 class Column implements ColumnInterface
 {
 
 	/**
 	 * Integer abstract type
-	 *
 	 */
 	const TYPE_INTEGER = 0;
 
 	/**
 	 * Date abstract type
-	 *
 	 */
 	const TYPE_DATE = 1;
 
 	/**
 	 * Varchar abstract type
-	 *
 	 */
 	const TYPE_VARCHAR = 2;
 
 	/**
 	 * Decimal abstract type
-	 *
 	 */
 	const TYPE_DECIMAL = 3;
 
 	/**
 	 * Datetime abstract type
-	 *
 	 */
 	const TYPE_DATETIME = 4;
 
 	/**
 	 * Char abstract type
-	 *
 	 */
 	const TYPE_CHAR = 5;
 
 	/**
 	 * Text abstract data type
-	 *
 	 */
 	const TYPE_TEXT = 6;
 
 	/**
 	 * Float abstract data type
-	 *
 	 */
 	const TYPE_FLOAT = 7;
 
 	/**
 	 * Boolean abstract data type
-	 *
 	 */
 	const TYPE_BOOLEAN = 8;
+
+	/**
+	 * Double abstract data type
+	 *
+	 */
+	const TYPE_DOUBLE = 9;
+
+	/**
+	 * Tinyblob abstract data type
+	 */
+	const TYPE_TINYBLOB = 10;
+
+	/**
+	 * Blob abstract data type
+	 */
+	const TYPE_BLOB = 11;
+
+	/**
+	 * Mediumblob abstract data type
+	 */
+	const TYPE_MEDIUMBLOB = 12;
+
+	/**
+	 * Longblob abstract data type
+	 */
+	const TYPE_LONGBLOB = 13;
+
+	/**
+	 * Big integer abstract type
+	 */
+	const TYPE_BIGINTEGER = 14;
+
+	/**
+	 * Json abstract type
+	 */
+	const TYPE_JSON = 15;
+
+	/**
+	 * Jsonb abstract type
+	 */
+	const TYPE_JSONB = 16;
 
 	/**
 	 * Bind Type Null
@@ -116,6 +147,11 @@ class Column implements ColumnInterface
 	 * Bind Type String
 	 */
 	const BIND_PARAM_STR = 2;
+
+	/**
+	 * Bind Type Blob
+	 */
+	const BIND_PARAM_BLOB = 3;
 
 	/**
 	 * Bind Type Bool
@@ -238,11 +274,8 @@ class Column implements ColumnInterface
 
 	/**
 	 * Phalcon\Db\Column constructor
-	 *
-	 * @param string name
-	 * @param array definition
 	 */
-	public function __construct(string! name, var definition)
+	public function __construct(string! name, array! definition)
 	{
 		var type, notNull, primary, size, scale, dunsigned, first,
 			after, bindType, isNumeric, autoIncrement, defaultValue,
@@ -291,10 +324,18 @@ class Column implements ColumnInterface
 		 * Check if the column has a decimal scale
 		 */
 		if fetch scale, definition["scale"] {
-			if type == self::TYPE_INTEGER || type == self::TYPE_FLOAT || type == self::TYPE_DECIMAL {
-				let this->_scale = scale;
-			} else {
-				throw new Exception("Column type does not support scale parameter");
+			switch type {
+
+				case self::TYPE_INTEGER:
+				case self::TYPE_FLOAT:
+				case self::TYPE_DECIMAL:
+				case self::TYPE_DOUBLE:
+				case self::TYPE_BIGINTEGER:
+					let this->_scale = scale;
+					break;
+
+				default:
+					throw new Exception("Column type does not support scale parameter");
 			}
 		}
 
@@ -323,14 +364,19 @@ class Column implements ColumnInterface
 		 * Check if the field is auto-increment/serial
 		 */
 		if fetch autoIncrement, definition["autoIncrement"] {
-			if autoIncrement {
-				if type == self::TYPE_INTEGER {
-					let this->_autoIncrement = true;
-				} else {
-					throw new Exception("Column type cannot be auto-increment");
-				}
-			} else {
+			if !autoIncrement {
 				let this->_autoIncrement = false;
+			} else {
+				switch type {
+
+					case self::TYPE_INTEGER:
+					case self::TYPE_BIGINTEGER:
+						let this->_autoIncrement = true;
+						break;
+
+					default:
+						throw new Exception("Column type cannot be auto-increment");
+				}
 			}
 		}
 
@@ -359,8 +405,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Returns true if number column is unsigned
-	 *
-	 * @return boolean
 	 */
 	public function isUnsigned() -> boolean
 	{
@@ -369,8 +413,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Not null
-	 *
-	 * @return boolean
 	 */
 	public function isNotNull() -> boolean
 	{
@@ -379,8 +421,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Column is part of the primary key?
-	 *
-	 * @return boolean
 	 */
 	public function isPrimary() -> boolean
 	{
@@ -389,8 +429,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Auto-Increment
-	 *
-	 * @return boolean
 	 */
 	public function isAutoIncrement() -> boolean
 	{
@@ -399,8 +437,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Check whether column have an numeric type
-	 *
-	 * @return boolean
 	 */
 	public function isNumeric() -> boolean
 	{
@@ -409,8 +445,6 @@ class Column implements ColumnInterface
 
 	/**
 	 * Check whether column have first position in table
-	 *
-	 * @return boolean
 	 */
 	public function isFirst() -> boolean
 	{
@@ -429,19 +463,14 @@ class Column implements ColumnInterface
 
 	/**
 	 * Returns the type of bind handling
-	 *
-	 * @return int
 	 */
-	public function getBindType()
+	public function getBindType() -> int
 	{
 		return this->_bindType;
 	}
 
 	/**
 	 * Restores the internal state of a Phalcon\Db\Column object
-	 *
-	 * @param array data
-	 * @return \Phalcon\Db\Column
 	 */
 	public static function __set_state(array! data) -> <Column>
 	{
@@ -485,8 +514,16 @@ class Column implements ColumnInterface
 		}
 
 		if fetch scale, data["_scale"] {
-			if definition["type"] == self::TYPE_INTEGER || definition["type"] == self::TYPE_FLOAT || definition["type"] == self::TYPE_DECIMAL {
-				let definition["scale"] = scale;
+			
+			switch definition["type"] {
+
+				case self::TYPE_INTEGER:
+				case self::TYPE_FLOAT:
+				case self::TYPE_DECIMAL:
+				case self::TYPE_DOUBLE:
+				case self::TYPE_BIGINTEGER:
+					let definition["scale"] = scale;
+					break;
 			}
 		}
 

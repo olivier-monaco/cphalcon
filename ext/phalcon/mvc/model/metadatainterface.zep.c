@@ -12,23 +12,6 @@
 #include "kernel/main.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\MetaDataInterface
  *
@@ -44,8 +27,6 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Model_MetaDataInterface) {
 
 /**
  * Set the meta-data extraction strategy
- *
- * @param Phalcon\Mvc\Model\MetaData\StrategyInterface strategy
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, setStrategy);
 
@@ -180,50 +161,41 @@ ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, getAutomaticUpdateAttribu
 
 /**
  * Set the attributes that must be ignored from the INSERT SQL generation
- *
- * @param  Phalcon\Mvc\ModelInterface model
- * @param  array attributes
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, setAutomaticCreateAttributes);
 
 /**
  * Set the attributes that must be ignored from the UPDATE SQL generation
- *
- * @param  Phalcon\Mvc\ModelInterface model
- * @param  array attributes
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, setAutomaticUpdateAttributes);
 
 /**
+ * Set the attributes that allow empty string values	 
+ */
+ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, setEmptyStringAttributes);
+
+/**
+ * Returns attributes allow empty strings
+ */
+ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, getEmptyStringAttributes);
+
+/**
  * Returns attributes (which have default values) and their default values
- *
- * @param Phalcon\Mvc\ModelInterface model
- * @return array
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, getDefaultValues);
 
 /**
  * Returns the column map if any
- *
- * @param Phalcon\Mvc\ModelInterface model
- * @return array
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, getColumnMap);
 
 /**
  * Returns the reverse column map if any
- *
- * @param Phalcon\Mvc\ModelInterface model
- * @return array
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, getReverseColumnMap);
 
 /**
  * Check if a model has certain attribute
- *
- * @param Phalcon\Mvc\ModelInterface model
- * @param string attribute
- * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Model_MetaDataInterface, hasAttribute);
 

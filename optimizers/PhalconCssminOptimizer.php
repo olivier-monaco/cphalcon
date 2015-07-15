@@ -4,7 +4,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -62,7 +62,7 @@ class PhalconCssminOptimizer extends OptimizerAbstract
 		$context->headersManager->add('phalcon/assets/filters/cssminifier');
 		$symbolVariable->setDynamicTypes('string');
 
-		$resolvedParams = $call->getReadOnlyResolvedParams($expression['parameters'], $context, $expression);
+		$resolvedParams = $call->getResolvedParams($expression['parameters'], $context, $expression);
 		$context->codePrinter->output('phalcon_cssmin(' . $symbolVariable->getName() . ', ' . $resolvedParams[0] . ' TSRMLS_CC);');
 		return new CompiledExpression('variable', $symbolVariable->getRealName(), $expression);
 	}

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,7 +20,6 @@
 namespace Phalcon\Validation\Validator;
 
 use Phalcon\Validation\Validator;
-use Phalcon\Validation\ValidatorInterface;
 use Phalcon\Validation\Exception;
 use Phalcon\Validation\Message;
 
@@ -38,17 +37,13 @@ use Phalcon\Validation\Message;
  *)));
  *</code>
  */
-class InclusionIn extends Validator implements ValidatorInterface
+class InclusionIn extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param Phalcon\Validation validation
-	 * @param string field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, field) -> boolean
+	public function validate(<\Phalcon\Validation> validation, string! field) -> boolean
 	{
 		var value, domain, message, label, replacePairs, strict;
 

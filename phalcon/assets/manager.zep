@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -25,6 +25,8 @@ use Phalcon\Assets\Collection;
 use Phalcon\Assets\Exception;
 use Phalcon\Assets\Resource\Js as ResourceJs;
 use Phalcon\Assets\Resource\Css as ResourceCss;
+use Phalcon\Assets\Inline\Css as InlineCss;
+use Phalcon\Assets\Inline\Js as InlineJs;
 
 /**
  * Phalcon\Assets\Manager
@@ -51,16 +53,13 @@ class Manager
 	 */
 	public function __construct(options = null)
 	{
-		if  typeof options == "array" {
+		if typeof options == "array" {
 			let this->_options = options;
 		}
 	}
 
 	/**
 	 * Sets the manager options
-	 *
-	 * @param array options
-	 * @return Phalcon\Assets\Manager
 	 */
 	public function setOptions(array! options) -> <Manager>
 	{
@@ -70,19 +69,14 @@ class Manager
 
 	/**
 	 * Returns the manager options
-	 *
-	 * @return array
 	 */
-	public function getOptions()
+	public function getOptions() -> array
 	{
 		return this->_options;
 	}
 
 	/**
 	 * Sets if the HTML generated must be directly printed or returned
-	 *
-	 * @param boolean implicitOutput
-	 * @return Phalcon\Assets\Manager
 	 */
 	public function useImplicitOutput(boolean implicitOutput) -> <Manager>
 	{
@@ -98,63 +92,43 @@ class Manager
 	*	$assets->addCss('css/bootstrap.css');
 	*	$assets->addCss('http://bootstrap.my-cdn.com/style.css', false);
 	*</code>
-	*
-	* @param string path
-	* @param boolean local
-	* @param boolean filter
-	* @param array attributes
-	* @return Phalcon\Assets\Manager
 	*/
-	public function addCss(string! path, local = true, filter = true, attributes = null)
+	public function addCss(string! path, local = true, filter = true, var attributes = null) -> <Manager>
 	{
 		this->addResourceByType("css", new ResourceCss(path, local, filter, attributes));
 		return this;
 	}
 
 	/**
-	* Adds a inline Css to the 'css' collection
-	*
-	* @param string content
-	* @param boolean filter
-	* @param array attributes
-	* @return Phalcon\Assets\Manager
-	*/
-	public function addInlineCss(string content, filter = true, attributes = null)
+	 * Adds a inline Css to the 'css' collection
+	 */
+	public function addInlineCss(string content, filter = true, var attributes = null) -> <Manager>
 	{
-		this->addInlineCodeByType("css", new \Phalcon\Assets\Inline\Css(content, filter, attributes));
+		this->addInlineCodeByType("css", new InlineCss(content, filter, attributes));
+		return this;
 	}
 
 	/**
-	* Adds a javascript resource to the 'js' collection
-	*
-	*<code>
-	*	$assets->addJs('scripts/jquery.js');
-        *       $assets->addJs('http://jquery.my-cdn.com/jquery.js', false);
-	*</code>
-	*
-	* @param string path
-	* @param boolean local
-	* @param boolean filter
-	* @param array attributes
-	* @return Phalcon\Assets\Manager
-	*/
-	public function addJs(string! path, local = true, filter = true, attributes = null)
+	 * Adds a javascript resource to the 'js' collection
+	 *
+	 *<code>
+	 *	$assets->addJs('scripts/jquery.js');
+	 *	$assets->addJs('http://jquery.my-cdn.com/jquery.js', false);
+	 *</code>
+	 */
+	public function addJs(string! path, local = true, filter = true, attributes = null) -> <Manager>
 	{
 		this->addResourceByType("js", new ResourceJs(path, local, filter, attributes));
 		return this;
 	}
 
 	/**
-	* Adds a inline javascript to the 'js' collection
-	*
-	* @param string content
-	* @param boolean filter
-	* @param array attributes
-	* @return Phalcon\Assets\Manager
-	*/
-	public function addInlineJs(string content, filter = true, attributes = null)
+	 * Adds a inline javascript to the 'js' collection
+	 */
+	public function addInlineJs(string content, filter = true, attributes = null) -> <Manager>
 	{
-		this->addInlineCodeByType("js", new \Phalcon\Assets\Inline\Js(content, filter, attributes));
+		this->addInlineCodeByType("js", new InlineJs(content, filter, attributes));
+		return this;
 	}
 
 	/**
@@ -163,10 +137,6 @@ class Manager
 	 *<code>
 	 *	$assets->addResourceByType('css', new \Phalcon\Assets\Resource\Css('css/style.css'));
 	 *</code>
-	 *
-	 * @param string type
-	 * @param Phalcon\Assets\Resource resource
-	 * @return Phalcon\Assets\Manager
 	 */
 	public function addResourceByType(string! type, <$Resource> $resource) -> <Manager>
 	{
@@ -187,12 +157,8 @@ class Manager
 
 	/**
 	 * Adds a inline code by its type
-	 *
-	 * @param string type
-	 * @param Phalcon\Assets\Inline code
-	 * @return Phalcon\Assets\Manager
 	 */
-	public function addInlineCodeByType(string! type, <\Phalcon\Assets\Inline> code) -> <Manager>
+	public function addInlineCodeByType(string! type, <$Inline> code) -> <Manager>
 	{
 		var collection;
 
@@ -215,9 +181,6 @@ class Manager
 	 *<code>
 	 * $assets->addResource(new Phalcon\Assets\Resource('css', 'css/style.css'));
 	 *</code>
-	 *
-	 * @param Phalcon\Assets\Resource $resource
-	 * @return Phalcon\Assets\Manager
 	 */
 	public function addResource(<$Resource> $resource) -> <Manager>
 	{
@@ -230,11 +193,8 @@ class Manager
 
 	/**
 	 * Adds a raw inline code to the manager
-	 *
-	 * @param Phalcon\Assets\Inline code
-	 * @return Phalcon\Assets\Manager
 	 */
-	public function addInlineCode(<$Resource> code) -> <Manager>
+	public function addInlineCode(<$Inline> code) -> <Manager>
 	{
 		/**
 		 * Adds the inline code by its type
@@ -249,10 +209,6 @@ class Manager
 	 *<code>
 	 * $assets->set('js', $collection);
 	 *</code>
-	 *
-	 * @param string id
-	 * @param Phalcon\Assets\Collection collection
-	 * @return Phalcon\Assets\Manager
 	 */
 	public function set(string! id, <Collection> collection) -> <Manager>
 	{
@@ -266,9 +222,6 @@ class Manager
 	*<code>
 	* $scripts = $assets->get('js');
 	*</code>
-	*
-	* @param string id
-	* @return Phalcon\Assets\Collection
 	*/
 	public function get(string! id) -> <Collection>
 	{
@@ -283,10 +236,8 @@ class Manager
 
 	/**
 	 * Returns the CSS collection of assets
-	 *
-	 * @return Phalcon\Assets\Collection
 	 */
-	public function getCss() -> <\Phalcon\Assets\Collection>
+	public function getCss() -> <Collection>
 	{
 		var collection;
 
@@ -294,15 +245,14 @@ class Manager
 		 * Check if the collection does not exist and create an implicit collection
 		 */
 		if !fetch collection, this->_collections["css"] {
-			return new \Phalcon\Assets\Collection();
+			return new Collection();
 		}
+
 		return collection;
 	}
 
 	/**
 	 * Returns the CSS collection of assets
-	 *
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function getJs() -> <Collection>
 	{
@@ -320,9 +270,6 @@ class Manager
 
 	/**
 	 * Creates/Returns a collection of resources
-	 *
-	 * @param string name
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function collection(string name) -> <Collection>
 	{
@@ -428,7 +375,7 @@ class Manager
 			/**
 			 * Global filtered content
 			 */
-			let filteredJoinedContent = null;
+			let filteredJoinedContent = "";
 
 			/**
 			 * Check if the collection have its own target base path
@@ -474,7 +421,7 @@ class Manager
 					/**
 					 * Get the complete path
 					 */
-					let sourcePath = $resource->getRealSourcePath();
+					let sourcePath = $resource->getRealSourcePath(completeSourcePath);
 
 					/**
 					 * We need a valid source path
@@ -508,7 +455,8 @@ class Manager
 					throw new Exception("Resource '". sourcePath. "' does not have a valid target path");
 				}
 
-				if join {
+				if local {
+
 					/**
 					 * Make sure the target path is not the same source path
 					 */
@@ -607,17 +555,9 @@ class Manager
 					 */
 					if join == true {
 						if type == typeCss {
-							if filteredJoinedContent == null {
-								let filteredJoinedContent = filteredContent;
-							} else {
-								let filteredJoinedContent .= filteredContent;
-							}
+							let filteredJoinedContent .= filteredContent;
 						} else {
-							if filteredJoinedContent == null {
-								let filteredJoinedContent = filteredContent . ";";
-							} else {
-								let filteredJoinedContent .= filteredContent. ";";
-							}
+							let filteredJoinedContent .= filteredContent . ";";
 						}
 					}
 				} else {
@@ -626,11 +566,7 @@ class Manager
 					 * Update the joined filtered content
 					 */
 					if join == true {
-						if filteredJoinedContent == null {
-							let filteredJoinedContent = content;
-						} else {
-							let filteredJoinedContent .= content;
-						}
+						let filteredJoinedContent .= content;
 					} else {
 						let filteredContent = content;
 					}
@@ -891,5 +827,13 @@ class Manager
 		}
 
 		return this->outputInline(collection, "script");
+	}
+
+	/**
+	 * Returns existing collections in the manager
+	 */
+	public function getCollections() -> <Collection[]>
+	{
+		return this->_collections;
 	}
 }

@@ -20,6 +20,7 @@
 #include <Zend/zend_exceptions.h>
 #include <Zend/zend_interfaces.h>
 
+#include "kernel/globals.h"
 #include "kernel/main.h"
 #include "kernel/fcall.h"
 #include "kernel/memory.h"
@@ -28,30 +29,36 @@
 
 zend_class_entry *phalcon_di_injectionawareinterface_ce;
 zend_class_entry *phalcon_events_eventsawareinterface_ce;
-zend_class_entry *phalcon_validation_validatorinterface_ce;
 zend_class_entry *phalcon_forms_elementinterface_ce;
-zend_class_entry *phalcon_dispatcherinterface_ce;
+zend_class_entry *phalcon_validation_validatorinterface_ce;
 zend_class_entry *phalcon_mvc_model_validatorinterface_ce;
 zend_class_entry *phalcon_cache_backendinterface_ce;
 zend_class_entry *phalcon_cache_frontendinterface_ce;
 zend_class_entry *phalcon_mvc_model_metadatainterface_ce;
+zend_class_entry *phalcon_db_dialectinterface_ce;
+zend_class_entry *phalcon_dispatcherinterface_ce;
 zend_class_entry *phalcon_annotations_adapterinterface_ce;
 zend_class_entry *phalcon_db_adapterinterface_ce;
 zend_class_entry *phalcon_logger_adapterinterface_ce;
 zend_class_entry *phalcon_logger_formatterinterface_ce;
+zend_class_entry *phalcon_mvc_entityinterface_ce;
 zend_class_entry *phalcon_mvc_model_resultsetinterface_ce;
 zend_class_entry *phalcon_assets_filterinterface_ce;
+zend_class_entry *phalcon_diinterface_ce;
+zend_class_entry *phalcon_mvc_viewbaseinterface_ce;
 zend_class_entry *phalcon_paginator_adapterinterface_ce;
 zend_class_entry *phalcon_session_adapterinterface_ce;
-zend_class_entry *phalcon_db_dialectinterface_ce;
-zend_class_entry *phalcon_diinterface_ce;
+zend_class_entry *phalcon_translate_adapterinterface_ce;
+zend_class_entry *phalcon_acl_adapterinterface_ce;
 zend_class_entry *phalcon_flashinterface_ce;
 zend_class_entry *phalcon_image_adapterinterface_ce;
+zend_class_entry *phalcon_mvc_collection_behaviorinterface_ce;
 zend_class_entry *phalcon_mvc_model_behaviorinterface_ce;
 zend_class_entry *phalcon_mvc_model_metadata_strategyinterface_ce;
 zend_class_entry *phalcon_mvc_model_resultinterface_ce;
+zend_class_entry *phalcon_mvc_routerinterface_ce;
 zend_class_entry *phalcon_mvc_view_engineinterface_ce;
-zend_class_entry *phalcon_translate_adapterinterface_ce;
+zend_class_entry *phalcon_acl_roleinterface_ce;
 zend_class_entry *phalcon_annotations_readerinterface_ce;
 zend_class_entry *phalcon_cryptinterface_ce;
 zend_class_entry *phalcon_db_columninterface_ce;
@@ -68,6 +75,7 @@ zend_class_entry *phalcon_http_response_cookiesinterface_ce;
 zend_class_entry *phalcon_http_response_headersinterface_ce;
 zend_class_entry *phalcon_http_responseinterface_ce;
 zend_class_entry *phalcon_mvc_collectioninterface_ce;
+zend_class_entry *phalcon_mvc_controllerinterface_ce;
 zend_class_entry *phalcon_mvc_dispatcherinterface_ce;
 zend_class_entry *phalcon_mvc_micro_collectioninterface_ce;
 zend_class_entry *phalcon_mvc_model_criteriainterface_ce;
@@ -80,28 +88,25 @@ zend_class_entry *phalcon_mvc_model_relationinterface_ce;
 zend_class_entry *phalcon_mvc_model_transaction_managerinterface_ce;
 zend_class_entry *phalcon_mvc_model_transactioninterface_ce;
 zend_class_entry *phalcon_mvc_modelinterface_ce;
+zend_class_entry *phalcon_mvc_router_groupinterface_ce;
+zend_class_entry *phalcon_mvc_router_routeinterface_ce;
 zend_class_entry *phalcon_mvc_urlinterface_ce;
 zend_class_entry *phalcon_mvc_viewinterface_ce;
 zend_class_entry *phalcon_session_baginterface_ce;
 zend_class_entry *phalcon_validation_messageinterface_ce;
-zend_class_entry *phalcon_acl_adapterinterface_ce;
 zend_class_entry *phalcon_acl_resourceinterface_ce;
-zend_class_entry *phalcon_acl_roleinterface_ce;
 zend_class_entry *phalcon_filter_userfilterinterface_ce;
 zend_class_entry *phalcon_mvc_collection_managerinterface_ce;
-zend_class_entry *phalcon_mvc_controllerinterface_ce;
 zend_class_entry *phalcon_mvc_micro_middlewareinterface_ce;
 zend_class_entry *phalcon_mvc_moduledefinitioninterface_ce;
-zend_class_entry *phalcon_mvc_router_routeinterface_ce;
-zend_class_entry *phalcon_mvc_routerinterface_ce;
 zend_class_entry *phalcon_exception_ce;
 zend_class_entry *phalcon_validation_validator_ce;
 zend_class_entry *phalcon_di_injectable_ce;
 zend_class_entry *phalcon_forms_element_ce;
 zend_class_entry *phalcon_mvc_model_validator_ce;
 zend_class_entry *phalcon_cache_backend_ce;
-zend_class_entry *phalcon_db_adapter_ce;
 zend_class_entry *phalcon_mvc_model_metadata_ce;
+zend_class_entry *phalcon_db_adapter_ce;
 zend_class_entry *phalcon_annotations_adapter_ce;
 zend_class_entry *phalcon_config_ce;
 zend_class_entry *phalcon_db_adapter_pdo_ce;
@@ -109,22 +114,25 @@ zend_class_entry *phalcon_db_dialect_ce;
 zend_class_entry *phalcon_logger_adapter_ce;
 zend_class_entry *phalcon_logger_formatter_ce;
 zend_class_entry *phalcon_mvc_model_exception_ce;
+zend_class_entry *phalcon_paginator_adapter_ce;
 zend_class_entry *phalcon_session_adapter_ce;
+zend_class_entry *phalcon_translate_adapter_ce;
 zend_class_entry *phalcon_assets_inline_ce;
 zend_class_entry *phalcon_assets_resource_ce;
 zend_class_entry *phalcon_di_ce;
 zend_class_entry *phalcon_dispatcher_ce;
 zend_class_entry *phalcon_flash_ce;
 zend_class_entry *phalcon_image_adapter_ce;
+zend_class_entry *phalcon_mvc_collection_behavior_ce;
 zend_class_entry *phalcon_mvc_model_behavior_ce;
 zend_class_entry *phalcon_mvc_model_resultset_ce;
 zend_class_entry *phalcon_mvc_view_engine_ce;
-zend_class_entry *phalcon_translate_adapter_ce;
 zend_class_entry *phalcon_acl_adapter_ce;
 zend_class_entry *phalcon_cache_frontend_data_ce;
 zend_class_entry *phalcon_di_factorydefault_ce;
 zend_class_entry *phalcon_mvc_model_transaction_exception_ce;
 zend_class_entry *phalcon_mvc_router_ce;
+zend_class_entry *phalcon_0__closure_ce;
 zend_class_entry *phalcon_acl_adapter_memory_ce;
 zend_class_entry *phalcon_acl_ce;
 zend_class_entry *phalcon_acl_exception_ce;
@@ -258,6 +266,8 @@ zend_class_entry *phalcon_logger_item_ce;
 zend_class_entry *phalcon_logger_multiple_ce;
 zend_class_entry *phalcon_mvc_application_ce;
 zend_class_entry *phalcon_mvc_application_exception_ce;
+zend_class_entry *phalcon_mvc_collection_behavior_softdelete_ce;
+zend_class_entry *phalcon_mvc_collection_behavior_timestampable_ce;
 zend_class_entry *phalcon_mvc_collection_ce;
 zend_class_entry *phalcon_mvc_collection_document_ce;
 zend_class_entry *phalcon_mvc_collection_exception_ce;
@@ -277,6 +287,8 @@ zend_class_entry *phalcon_mvc_model_manager_ce;
 zend_class_entry *phalcon_mvc_model_message_ce;
 zend_class_entry *phalcon_mvc_model_metadata_apc_ce;
 zend_class_entry *phalcon_mvc_model_metadata_files_ce;
+zend_class_entry *phalcon_mvc_model_metadata_libmemcached_ce;
+zend_class_entry *phalcon_mvc_model_metadata_memcache_ce;
 zend_class_entry *phalcon_mvc_model_metadata_memory_ce;
 zend_class_entry *phalcon_mvc_model_metadata_session_ce;
 zend_class_entry *phalcon_mvc_model_metadata_strategy_annotations_ce;
@@ -297,6 +309,7 @@ zend_class_entry *phalcon_mvc_model_validationfailed_ce;
 zend_class_entry *phalcon_mvc_model_validator_email_ce;
 zend_class_entry *phalcon_mvc_model_validator_exclusionin_ce;
 zend_class_entry *phalcon_mvc_model_validator_inclusionin_ce;
+zend_class_entry *phalcon_mvc_model_validator_ip_ce;
 zend_class_entry *phalcon_mvc_model_validator_numericality_ce;
 zend_class_entry *phalcon_mvc_model_validator_presenceof_ce;
 zend_class_entry *phalcon_mvc_model_validator_regex_ce;
@@ -338,6 +351,7 @@ zend_class_entry *phalcon_tag_exception_ce;
 zend_class_entry *phalcon_tag_select_ce;
 zend_class_entry *phalcon_text_ce;
 zend_class_entry *phalcon_translate_adapter_csv_ce;
+zend_class_entry *phalcon_translate_adapter_gettext_ce;
 zend_class_entry *phalcon_translate_adapter_nativearray_ce;
 zend_class_entry *phalcon_translate_ce;
 zend_class_entry *phalcon_translate_exception_ce;
@@ -365,6 +379,24 @@ zend_class_entry *phalcon_version_ce;
 
 ZEND_DECLARE_MODULE_GLOBALS(phalcon)
 
+PHP_INI_BEGIN()
+	STD_PHP_INI_BOOLEAN("phalcon.db.escape_identifiers", "1", PHP_INI_ALL, OnUpdateBool, db.escape_identifiers, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.db.force_casting", "0", PHP_INI_ALL, OnUpdateBool, db.force_casting, zend_phalcon_globals, phalcon_globals)
+	
+	
+	
+	
+	STD_PHP_INI_BOOLEAN("phalcon.orm.events", "1", PHP_INI_ALL, OnUpdateBool, orm.events, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.virtual_foreign_keys", "1", PHP_INI_ALL, OnUpdateBool, orm.virtual_foreign_keys, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.column_renaming", "1", PHP_INI_ALL, OnUpdateBool, orm.column_renaming, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.not_null_validations", "1", PHP_INI_ALL, OnUpdateBool, orm.not_null_validations, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.exception_on_failed_save", "0", PHP_INI_ALL, OnUpdateBool, orm.exception_on_failed_save, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.enable_literals", "1", PHP_INI_ALL, OnUpdateBool, orm.enable_literals, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.late_state_binding", "0", PHP_INI_ALL, OnUpdateBool, orm.late_state_binding, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.cast_on_hydrate", "0", PHP_INI_ALL, OnUpdateBool, orm.cast_on_hydrate, zend_phalcon_globals, phalcon_globals)
+	STD_PHP_INI_BOOLEAN("phalcon.orm.ignore_unknown_columns", "0", PHP_INI_ALL, OnUpdateBool, orm.ignore_unknown_columns, zend_phalcon_globals, phalcon_globals)
+PHP_INI_END()
+
 static PHP_MINIT_FUNCTION(phalcon)
 {
 #if PHP_VERSION_ID < 50500
@@ -382,33 +414,39 @@ static PHP_MINIT_FUNCTION(phalcon)
 
 	setlocale(LC_ALL, "C");
 #endif
-
+	REGISTER_INI_ENTRIES();
 	ZEPHIR_INIT(Phalcon_Di_InjectionAwareInterface);
 	ZEPHIR_INIT(Phalcon_Events_EventsAwareInterface);
-	ZEPHIR_INIT(Phalcon_Validation_ValidatorInterface);
 	ZEPHIR_INIT(Phalcon_Forms_ElementInterface);
-	ZEPHIR_INIT(Phalcon_DispatcherInterface);
+	ZEPHIR_INIT(Phalcon_Validation_ValidatorInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_ValidatorInterface);
 	ZEPHIR_INIT(Phalcon_Cache_BackendInterface);
 	ZEPHIR_INIT(Phalcon_Cache_FrontendInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaDataInterface);
+	ZEPHIR_INIT(Phalcon_Db_DialectInterface);
+	ZEPHIR_INIT(Phalcon_DispatcherInterface);
 	ZEPHIR_INIT(Phalcon_Annotations_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_Db_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_Logger_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_Logger_FormatterInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_EntityInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_ResultsetInterface);
 	ZEPHIR_INIT(Phalcon_Assets_FilterInterface);
+	ZEPHIR_INIT(Phalcon_DiInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_ViewBaseInterface);
 	ZEPHIR_INIT(Phalcon_Paginator_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_Session_AdapterInterface);
-	ZEPHIR_INIT(Phalcon_Db_DialectInterface);
-	ZEPHIR_INIT(Phalcon_DiInterface);
+	ZEPHIR_INIT(Phalcon_Translate_AdapterInterface);
+	ZEPHIR_INIT(Phalcon_Acl_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_FlashInterface);
 	ZEPHIR_INIT(Phalcon_Image_AdapterInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_Collection_BehaviorInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_BehaviorInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_StrategyInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_ResultInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_RouterInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_View_EngineInterface);
-	ZEPHIR_INIT(Phalcon_Translate_AdapterInterface);
+	ZEPHIR_INIT(Phalcon_Acl_RoleInterface);
 	ZEPHIR_INIT(Phalcon_Annotations_ReaderInterface);
 	ZEPHIR_INIT(Phalcon_CryptInterface);
 	ZEPHIR_INIT(Phalcon_Db_ColumnInterface);
@@ -425,6 +463,7 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Http_Response_CookiesInterface);
 	ZEPHIR_INIT(Phalcon_Http_Response_HeadersInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_CollectionInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_ControllerInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_DispatcherInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Micro_CollectionInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_ModelInterface);
@@ -437,28 +476,25 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Mvc_Model_RelationInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_TransactionInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Transaction_ManagerInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_Router_GroupInterface);
+	ZEPHIR_INIT(Phalcon_Mvc_Router_RouteInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_UrlInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_ViewInterface);
 	ZEPHIR_INIT(Phalcon_Session_BagInterface);
 	ZEPHIR_INIT(Phalcon_Validation_MessageInterface);
-	ZEPHIR_INIT(Phalcon_Acl_AdapterInterface);
 	ZEPHIR_INIT(Phalcon_Acl_ResourceInterface);
-	ZEPHIR_INIT(Phalcon_Acl_RoleInterface);
 	ZEPHIR_INIT(Phalcon_Filter_UserFilterInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Collection_ManagerInterface);
-	ZEPHIR_INIT(Phalcon_Mvc_ControllerInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_Micro_MiddlewareInterface);
 	ZEPHIR_INIT(Phalcon_Mvc_ModuleDefinitionInterface);
-	ZEPHIR_INIT(Phalcon_Mvc_RouterInterface);
-	ZEPHIR_INIT(Phalcon_Mvc_Router_RouteInterface);
 	ZEPHIR_INIT(Phalcon_Exception);
 	ZEPHIR_INIT(Phalcon_Validation_Validator);
 	ZEPHIR_INIT(Phalcon_Di_Injectable);
 	ZEPHIR_INIT(Phalcon_Forms_Element);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator);
 	ZEPHIR_INIT(Phalcon_Cache_Backend);
-	ZEPHIR_INIT(Phalcon_Db_Adapter);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData);
+	ZEPHIR_INIT(Phalcon_Db_Adapter);
 	ZEPHIR_INIT(Phalcon_Annotations_Adapter);
 	ZEPHIR_INIT(Phalcon_Config);
 	ZEPHIR_INIT(Phalcon_Db_Adapter_Pdo);
@@ -466,17 +502,19 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Logger_Adapter);
 	ZEPHIR_INIT(Phalcon_Logger_Formatter);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Exception);
+	ZEPHIR_INIT(Phalcon_Paginator_Adapter);
 	ZEPHIR_INIT(Phalcon_Session_Adapter);
+	ZEPHIR_INIT(Phalcon_Translate_Adapter);
 	ZEPHIR_INIT(Phalcon_Assets_Inline);
 	ZEPHIR_INIT(Phalcon_Assets_Resource);
 	ZEPHIR_INIT(Phalcon_Di);
 	ZEPHIR_INIT(Phalcon_Dispatcher);
 	ZEPHIR_INIT(Phalcon_Flash);
 	ZEPHIR_INIT(Phalcon_Image_Adapter);
+	ZEPHIR_INIT(Phalcon_Mvc_Collection_Behavior);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Behavior);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Resultset);
 	ZEPHIR_INIT(Phalcon_Mvc_View_Engine);
-	ZEPHIR_INIT(Phalcon_Translate_Adapter);
 	ZEPHIR_INIT(Phalcon_Acl_Adapter);
 	ZEPHIR_INIT(Phalcon_Cache_Frontend_Data);
 	ZEPHIR_INIT(Phalcon_Di_FactoryDefault);
@@ -616,6 +654,8 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Mvc_Application);
 	ZEPHIR_INIT(Phalcon_Mvc_Application_Exception);
 	ZEPHIR_INIT(Phalcon_Mvc_Collection);
+	ZEPHIR_INIT(Phalcon_Mvc_Collection_Behavior_SoftDelete);
+	ZEPHIR_INIT(Phalcon_Mvc_Collection_Behavior_Timestampable);
 	ZEPHIR_INIT(Phalcon_Mvc_Collection_Document);
 	ZEPHIR_INIT(Phalcon_Mvc_Collection_Exception);
 	ZEPHIR_INIT(Phalcon_Mvc_Collection_Manager);
@@ -634,6 +674,8 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Message);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Apc);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Files);
+	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Libmemcached);
+	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Memcache);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Memory);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Session);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_MetaData_Strategy_Annotations);
@@ -654,6 +696,7 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Email);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Exclusionin);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Inclusionin);
+	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Ip);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Numericality);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_PresenceOf);
 	ZEPHIR_INIT(Phalcon_Mvc_Model_Validator_Regex);
@@ -696,6 +739,7 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Text);
 	ZEPHIR_INIT(Phalcon_Translate);
 	ZEPHIR_INIT(Phalcon_Translate_Adapter_Csv);
+	ZEPHIR_INIT(Phalcon_Translate_Adapter_Gettext);
 	ZEPHIR_INIT(Phalcon_Translate_Adapter_NativeArray);
 	ZEPHIR_INIT(Phalcon_Translate_Exception);
 	ZEPHIR_INIT(Phalcon_Validation);
@@ -719,6 +763,7 @@ static PHP_MINIT_FUNCTION(phalcon)
 	ZEPHIR_INIT(Phalcon_Validation_Validator_Uniqueness);
 	ZEPHIR_INIT(Phalcon_Validation_Validator_Url);
 	ZEPHIR_INIT(Phalcon_Version);
+	ZEPHIR_INIT(phalcon_0__closure);
 
 #if PHP_VERSION_ID < 50500
 	setlocale(LC_ALL, old_lc_all);
@@ -732,7 +777,7 @@ static PHP_MSHUTDOWN_FUNCTION(phalcon)
 {
 
 	zephir_deinitialize_memory(TSRMLS_C);
-
+	UNREGISTER_INI_ENTRIES();
 	return SUCCESS;
 }
 #endif
@@ -740,45 +785,53 @@ static PHP_MSHUTDOWN_FUNCTION(phalcon)
 /**
  * Initialize globals on each request or each thread started
  */
-static void php_zephir_init_globals(zend_phalcon_globals *zephir_globals TSRMLS_DC)
+static void php_zephir_init_globals(zend_phalcon_globals *phalcon_globals TSRMLS_DC)
 {
-	zephir_globals->initialized = 0;
+	phalcon_globals->initialized = 0;
 
 	/* Memory options */
-	zephir_globals->active_memory = NULL;
+	phalcon_globals->active_memory = NULL;
 
 	/* Virtual Symbol Tables */
-	zephir_globals->active_symbol_table = NULL;
+	phalcon_globals->active_symbol_table = NULL;
 
 	/* Cache Enabled */
-	zephir_globals->cache_enabled = 1;
+	phalcon_globals->cache_enabled = 1;
 
 	/* Recursive Lock */
-	zephir_globals->recursive_lock = 0;
+	phalcon_globals->recursive_lock = 0;
 
-	zephir_globals->db.escape_identifiers = 1;
-	zephir_globals->orm.parser_cache = NULL;
-	zephir_globals->orm.ast_cache = NULL;
-	zephir_globals->orm.cache_level = 3;
-	zephir_globals->orm.unique_cache_id = 3;
-	zephir_globals->orm.events = 1;
-	zephir_globals->orm.virtual_foreign_keys = 1;
-	zephir_globals->orm.column_renaming = 1;
-	zephir_globals->orm.not_null_validations = 1;
-	zephir_globals->orm.exception_on_failed_save = 0;
-	zephir_globals->orm.enable_literals = 1;
+	/* Static cache */
+	memset(phalcon_globals->scache, '\0', sizeof(zephir_fcall_cache_entry*) * ZEPHIR_MAX_CACHE_SLOTS);
+
+
+
+	phalcon_globals->orm.parser_cache = NULL;
+	phalcon_globals->orm.ast_cache = NULL;
+	phalcon_globals->orm.cache_level = 3;
+	phalcon_globals->orm.unique_cache_id = 3;
+
+
+
+
+
+
+
+
+
 
 }
 
 static PHP_RINIT_FUNCTION(phalcon)
 {
 
-	zend_phalcon_globals *zephir_globals_ptr = ZEPHIR_VGLOBAL;
+	zend_phalcon_globals *phalcon_globals_ptr = ZEPHIR_VGLOBAL;
 
-	php_zephir_init_globals(zephir_globals_ptr TSRMLS_CC);
+	php_zephir_init_globals(phalcon_globals_ptr TSRMLS_CC);
 	//zephir_init_interned_strings(TSRMLS_C);
 
-	zephir_initialize_memory(zephir_globals_ptr TSRMLS_CC);
+	zephir_initialize_memory(phalcon_globals_ptr TSRMLS_CC);
+
 
 	return SUCCESS;
 }
@@ -802,10 +855,11 @@ static PHP_MINFO_FUNCTION(phalcon)
 	php_info_print_table_header(2, PHP_PHALCON_NAME, "enabled");
 	php_info_print_table_row(2, "Author", PHP_PHALCON_AUTHOR);
 	php_info_print_table_row(2, "Version", PHP_PHALCON_VERSION);
+	php_info_print_table_row(2, "Build Date", __DATE__ " " __TIME__ );
 	php_info_print_table_row(2, "Powered by Zephir", "Version " PHP_PHALCON_ZEPVERSION);
 	php_info_print_table_end();
 
-
+	DISPLAY_INI_ENTRIES();
 }
 
 static PHP_GINIT_FUNCTION(phalcon)
@@ -818,12 +872,18 @@ static PHP_GSHUTDOWN_FUNCTION(phalcon)
 
 }
 
+
+zend_function_entry php_phalcon_functions[] = {
+ZEND_FE_END
+
+};
+
 zend_module_entry phalcon_module_entry = {
 	STANDARD_MODULE_HEADER_EX,
 	NULL,
 	NULL,
 	PHP_PHALCON_EXTNAME,
-	NULL,
+	php_phalcon_functions,
 	PHP_MINIT(phalcon),
 #ifndef ZEPHIR_RELEASE
 	PHP_MSHUTDOWN(phalcon),

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -23,6 +23,7 @@ use Phalcon\Logger\Adapter;
 use Phalcon\Logger\AdapterInterface;
 use Phalcon\Logger\Exception;
 use Phalcon\Logger\FormatterInterface;
+use Phalcon\Logger\Formatter\Line as LineFormatter;
 
 /**
  * Phalcon\Logger\Adapter\File
@@ -65,7 +66,7 @@ class File extends Adapter implements AdapterInterface
 	 */
 	public function __construct(string! name, options = null)
 	{
-		var mode, handler;
+		var mode = null, handler;
 
 		if typeof options === "array" {
 			if fetch mode, options["mode"] {
@@ -73,7 +74,9 @@ class File extends Adapter implements AdapterInterface
 					throw new Exception("Logger must be opened in append or write mode");
 				}
 			}
-		} else {
+		}
+
+		if mode === null {
 			let mode = "ab";
 		}
 
@@ -92,13 +95,11 @@ class File extends Adapter implements AdapterInterface
 
 	/**
 	 * Returns the internal formatter
-	 *
-	 * @return Phalcon\Logger\FormatterInterface
 	 */
 	public function getFormatter() -> <FormatterInterface>
 	{
 		if typeof this->_formatter !== "object" {
-			let this->_formatter = new \Phalcon\Logger\Formatter\Line();
+			let this->_formatter = new LineFormatter();
 		}
 
 		return this->_formatter;
@@ -106,11 +107,6 @@ class File extends Adapter implements AdapterInterface
 
 	/**
 	 * Writes the log to the file itself
-	 *
-	 * @param string message
-	 * @param int type
-	 * @param int time
-	  * @param array $context
 	 */
 	public function logInternal(string message, int type, int time, array context) -> void
 	{
@@ -126,8 +122,6 @@ class File extends Adapter implements AdapterInterface
 
 	/**
  	 * Closes the logger
- 	 *
- 	 * @return boolean
  	 */
 	public function close() -> boolean
 	{
@@ -136,7 +130,6 @@ class File extends Adapter implements AdapterInterface
 
 	/**
 	 * Opens the internal file handler after unserialization
-	 *
 	 */
 	public function __wakeup()
 	{

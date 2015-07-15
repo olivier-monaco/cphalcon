@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,13 +20,16 @@
 
 namespace Phalcon\Db\Adapter\Pdo;
 
+use Phalcon\Db;
 use Phalcon\Db\Column;
 use Phalcon\Db\Exception;
+use Phalcon\Db\RawValue;
 use Phalcon\Db\Reference;
 use Phalcon\Db\ReferenceInterface;
 use Phalcon\Db\Index;
 use Phalcon\Db\IndexInterface;
 use Phalcon\Db\AdapterInterface;
+use Phalcon\Db\Adapter\Pdo as PdoAdapter;
 
 /**
  * Phalcon\Db\Adapter\Pdo\Sqlite
@@ -39,10 +42,9 @@ use Phalcon\Db\AdapterInterface;
  * );
  *
  * $connection = new \Phalcon\Db\Adapter\Pdo\Sqlite($config);
- *
  * </code>
  */
-class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
+class Sqlite extends PdoAdapter implements AdapterInterface
 {
 
 	protected _type = "sqlite";
@@ -64,11 +66,9 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 			let descriptor = this->_descriptor;
 		}
 
-		if !isset descriptor["dbname"] {
+		if !fetch dbname, descriptor["dbname"] {
 			throw new Exception("dbname must be specified");
 		}
-
-		fetch dbname, descriptor["dbname"];
 
 		let descriptor["dsn"] = dbname;
 
@@ -81,12 +81,8 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * <code>
 	 * print_r($connection->describeColumns("posts"));
 	 * </code>
-	 *
-	 * @param string table
-	 * @param string schema
-	 * @return Phalcon\Db\Column[]
 	 */
-	public function describeColumns(string table, string schema = null)
+	public function describeColumns(string table, string schema = null) -> <Column[]>
 	{
 		var columns, columnType, field, definition,
 			oldColumn, sizePattern, matches, matchOne, matchTwo, columnName;
@@ -99,7 +95,7 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 		/**
 		 * We're using FETCH_NUM to fetch the columns
 		 */
-		for field in this->fetchAll(this->_dialect->describeColumns(table, schema), \Phalcon\Db::FETCH_NUM) {
+		for field in this->fetchAll(this->_dialect->describeColumns(table, schema), Db::FETCH_NUM) {
 
 			/**
 			 * By default the bind types is two
@@ -124,7 +120,17 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				}
 
 				/**
-				 * Smallint/Bigint/Integers/Int are int
+				 * Bigint are int
+				 */
+				if memstr(columnType, "bigint") {
+					let definition["type"] = Column::TYPE_BIGINTEGER,
+						definition["isNumeric"] = true,
+						definition["bindType"] = Column::BIND_PARAM_INT;
+					break;
+				}
+
+				/**
+				 * Smallint/Integers/Int are int
 				 */
 				if memstr(columnType, "int") || memstr(columnType, "INT") {
 
@@ -292,13 +298,13 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * @param	string schema
 	 * @return	Phalcon\Db\IndexInterface[]
 	 */
-	public function describeIndexes(table, schema = null) -> <IndexInterface>
+	public function describeIndexes(table, schema = null) -> <IndexInterface[]>
 	{
 		var indexes, index, keyName, indexObjects, name, indexColumns, columns,
 			describe_index;
 
 		let indexes = [];
-		for index in this->fetchAll(this->_dialect->describeIndexes(table, schema), \Phalcon\Db::FETCH_NUM) {
+		for index in this->fetchAll(this->_dialect->describeIndexes(table, schema), Db::FETCH_NUM) {
 
 			let keyName = index[1];
 			if !isset indexes[keyName] {
@@ -307,7 +313,7 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 				let columns = indexes[keyName];
 			}
 
-			for describe_index in this->fetchAll(this->_dialect->describeIndex(keyName), \Phalcon\Db::FETCH_NUM) {
+			for describe_index in this->fetchAll(this->_dialect->describeIndex(keyName), Db::FETCH_NUM) {
 				let columns[] = describe_index[2];
 			}
 
@@ -329,7 +335,7 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 	 * @param	string schema
 	 * @return	Phalcon\Db\ReferenceInterface[]
 	 */
-	public function describeReferences(table, schema=null) -> <ReferenceInterface[]>
+	public function describeReferences(table, schema = null) -> <ReferenceInterface[]>
 	{
 		var references, reference,
 			arrayReference, constraintName, referenceObjects, name,
@@ -338,7 +344,7 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 
 		let references = [];
 
-		for number, reference in this->fetchAll(this->_dialect->describeReferences(table, schema), \Phalcon\Db::FETCH_NUM) {
+		for number, reference in this->fetchAll(this->_dialect->describeReferences(table, schema), Db::FETCH_NUM) {
 
 			let constraintName = "foreign_key_" . number;
 			if !isset references[constraintName] {
@@ -379,11 +385,26 @@ class Sqlite extends \Phalcon\Db\Adapter\Pdo implements AdapterInterface
 
 	/**
 	 * Check whether the database system requires an explicit value for identity columns
-	 *
-	 * @return boolean
 	 */
 	public function useExplicitIdValue() -> boolean
 	{
 		return true;
+	}
+
+	/**
+	 * Returns the default value to make the RBDM use the default value declared in the table definition
+	 *
+	 *<code>
+	 * //Inserting a new robot with a valid default value for the column 'year'
+	 * $success = $connection->insert(
+	 *	 "robots",
+	 *	 array("Astro Boy", $connection->getDefaultValue()),
+	 *	 array("name", "year")
+	 * );
+	 *</code>
+	 */
+	public function getDefaultValue() -> <RawValue>
+	{
+		return new RawValue("NULL");
 	}
 }

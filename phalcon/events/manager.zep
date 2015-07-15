@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,6 +20,7 @@
 namespace Phalcon\Events;
 
 use Phalcon\Events\Event;
+use SplPriorityQueue as PriorityQueue;
 
 /**
  * Phalcon\Events\Manager
@@ -60,10 +61,10 @@ class Manager implements ManagerInterface
 			if this->_enablePriorities {
 
 				// Create a SplPriorityQueue to store the events with priorities
-				let priorityQueue = new \SplPriorityQueue();
+				let priorityQueue = new PriorityQueue();
 
 				// Extract only the Data // Set extraction flags
-				priorityQueue->setExtractFlags(\SplPriorityQueue::EXTR_DATA);
+				priorityQueue->setExtractFlags(PriorityQueue::EXTR_DATA);
 
 				// Append the events to the queue
 				let this->_events[eventType] = priorityQueue;
@@ -103,10 +104,10 @@ class Manager implements ManagerInterface
 			if typeof priorityQueue == "object" {
 
 				// SplPriorityQueue hasn't method for element deletion, so we need to rebuild queue
-				let newPriorityQueue = new \SplPriorityQueue();
+				let newPriorityQueue = new PriorityQueue();
 				newPriorityQueue->setExtractFlags(\SplPriorityQueue::EXTR_DATA);
 
-				priorityQueue->setExtractFlags(\SplPriorityQueue::EXTR_BOTH);
+				priorityQueue->setExtractFlags(PriorityQueue::EXTR_BOTH);
 				priorityQueue->top();
 
 				while priorityQueue->valid() {
@@ -130,8 +131,6 @@ class Manager implements ManagerInterface
 
 	/**
 	 * Set if priorities are enabled in the EventsManager
-	 *
-	 * @param boolean enablePriorities
 	 */
 	public function enablePriorities(boolean enablePriorities)
 	{
@@ -140,8 +139,6 @@ class Manager implements ManagerInterface
 
 	/**
 	 * Returns if priorities are enabled
-	 *
-	 * @return boolean
 	 */
 	public function arePrioritiesEnabled() -> boolean
 	{
@@ -151,8 +148,6 @@ class Manager implements ManagerInterface
 	/**
 	 * Tells the event manager if it needs to collect all the responses returned by every
 	 * registered listener in a single fire
-	 *
-	 * @param boolean collect
 	 */
 	public function collectResponses(boolean collect)
 	{
@@ -180,10 +175,8 @@ class Manager implements ManagerInterface
 
 	/**
 	 * Removes all events from the EventsManager
-	 *
-	 * @param string type
 	 */
-	public function detachAll(string! type=null)
+	public function detachAll(string! type = null)
 	{
 		if type === null {
 			let this->_events = null;
@@ -196,10 +189,8 @@ class Manager implements ManagerInterface
 
 	/**
 	 * Alias of detachAll
-	 *
-	 * @param string type
 	 */
-	public function dettachAll(string! type=null)
+	public function dettachAll(string! type = null)
 	{
 		this->detachAll(type);
 	}
@@ -211,7 +202,7 @@ class Manager implements ManagerInterface
 	 * @param Phalcon\Events\Event event
 	 * @return mixed
 	 */
-	public final function fireQueue(var queue, var event)
+	public final function fireQueue(var queue, <Event> event)
 	{
 		var status, arguments, eventName, data, iterator, source, handler;
 		boolean collect, cancelable;
@@ -224,10 +215,6 @@ class Manager implements ManagerInterface
 			} else {
 				throw new Exception("The queue is not valid");
 			}
-		}
-
-		if typeof event != "object" || !(event instanceof Event) {
-			throw new Exception("The event is not valid");
 		}
 
 		let status = null, arguments = null;
@@ -311,9 +298,7 @@ class Manager implements ManagerInterface
 									break;
 								}
 							}
-
 						}
-
 					}
 				}
 
@@ -394,7 +379,7 @@ class Manager implements ManagerInterface
 	 * @param boolean cancelable
 	 * @return mixed
 	 */
-	public function fire(string! eventType, source, data=null, boolean cancelable=true)
+	public function fire(string! eventType, source, data = null, boolean cancelable = true)
 	{
 		var events, eventParts, type, eventName, event, status, fireEvents;
 
@@ -456,9 +441,6 @@ class Manager implements ManagerInterface
 
 	/**
 	 * Check whether certain type of event has listeners
-	 *
-	 * @param string type
-	 * @return boolean
 	 */
 	public function hasListeners(string! type) -> boolean
 	{
@@ -482,5 +464,4 @@ class Manager implements ManagerInterface
 		}
 		return [];
 	}
-
 }

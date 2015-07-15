@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,10 +19,10 @@
 
 namespace Phalcon\Mvc\Model\Validator;
 
+use Phalcon\Mvc\EntityInterface;
 use Phalcon\Mvc\Model\Exception;
 use Phalcon\Mvc\Model\ValidatorInterface;
 use Phalcon\Mvc\Model\Validator;
-use Phalcon\Mvc\ModelInterface;
 
 /**
  * Phalcon\Mvc\Model\Validator\Url
@@ -37,32 +37,28 @@ use Phalcon\Mvc\ModelInterface;
  *
  *  public function validation()
  *  {
- *      this->validate(new UrlValidator(array(
+ *      $this->validate(new UrlValidator(array(
  *          'field' => 'source_url'
  *      )));
- *      if (this->validationHasFailed() == true) {
+ *      if ($this->validationHasFailed() == true) {
  *          return false;
  *      }
  *  }
  *
  *}
  *</code>
- *
  */
 class Url extends Validator implements ValidatorInterface
 {
 	/**
 	 * Executes the validator
-	 *
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @return boolean
 	 */
-	public function validate(<ModelInterface> record) -> boolean
+	public function validate(<EntityInterface> record) -> boolean
 	{
 		var field, value, message;
 
 		let field = this->getOption("field");
-		if typeof field == "string" {
+		if typeof field != "string" {
 			throw new Exception("Field name must be a string");
 		}
 

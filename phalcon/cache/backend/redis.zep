@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,7 +19,10 @@
 
 namespace Phalcon\Cache\Backend;
 
+use Phalcon\Cache\Backend;
 use Phalcon\Cache\Exception;
+use Phalcon\Cache\BackendInterface;
+use Phalcon\Cache\FrontendInterface;
 
 /**
  * Phalcon\Cache\Backend\Redis
@@ -51,7 +54,7 @@ use Phalcon\Cache\Exception;
  *
  *</code>
  */
-class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInterface
+class Redis extends Backend implements BackendInterface
 {
 
 	protected _redis = null;
@@ -62,7 +65,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param	Phalcon\Cache\FrontendInterface frontend
 	 * @param	array options
 	 */
-	public function __construct(<\Phalcon\Cache\FrontendInterface> frontend, options=null)
+	public function __construct(<FrontendInterface> frontend, options = null)
 	{
 		if typeof options != "array" {
 			let options = [];
@@ -74,6 +77,10 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 
 		if !isset options["port"] {
 			let options["port"] = 6379;
+		}
+
+		if !isset options["index"] {
+			let options["index"] = 0;
 		}
 
 		if !isset options["persistent"] {
@@ -88,11 +95,11 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	}
 
 	/**
-	* Create internal connection to redis
-	*/
+	 * Create internal connection to redis
+	 */
 	public function _connect()
 	{
-		var options, redis, persistent, success, host, port, auth;
+		var options, redis, persistent, success, host, port, auth, index;
 
 		let options = this->_options;
 		let redis = new \Redis();
@@ -108,14 +115,22 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 		}
 
 		if !success {
-			throw new Exception("Cannot connect to Redisd server");
+			throw new Exception("Could not connect to the Redisd server ".host.":".port);
 		}
 
 		if fetch auth, options["auth"] {
 			let success = redis->auth(auth);
 
 			if !success {
-				throw new Exception("Redisd server is authentication failed");
+				throw new Exception("Failed to authenticate with the Redisd server");
+			}
+		}
+
+		if fetch index, options["index"] {
+			let success = redis->select(index);
+
+			if !success {
+				throw new Exception("Redisd server selected database failed");
 			}
 		}
 
@@ -129,7 +144,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param   long lifetime
 	 * @return  mixed
 	 */
-	public function get(keyName, lifetime=null)
+	public function get(keyName, lifetime = null)
 	{
 		var redis, frontend, prefix, lastKey, cachedContent;
 
@@ -164,10 +179,10 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param long lifetime
 	 * @param boolean stopBuffer
 	 */
-	public function save(keyName=null, content=null, lifetime=null, stopBuffer=true)
+	public function save(keyName = null, content = null, lifetime = null, boolean stopBuffer = true)
 	{
-		var prefixedKey, lastKey, prefix, frontend, redis, cachedContent, preparedContent, tmp, tt1, success, options,
-			specialKey, isBuffering;
+		var prefixedKey, lastKey, prefix, frontend, redis, cachedContent, preparedContent,
+			tmp, tt1, success, options, specialKey, isBuffering;
 
 		if !keyName {
 			let lastKey = this->_lastKey;
@@ -179,7 +194,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 		}
 
 		if !lastKey {
-			throw new Exception("Cache must be started first");
+			throw new Exception("The cache must be started first");
 		}
 
 		let frontend = this->_frontend;
@@ -225,7 +240,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 		}
 
 		if !success {
-			throw new Exception("Failed storing data in redis");
+			throw new Exception("Failed storing the data in redis");
 		}
 
 		redis->settimeout(lastKey, tt1);
@@ -242,11 +257,11 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 
 		let isBuffering = frontend->isBuffering();
 
-		if !stopBuffer {
+		if stopBuffer === true {
 			frontend->stop();
 		}
 
-		if isBuffering == true {
+		if isBuffering === true {
 			echo cachedContent;
 		}
 
@@ -285,7 +300,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 		/**
 		* Delete the key from redis
 		*/
-		redis->delete(lastKey);
+		return redis->delete(lastKey);
 	}
 
 	/**
@@ -294,9 +309,9 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param string prefix
 	 * @return array
 	 */
-	public function queryKeys(prefix=null)
+	public function queryKeys(prefix = null)
 	{
-		var redis, options, keys, specialKey, key;
+		var redis, options, keys, specialKey, key, value;
 
 		let redis = this->_redis;
 
@@ -318,8 +333,8 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 		*/
 		let keys = redis->sMembers(specialKey);
 		if typeof keys == "array" {
-			for key in keys {
-				if prefix && !starts_with(key, prefix) {
+			for key, value in keys {
+				if prefix && !starts_with(value, prefix) {
 					unset(keys[key]);
 				}
 			}
@@ -335,7 +350,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param   long lifetime
 	 * @return boolean
 	 */
-	public function exists(keyName=null, lifetime=null) -> boolean
+	public function exists(keyName = null, lifetime = null) -> boolean
 	{
 		var lastKey, redis, prefix;
 
@@ -369,7 +384,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param  long lifetime
 	 * @return long
 	 */
-	public function increment(keyName=null, value=null)
+	public function increment(keyName = null, value = null)
 	{
 		var redis, prefix, lastKey;
 
@@ -402,7 +417,7 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 	 * @param  long value
 	 * @return long
 	 */
-	public function decrement(keyName=null, value=null)
+	public function decrement(keyName = null, value = null)
 	{
 		var redis, prefix, lastKey;
 
@@ -430,10 +445,8 @@ class Redis extends \Phalcon\Cache\Backend implements \Phalcon\Cache\BackendInte
 
 	/**
 	 * Immediately invalidates all existing items.
-	 *
-	 * @return boolean
 	 */
-	public function flush()
+	public function flush() -> boolean
 	{
 		var options, specialKey, redis, keys, key, lastKey;
 

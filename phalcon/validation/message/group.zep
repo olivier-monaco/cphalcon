@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -123,8 +123,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 	 *<code>
 	 * $messages->appendMessage(new \Phalcon\Validation\Message('This is a message'));
 	 *</code>
-	 *
-	 * @param Phalcon\Validation\MessageInterface message
 	 */
 	public function appendMessage(<MessageInterface> message)
 	{
@@ -199,7 +197,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 					}
 				}
 			}
-
 		}
 
 		return filtered;
@@ -207,8 +204,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 
 	/**
 	 * Returns the number of messages in the list
-	 *
-	 * @return int
 	 */
 	public function count() -> int
 	{
@@ -239,8 +234,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 
 	/**
 	 * Returns the current position/key in the iterator
-	 *
-	 * @return int
 	 */
 	public function key() -> int
 	{
@@ -249,7 +242,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 
 	/**
 	 * Moves the internal iteration pointer to the next position
-	 *
 	 */
 	public function next() -> void
 	{
@@ -258,8 +250,6 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 
 	/**
 	 * Check if the current message in the iterator is valid
-	 *
-	 * @return boolean
 	 */
 	public function valid() -> boolean
 	{
@@ -276,5 +266,4 @@ class Group implements \Countable, \ArrayAccess, \Iterator
 	{
 		return new self(group["_messages"]);
 	}
-
 }

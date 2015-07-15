@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -24,16 +24,16 @@ namespace Phalcon\Debug;
  *
  * Dumps information about a variable(s)
  *
- *<code>
- *	$foo = 123;
- *	echo (new \Phalcon\Debug\Dump())->var($foo, "foo");
+ * <code>
+ *    $foo = 123;
+ *    echo (new \Phalcon\Debug\Dump())->variable($foo, "foo");
  *</code>
  *
- *<code>
- *	$foo = "string";
- *	$bar = ["key" => "value"];
- *	$baz = new stdClass();
- *	echo (new \Phalcon\Debug\Dump())->vars($foo, $bar, $baz);
+ * <code>
+ *    $foo = "string";
+ *    $bar = ["key" => "value"];
+ *    $baz = new stdClass();
+ *    echo (new \Phalcon\Debug\Dump())->variables($foo, $bar, $baz);
  *</code>
  */
 class Dump
@@ -48,7 +48,6 @@ class Dump
 	/**
 	 * Phalcon\Debug\Dump constructor
 	 *
-	 * @param array styles
 	 * @param boolean detailed debug object's private and protected properties
 	 */
 	public function __construct(array styles = null, boolean detailed = false)
@@ -63,22 +62,18 @@ class Dump
 
 
 	/**
-	 * Alias of vars() method
+	 * Alias of variables() method
 	 *
 	 * @param mixed variable
 	 * @param ...
-	 * @return string
 	 */
 	public function all() -> string
 	{
-		return call_user_func_array([this, "vars"], func_get_args());
+		return call_user_func_array([this, "variables"], func_get_args());
 	}
 
 	/**
 	 * Get style for type
-	 *
-	 * @param string type
-	 * @return string
 	 */
 	protected function getStyle(string! type) -> string
 	{
@@ -93,9 +88,6 @@ class Dump
 
 	/**
 	 * Set styles for vars type
-	 *
-	 * @param array styles
-	 * @return array
 	 */
 	public function setStyles(var styles = null) -> array
 	{
@@ -127,26 +119,17 @@ class Dump
 	}
 
 	/**
-	 * Alias of var() method
-	 *
-	 * @param mixed variable
-	 * @param string name
-	 * @return string
+	 * Alias of variable() method
 	 */
-	public function one(variable, string name = null) -> string
+	public function one(var variable, string name = null) -> string
 	{
-		return this->$var(variable, name);
+		return this->variable(variable, name);
 	}
 
 	/**
 	 * Prepare an HTML string of information about a single variable.
-	 *
-	 * @param mixed variable
-	 * @param string name
-	 * @param intiger tab
-	 * @return  string
 	 */
-	protected function output(variable, name = null, tab = 1) -> string
+	protected function output(var variable, string name = null, int tab = 1) -> string
 	{
 		var key, value, output, space, type, attr;
 		let space = "  ",
@@ -187,11 +170,13 @@ class Dump
 				}
 			} else {
 				do {
+
 					let attr = each(variable);
 
 					if !attr {
 						continue;
 					}
+
 					let key = attr["key"],
 						value = attr["value"];
 
@@ -202,21 +187,24 @@ class Dump
 						type = "public";
 
 					if isset key[1] {
+
 						let type = "private";
 
 						if key[1] == "*" {
 							let type = "protected";
 						}
 					}
+
 					let output .= str_repeat(space, tab) . strtr("-><span style=':style'>:key</span> (<span style=':style'>:type</span>) = ", [":style": this->getStyle("obj"), ":key": end(key), ":type": type]);
 					let output .= this->output(value, "", tab + 1) . "\n";
+
 				} while attr;
 			}
 
 			let attr = get_class_methods(variable);
 			let output .= str_repeat(space, tab) . strtr(":class <b style=':style'>methods</b>: (<span style=':style'>:count</span>) (\n", [":style": this->getStyle("obj"), ":class": get_class(variable), ":count": count(attr)]);
 
-			if (in_array(get_class(variable), this->_methods)) {
+			if in_array(get_class(variable), this->_methods) {
 				let output .= str_repeat(space, tab) . "[already listed]\n";
 			} else {
 				for value in attr {
@@ -230,11 +218,12 @@ class Dump
 				}
 				let output .= str_repeat(space, tab) . ")\n";
 			}
+
 			return output . str_repeat(space, tab - 1) . ")";
 		}
 
 		if is_int(variable) {
-			return strtr("<b style=':style'>Intiger</b> (<span style=':style'>:var</span>)", [":style": this->getStyle("int"), ":var": variable]);
+			return strtr("<b style=':style'>Integer</b> (<span style=':style'>:var</span>)", [":style": this->getStyle("int"), ":var": variable]);
 		}
 
 		if is_float(variable) {
@@ -256,21 +245,18 @@ class Dump
 		if is_null(variable) {
 			return strtr("<b style=':style'>NULL</b>", [":style": this->getStyle("null")]);
 		}
+
 		return strtr("(<span style=':style'>:var</span>)", [":style": this->getStyle("other"), ":var": variable]);
 	}
 
 	/**
 	 * Returns an HTML string of information about a single variable.
 	 *
-	 *<code>
-	 *	echo (new \Phalcon\Debug\Dump())->var($foo, "foo");
-	 *</code>
-	 *
-	 * @param mixed variable
-	 * @param string name
-	 * @return string
+	 * <code>
+	 *    echo (new \Phalcon\Debug\Dump())->variable($foo, "foo");
+	 * </code>
 	 */
-	public function $var(variable, string name = null) -> string
+	public function variable(var variable, string name = null) -> string
 	{
 		return strtr("<pre style=':style'>:output</pre>", [
 			":style": this->getStyle("pre"),
@@ -282,18 +268,17 @@ class Dump
 	 * Returns an HTML string of debugging information about any number of
 	 * variables, each wrapped in a "pre" tag.
 	 *
-	 *<code>
-	 *	$foo = "string";
-	 *	$bar = ["key" => "value"];
-	 *	$baz = new stdClass();
-	 *	echo (new \Phalcon\Debug\Dump())->vars($foo, $bar, $baz);
+	 * <code>
+	 *    $foo = "string";
+	 *    $bar = ["key" => "value"];
+	 *    $baz = new stdClass();
+	 *    echo (new \Phalcon\Debug\Dump())->variables($foo, $bar, $baz);
 	 *</code>
 	 *
 	 * @param mixed variable
 	 * @param ...
-	 * @return string
 	 */
-	public function vars() -> string
+	public function variables() -> string
 	{
 		var key, value, output;
 
@@ -303,5 +288,23 @@ class Dump
 		}
 
 		return output;
+	}
+
+	/**
+	 * Returns an JSON string of information about a single variable.
+	 *
+	 * <code>
+	 *    $foo = ["key" => "value"];
+	 *    echo (new \Phalcon\Debug\Dump())->toJson($foo);
+	 *    $foo = new stdClass();
+	 *    $foo->bar = 'buz';
+	 *    echo (new \Phalcon\Debug\Dump())->toJson($foo);
+	 * </code>
+	 *
+	 * @param mixed variable
+	 */
+	public function toJson(var variable) -> string
+	{
+		return json_encode(variable, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 	}
 }

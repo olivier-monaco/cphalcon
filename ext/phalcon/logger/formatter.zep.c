@@ -20,23 +20,6 @@
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Logger\Formatter
  *
@@ -52,9 +35,6 @@ ZEPHIR_INIT_CLASS(Phalcon_Logger_Formatter) {
 
 /**
  * Returns the string meaning of a logger constant
- *
- * @param  integer type
- * @return string
  */
 PHP_METHOD(Phalcon_Logger_Formatter, getTypeString) {
 
@@ -113,7 +93,6 @@ PHP_METHOD(Phalcon_Logger_Formatter, getTypeString) {
 PHP_METHOD(Phalcon_Logger_Formatter, interpolate) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_5 = NULL;
 	HashTable *_2;
 	HashPosition _1;
 	zend_bool _0;
@@ -136,7 +115,7 @@ PHP_METHOD(Phalcon_Logger_Formatter, interpolate) {
 	if (_0) {
 		ZEPHIR_INIT_VAR(replace);
 		array_init(replace);
-		zephir_is_iterable(context, &_2, &_1, 0, 0, "phalcon/logger/formatter.zep", 92);
+		zephir_is_iterable(context, &_2, &_1, 0, 0, "phalcon/logger/formatter.zep", 89);
 		for (
 		  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 		  ; zephir_hash_move_forward_ex(_2, &_1)
@@ -147,7 +126,7 @@ PHP_METHOD(Phalcon_Logger_Formatter, interpolate) {
 			ZEPHIR_CONCAT_SVS(_4, "{", key, "}");
 			zephir_array_update_zval(&replace, _4, &value, PH_COPY | PH_SEPARATE);
 		}
-		ZEPHIR_RETURN_CALL_FUNCTION("strtr", &_5, message, replace);
+		ZEPHIR_RETURN_CALL_FUNCTION("strtr", NULL, 53, message, replace);
 		zephir_check_call_status();
 		RETURN_MM();
 	}

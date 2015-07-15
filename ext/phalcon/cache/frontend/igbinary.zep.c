@@ -18,24 +18,6 @@
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- |          Vladimir Kolesnikov <vladimir@extrememember.com>              |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Frontend\Igbinary
  *
@@ -105,8 +87,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, __construct) {
 
 /**
  * Returns the cache lifetime
- *
- * @return integer
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, getLifetime) {
 
@@ -125,8 +105,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, getLifetime) {
 
 /**
  * Check whether if frontend is buffering output
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, isBuffering) {
 
@@ -181,7 +159,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, beforeStore) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("igbinary_serialize", NULL, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("igbinary_serialize", NULL, 114, data);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -203,7 +181,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Igbinary, afterRetrieve) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("igbinary_unserialize", NULL, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("igbinary_unserialize", NULL, 115, data);
 	zephir_check_call_status();
 	RETURN_MM();
 

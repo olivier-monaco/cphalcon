@@ -22,23 +22,6 @@
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\MetaData\Apc
  *
@@ -102,9 +85,6 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, __construct) {
 
 /**
  * Reads meta-data from APC
- *
- * @param  string key
- * @return array
  */
 PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, read) {
 
@@ -131,7 +111,7 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, read) {
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_prefix"), PH_NOISY_CC);
 	ZEPHIR_INIT_VAR(_1);
 	ZEPHIR_CONCAT_SVV(_1, "$PMM$", _0, key);
-	ZEPHIR_CALL_FUNCTION(&data, "apc_fetch", NULL, _1);
+	ZEPHIR_CALL_FUNCTION(&data, "apc_fetch", NULL, 79, _1);
 	zephir_check_call_status();
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		RETURN_CCTOR(data);
@@ -142,9 +122,6 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, read) {
 
 /**
  * Writes the meta-data to APC
- *
- * @param string key
- * @param array data
  */
 PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, write) {
 
@@ -172,7 +149,7 @@ PHP_METHOD(Phalcon_Mvc_Model_MetaData_Apc, write) {
 	ZEPHIR_INIT_VAR(_1);
 	ZEPHIR_CONCAT_SVV(_1, "$PMM$", _0, key);
 	_2 = zephir_fetch_nproperty_this(this_ptr, SL("_ttl"), PH_NOISY_CC);
-	ZEPHIR_CALL_FUNCTION(NULL, "apc_store", NULL, _1, data, _2);
+	ZEPHIR_CALL_FUNCTION(NULL, "apc_store", NULL, 80, _1, data, _2);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();
 

@@ -19,37 +19,23 @@
 #include "kernel/hash.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Annotations\Reflection
  *
  * Allows to manipulate the annotations reflection in an OO manner
  *
  *<code>
- * //Parse the annotations in a class
- * $reader = new \Phalcon\Annotations\Reader();
+ * use Phalcon\Annotations\Reader;
+ * use Phalcon\Annotations\Reflection;
+ *
+ * // Parse the annotations in a class
+ * $reader = new Reader();
  * $parsing = reader->parse('MyComponent');
  *
- * //Create the reflection
- * $reflection = new \Phalcon\Annotations\Reflection($parsing);
+ * // Create the reflection
+ * $reflection = new Reflection($parsing);
  *
- * //Get the annotations in the class docblock
+ * // Get the annotations in the class docblock
  * $classAnnotations = reflection->getClassAnnotations();
  *</code>
  */
@@ -93,8 +79,6 @@ PHP_METHOD(Phalcon_Annotations_Reflection, __construct) {
 
 /**
  * Returns the annotations found in the class docblock
- *
- * @return Phalcon\Annotations\Collection|false
  */
 PHP_METHOD(Phalcon_Annotations_Reflection, getClassAnnotations) {
 
@@ -109,7 +93,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getClassAnnotations) {
 		if (zephir_array_isset_string_fetch(&reflectionClass, _0, SS("class"), 1 TSRMLS_CC)) {
 			ZEPHIR_INIT_VAR(collection);
 			object_init_ex(collection, phalcon_annotations_collection_ce);
-			ZEPHIR_CALL_METHOD(NULL, collection, "__construct", NULL, reflectionClass);
+			ZEPHIR_CALL_METHOD(NULL, collection, "__construct", NULL, 19, reflectionClass);
 			zephir_check_call_status();
 			zephir_update_property_this(this_ptr, SL("_classAnnotations"), collection TSRMLS_CC);
 			RETURN_CCTOR(collection);
@@ -123,8 +107,6 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getClassAnnotations) {
 
 /**
  * Returns the annotations found in the methods' docblocks
- *
- * @return Phalcon\Annotations\Collection[]
  */
 PHP_METHOD(Phalcon_Annotations_Reflection, getMethodsAnnotations) {
 
@@ -145,7 +127,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getMethodsAnnotations) {
 			if (zephir_fast_count_int(reflectionMethods TSRMLS_CC)) {
 				ZEPHIR_INIT_VAR(collections);
 				array_init(collections);
-				zephir_is_iterable(reflectionMethods, &_2, &_1, 0, 0, "phalcon/annotations/reflection.zep", 105);
+				zephir_is_iterable(reflectionMethods, &_2, &_1, 0, 0, "phalcon/annotations/reflection.zep", 104);
 				for (
 				  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 				  ; zephir_hash_move_forward_ex(_2, &_1)
@@ -154,7 +136,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getMethodsAnnotations) {
 					ZEPHIR_GET_HVALUE(reflectionMethod, _3);
 					ZEPHIR_INIT_NVAR(_4);
 					object_init_ex(_4, phalcon_annotations_collection_ce);
-					ZEPHIR_CALL_METHOD(NULL, _4, "__construct", &_5, reflectionMethod);
+					ZEPHIR_CALL_METHOD(NULL, _4, "__construct", &_5, 19, reflectionMethod);
 					zephir_check_call_status();
 					zephir_array_update_zval(&collections, methodName, &_4, PH_COPY | PH_SEPARATE);
 				}
@@ -170,9 +152,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getMethodsAnnotations) {
 }
 
 /**
- * Returns the annotations found in the properties' docblocks
- *
- * @return Phalcon\Annotations\Collection[]
+ * Returns the annotations found in the properties' docblocks	 
  */
 PHP_METHOD(Phalcon_Annotations_Reflection, getPropertiesAnnotations) {
 
@@ -193,7 +173,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getPropertiesAnnotations) {
 			if (zephir_fast_count_int(reflectionProperties TSRMLS_CC)) {
 				ZEPHIR_INIT_VAR(collections);
 				array_init(collections);
-				zephir_is_iterable(reflectionProperties, &_2, &_1, 0, 0, "phalcon/annotations/reflection.zep", 133);
+				zephir_is_iterable(reflectionProperties, &_2, &_1, 0, 0, "phalcon/annotations/reflection.zep", 131);
 				for (
 				  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 				  ; zephir_hash_move_forward_ex(_2, &_1)
@@ -202,7 +182,7 @@ PHP_METHOD(Phalcon_Annotations_Reflection, getPropertiesAnnotations) {
 					ZEPHIR_GET_HVALUE(reflectionProperty, _3);
 					ZEPHIR_INIT_NVAR(_4);
 					object_init_ex(_4, phalcon_annotations_collection_ce);
-					ZEPHIR_CALL_METHOD(NULL, _4, "__construct", &_5, reflectionProperty);
+					ZEPHIR_CALL_METHOD(NULL, _4, "__construct", &_5, 19, reflectionProperty);
 					zephir_check_call_status();
 					zephir_array_update_zval(&collections, property, &_4, PH_COPY | PH_SEPARATE);
 				}
@@ -247,13 +227,13 @@ PHP_METHOD(Phalcon_Annotations_Reflection, __set_state) {
 	if (Z_TYPE_P(data) == IS_ARRAY) {
 		if (zephir_array_isset_string_fetch(&reflectionData, data, SS("_reflectionData"), 1 TSRMLS_CC)) {
 			object_init_ex(return_value, phalcon_annotations_reflection_ce);
-			ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, reflectionData);
+			ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 18, reflectionData);
 			zephir_check_call_status();
 			RETURN_MM();
 		}
 	}
 	object_init_ex(return_value, phalcon_annotations_reflection_ce);
-	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL);
+	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 18);
 	zephir_check_call_status();
 	RETURN_MM();
 

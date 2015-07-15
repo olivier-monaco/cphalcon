@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,6 +20,7 @@
 namespace Phalcon\Tag;
 
 use Phalcon\Tag\Exception;
+use Phalcon\Tag as BaseTag;
 
 /**
  * Phalcon\Tag\Select
@@ -68,7 +69,7 @@ abstract class Select
 		}
 
 		if !fetch value, params["value"] {
-			let value = \Phalcon\Tag::getValue(id, params);
+			let value = BaseTag::getValue(id, params);
 		} else {
 			unset params["value"];
 		}
@@ -103,14 +104,14 @@ abstract class Select
 				throw new Exception("The 'using' parameter is required");
 			} else {
 				if typeof using != "array" && typeof using != "object" {
-					throw new Exception("The 'using' parameter should be an Array");
+					throw new Exception("The 'using' parameter should be an array");
 				}
 			}
-
-			unset params["using"];
 		}
 
-		let code = \Phalcon\Tag::renderAttributes("<select", params) . ">" . PHP_EOL;
+		unset params["using"];
+
+		let code = BaseTag::renderAttributes("<select", params) . ">" . PHP_EOL;
 
 		if useEmpty {
 			/**
@@ -144,7 +145,7 @@ abstract class Select
 	}
 
 	/**
-	 * Generate the OPTION tags based on a resulset
+	 * Generate the OPTION tags based on a resultset
 	 *
 	 * @param Phalcon\Mvc\Model\Resultset resultset
 	 * @param array using
@@ -153,12 +154,16 @@ abstract class Select
 	 */
 	private static function _optionsFromResultset(resultset, using, value, closeOption)
 	{
-		var code, params, option, usingZero, usingOne, optionValue, optionText;
+		var code, params, option, usingZero, usingOne,
+			optionValue, optionText, strValue, strOptionValue;
 
 		let code = "";
 		let params = null;
 
 		if typeof using == "array" {
+			if count(using) != 2 {
+				throw new Exception("Parameter 'using' requires two values");
+			}
 			let usingZero = using[0], usingOne = using[1];
 		}
 
@@ -193,10 +198,12 @@ abstract class Select
 						let code .= "\t<option value=\"" . optionValue . "\">" . optionText . closeOption;
 					}
 				} else {
-					if optionValue == value {
-						let code .= "\t<option selected=\"selected\" value=\"" . optionValue . "\">" . optionText . closeOption;
+					let strOptionValue = (string) optionValue,
+						strValue = (string) value;
+					if strOptionValue === strValue {
+						let code .= "\t<option selected=\"selected\" value=\"" . strOptionValue . "\">" . optionText . closeOption;
 					} else {
-						let code .= "\t<option value=\"" . optionValue . "\">" . optionText . closeOption;
+						let code .= "\t<option value=\"" . strOptionValue . "\">" . optionText . closeOption;
 					}
 				}
 			} else {
@@ -224,32 +231,40 @@ abstract class Select
 	 * @param mixed value
 	 * @param string closeOption
 	 */
-	private static function _optionsFromArray(data, value, closeOption)
+	private static function _optionsFromArray(var data, var value, var closeOption)
 	{
-		var code, optionValue, optionText, escaped;
+		var strValue, strOptionValue, code, optionValue, optionText, escaped;
 
 		let code = "";
+
 		for optionValue, optionText in data {
+
 			let escaped = htmlspecialchars(optionValue);
+
 			if typeof optionText == "array" {
 				let code .= "\t<optgroup label=\"" . escaped . "\">" . PHP_EOL . self::_optionsFromArray(optionText, value, closeOption) . "\t</optgroup>" . PHP_EOL;
-			} else {
-				if typeof value == "array" {
-					if in_array(optionValue, value) {
-						let code .= "\t<option selected=\"selected\" value=\"" . escaped . "\">" . optionText . closeOption;
-					} else {
-						let code .= "\t<option value=\"" . escaped . "\">" . optionText . closeOption;
-					}
+				continue;
+			}
+
+			if typeof value == "array" {
+				if in_array(optionValue, value) {
+					let code .= "\t<option selected=\"selected\" value=\"" . escaped . "\">" . optionText . closeOption;
 				} else {
-					if optionValue == value {
-						let code .= "\t<option selected=\"selected\" value=\"" . escaped . "\">" . optionText . closeOption;
-					} else {
-						let code .= "\t<option value=\"" . escaped . "\">" . optionText . closeOption;
-					}
+					let code .= "\t<option value=\"" . escaped . "\">" . optionText . closeOption;
+				}
+			} else {
+
+				let strOptionValue = (string) optionValue,
+					strValue = (string) value;
+
+				if strOptionValue === strValue {
+					let code .= "\t<option selected=\"selected\" value=\"" . escaped . "\">" . optionText . closeOption;
+				} else {
+					let code .= "\t<option value=\"" . escaped . "\">" . optionText . closeOption;
 				}
 			}
 		}
+
 		return code;
 	}
-
 }

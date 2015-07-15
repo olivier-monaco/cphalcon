@@ -19,23 +19,6 @@
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Assets\Resource\Css
  *
@@ -60,7 +43,7 @@ ZEPHIR_INIT_CLASS(Phalcon_Assets_Resource_Css) {
 PHP_METHOD(Phalcon_Assets_Resource_Css, __construct) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
+	zephir_fcall_cache_entry *_0 = NULL;
 	zend_bool local, filter;
 	zval *path_param = NULL, *local_param = NULL, *filter_param = NULL, *attributes = NULL, *_1;
 	zval *path = NULL;
@@ -96,7 +79,7 @@ PHP_METHOD(Phalcon_Assets_Resource_Css, __construct) {
 
 	ZEPHIR_INIT_VAR(_1);
 	ZVAL_STRING(_1, "css", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_PARENT(NULL, phalcon_assets_resource_css_ce, this_ptr, "__construct", &_0, _1, path, (local ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), (filter ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), attributes);
+	ZEPHIR_CALL_PARENT(NULL, phalcon_assets_resource_css_ce, this_ptr, "__construct", &_0, 98, _1, path, (local ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), (filter ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), attributes);
 	zephir_check_temp_parameter(_1);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();

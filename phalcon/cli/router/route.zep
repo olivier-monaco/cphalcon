@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -57,7 +57,7 @@ class Route
 	 * @param string pattern
 	 * @param array paths
 	 */
-	public function __construct(string! pattern, paths=null)
+	public function __construct(string! pattern, paths = null)
 	{
 		var routeId, uniqueId, delimiter;
 
@@ -85,11 +85,8 @@ class Route
 
 	/**
 	 * Replaces placeholders from pattern returning a valid PCRE regular expression
-	 *
-	 * @param string pattern
-	 * @return string
 	 */
-	public function compilePattern(string! pattern)
+	public function compilePattern(string! pattern) -> string
 	{
 		var idPattern, part;
 
@@ -162,7 +159,6 @@ class Route
 	 */
 	public function extractNamedParams(string! pattern)
 	{
-
 		char ch;
 		var tmp, matches;
 		boolean notValid;
@@ -299,7 +295,7 @@ class Route
 	 * @param string pattern
 	 * @param array paths
 	 */
-	public function reConfigure(string! pattern, paths=null)
+	public function reConfigure(string! pattern, paths = null)
 	{
 		var moduleName, taskName, actionName,
 			parts, routePaths, realClassName, namespaceName,
@@ -317,15 +313,18 @@ class Route
 
 				// Create the array paths dynamically
 				switch count(parts) {
+
 					case 3:
 						let moduleName = parts[0],
 							taskName = parts[1],
 							actionName = parts[2];
 						break;
+
 					case 2:
 						let taskName = parts[0],
 							actionName = parts[1];
 						break;
+
 					case 1:
 						let taskName = parts[0];
 						break;
@@ -423,8 +422,6 @@ class Route
 
 	/**
 	 * Returns the route's name
-	 *
-	 * @return string
 	 */
 	public function getName() -> string
 	{
@@ -439,9 +436,6 @@ class Route
 	 *     'controller' => 'about'
 	 * ))->setName('about');
 	 *</code>
-	 *
-	 * @param string name
-	 * @return Phalcon\Cli\Router\Route
 	 */
 	public function setName(string! name) -> <Route>
 	{
@@ -452,7 +446,7 @@ class Route
 	/**
 	 * Sets a callback that is called if the route is matched.
 	 * The developer can implement any arbitrary conditions here
-	 * If the callback returns false the route is treaded as not matched
+	 * If the callback returns false the route is treated as not matched
 	 *
 	 * @param callback callback
 	 * @return Phalcon\Cli\Router\Route
@@ -475,8 +469,6 @@ class Route
 
 	/**
 	 * Returns the route's id
-	 *
-	 * @return string
 	 */
 	public function getRouteId() -> string
 	{
@@ -485,8 +477,6 @@ class Route
 
 	/**
 	 * Returns the route's pattern
-	 *
-	 * @return string
 	 */
 	public function getPattern() -> string
 	{
@@ -495,8 +485,6 @@ class Route
 
 	/**
 	 * Returns the route's compiled pattern
-	 *
-	 * @return string
 	 */
 	public function getCompiledPattern() -> string
 	{
@@ -505,20 +493,16 @@ class Route
 
 	/**
 	 * Returns the paths
-	 *
-	 * @return array
 	 */
-	public function getPaths()
+	public function getPaths() -> array
 	{
 		return this->_paths;
 	}
 
 	/**
 	 * Returns the paths using positions as keys and names as values
-	 *
-	 * @return array
 	 */
-	public function getReversedPaths()
+	public function getReversedPaths() -> array
 	{
 		var reversed, path, position;
 
@@ -544,10 +528,8 @@ class Route
 
 	/**
 	 * Returns the router converter
-	 *
-	 * @return array
 	 */
-	public function getConverters()
+	public function getConverters() -> array
 	{
 		return this->_converters;
 	}
@@ -570,8 +552,6 @@ class Route
 
 	/**
 	 * Get routing delimiter
-	 *
-	 * @return string
 	 */
 	public static function getDelimiter() -> string
 	{
@@ -584,5 +564,4 @@ class Route
 
 		return delimiter;
 	}
-
 }

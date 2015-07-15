@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,8 +19,8 @@
 
 namespace Phalcon\Mvc\Model\Validator;
 
+use Phalcon\Mvc\EntityInterface;
 use Phalcon\Mvc\Model\Exception;
-use Phalcon\Mvc\ModelInterface;
 use Phalcon\Mvc\Model\Validator;
 use Phalcon\Mvc\Model\ValidatorInterface;
 
@@ -37,28 +37,24 @@ use Phalcon\Mvc\Model\ValidatorInterface;
  *
  *  public function validation()
  *  {
- *      this->validate(new PresenceOf(array(
+ *      $this->validate(new PresenceOf(array(
  *          "field" => 'name',
  *          "message" => 'The name is required'
  *      )));
- *      if (this->validationHasFailed() == true) {
+ *      if ($this->validationHasFailed() == true) {
  *          return false;
  *      }
  *  }
  *
  *}
  *</code>
- *
  */
 class PresenceOf extends Validator implements ValidatorInterface
 {
 	/**
 	 * Executes the validator
-	 *
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @return boolean
 	 */
-	public function validate(<ModelInterface> record) -> boolean
+	public function validate(<EntityInterface> record) -> boolean
 	{
 		var field, value, message;
 
@@ -71,7 +67,7 @@ class PresenceOf extends Validator implements ValidatorInterface
 		 * A value is null when it is identical to null or a empty string
 		 */
 		let value = record->readAttribute(field);
-		if empty value {
+		if is_null(value) || (is_string(value) && !strlen(value)) {
 
 			/**
 			 * Check if the developer has defined a custom message

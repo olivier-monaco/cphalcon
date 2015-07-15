@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,11 @@
 
 namespace Phalcon\Mvc\Collection;
 
+use Phalcon\Db\AdapterInterface;
+use Phalcon\Mvc\CollectionInterface;
+use Phalcon\Mvc\Collection\BehaviorInterface;
+use Phalcon\Events\ManagerInterface as EventsManagerInterface;
+
 /**
  * Phalcon\Mvc\Collection\Manager
  *
@@ -30,11 +35,11 @@ namespace Phalcon\Mvc\Collection;
  * <code>
  * $di = new \Phalcon\Di();
  *
- * $di->set('collectionManager', function(){
+ * $di->set('collectionManager', function() {
  *      return new \Phalcon\Mvc\Collection\Manager();
  * });
  *
- * robot = new Robots(di);
+ * $robot = new Robots(di);
  * </code>
  */
 interface ManagerInterface
@@ -42,81 +47,57 @@ interface ManagerInterface
 
 	/**
 	 * Sets a custom events manager for a specific model
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @param Phalcon\Events\ManagerInterface eventsManager
 	 */
-	public function setCustomEventsManager(model, eventsManager);
+	public function setCustomEventsManager(<CollectionInterface> model, <EventsManagerInterface> eventsManager);
 
 	/**
 	 * Returns a custom events manager related to a model
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @return Phalcon\Events\ManagerInterface
 	 */
-	public function getCustomEventsManager(model);
+	public function getCustomEventsManager(<CollectionInterface> model) -> <EventsManagerInterface>;
 
 	/**
 	 * Initializes a model in the models manager
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
 	 */
-	public function initialize(model);
+	public function initialize(<CollectionInterface> model);
 
 	/**
 	 * Check whether a model is already initialized
-	 *
-	 * @param string modelName
-	 * @return bool
 	 */
-	public function isInitialized(modelName);
+	public function isInitialized(string! modelName) -> boolean;
 
 	/**
 	 * Get the latest initialized model
-	 *
-	 * @return Phalcon\Mvc\CollectionInterface
 	 */
-	public function getLastInitialized();
+	public function getLastInitialized() -> <CollectionInterface>;
 
 	/**
 	 * Sets a connection service for a specific model
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @param string connectionService
 	 */
-	public function setConnectionService(model, connectionService);
+	public function setConnectionService(<CollectionInterface> model, string! connectionService);
 
 	/**
 	 * Sets if a model must use implicit objects ids
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @param boolean useImplicitObjectIds
 	 */
-	public function useImplicitObjectIds(model, useImplicitObjectIds);
+	public function useImplicitObjectIds(<CollectionInterface> model, boolean useImplicitObjectIds);
 
 	/**
 	 * Checks if a model is using implicit object ids
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @return boolean
 	 */
-	public function isUsingImplicitObjectIds(model);
+	public function isUsingImplicitObjectIds(<CollectionInterface> model) -> boolean;
 
 	/**
 	 * Returns the connection related to a model
-	 *
-	 * @param Phalcon\Mvc\CollectionInterface model
-	 * @return Phalcon\Db\AdapterInterface
 	 */
-	public function getConnection(model);
+	public function getConnection(<CollectionInterface> model) -> <AdapterInterface>;
 
 	/**
 	 * Receives events generated in the models and dispatches them to a events-manager if available
 	 * Notify the behaviors that are listening in the model
-	 *
-	 * @param string eventName
-	 * @param Phalcon\Mvc\CollectionInterface model
 	 */
-	public function notifyEvent(eventName, model);
+	public function notifyEvent(string! eventName, <CollectionInterface> model);
 
+	/**
+	 * Binds a behavior to a collection
+	 */
+	public function addBehavior(<CollectionInterface> model, <BehaviorInterface> behavior);
 }

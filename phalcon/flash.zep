@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -41,10 +41,10 @@ abstract class Flash
 
 	protected _automaticHtml = true;
 
+	protected _messages;
+
 	/**
 	 * Phalcon\Flash constructor
-	 *
-	 * @param array cssClasses
 	 */
 	public function __construct(cssClasses = null)
 	{
@@ -60,10 +60,7 @@ abstract class Flash
 	}
 
 	/**
-	 * Set whether the output must be implictly flushed to the output or returned as string
-	 *
-	 * @param boolean implicitFlush
-	 * @return Phalcon\FlashInterface
+	 * Set whether the output must be implicitly flushed to the output or returned as string
 	 */
 	public function setImplicitFlush(boolean implicitFlush) -> <FlashInterface>
 	{
@@ -72,10 +69,7 @@ abstract class Flash
 	}
 
 	/**
-	 * Set if the output must be implictily formatted with HTML
-	 *
-	 * @param boolean automaticHtml
-	 * @return Phalcon\FlashInterface
+	 * Set if the output must be implicitly formatted with HTML
 	 */
 	public function setAutomaticHtml(boolean automaticHtml) -> <FlashInterface>
 	{
@@ -85,9 +79,6 @@ abstract class Flash
 
 	/**
 	 * Set an array with CSS classes to format the messages
-	 *
-	 * @param array cssClasses
-	 * @return Phalcon\FlashInterface
 	 */
 	public function setCssClasses(array! cssClasses) -> <FlashInterface>
 	{
@@ -101,9 +92,6 @@ abstract class Flash
 	 *<code>
 	 * $flash->error('This is an error');
 	 *</code>
-	 *
-	 * @param string message
-	 * @return string
 	 */
 	public function error(var message) -> string
 	{
@@ -116,9 +104,6 @@ abstract class Flash
 	 *<code>
 	 * $flash->notice('This is an information');
 	 *</code>
-	 *
-	 * @param string message
-	 * @return string
 	 */
 	public function notice(var message) -> string
 	{
@@ -131,9 +116,6 @@ abstract class Flash
 	 *<code>
 	 * $flash->success('The process was finished successfully');
 	 *</code>
-	 *
-	 * @param string message
-	 * @return string
 	 */
 	public function success(string message) -> string
 	{
@@ -146,9 +128,6 @@ abstract class Flash
 	 *<code>
 	 * $flash->warning('Hey, this is important');
 	 *</code>
-	 *
-	 * @param string message
-	 * @return string
 	 */
 	public function warning(var message) -> string
 	{
@@ -162,7 +141,6 @@ abstract class Flash
 	 * $flash->outputMessage('error', message);
 	 *</code>
 	 *
-	 * @param string type
 	 * @param string|array message
 	 */
 	public function outputMessage(string type, var message)
@@ -215,6 +193,7 @@ abstract class Flash
 					echo htmlMessage;
 				} else {
 					let content .= htmlMessage;
+					let this->_messages[] = htmlMessage;
 				}
 			}
 
@@ -242,8 +221,17 @@ abstract class Flash
 			if implicitFlush === true {
 				echo htmlMessage;
 			} else {
+				let this->_messages[] = htmlMessage;
 				return htmlMessage;
 			}
 		}
+	}
+
+	/**
+	 * Clears accumulated messages when implicit flush is disabled
+	 */
+	public function clear() -> void
+	{
+		let this->_messages = [];
 	}
 }

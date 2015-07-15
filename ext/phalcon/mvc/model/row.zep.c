@@ -17,26 +17,10 @@
 #include "kernel/object.h"
 #include "kernel/array.h"
 #include "kernel/exception.h"
+#include "ext/spl/spl_exceptions.h"
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Model\Row
  *
@@ -47,16 +31,15 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Model_Row) {
 
 	ZEPHIR_REGISTER_CLASS(Phalcon\\Mvc\\Model, Row, phalcon, mvc_model_row, phalcon_mvc_model_row_method_entry, 0);
 
-	zend_class_implements(phalcon_mvc_model_row_ce TSRMLS_CC, 1, zend_ce_arrayaccess);
+	zend_class_implements(phalcon_mvc_model_row_ce TSRMLS_CC, 1, phalcon_mvc_entityinterface_ce);
 	zend_class_implements(phalcon_mvc_model_row_ce TSRMLS_CC, 1, phalcon_mvc_model_resultinterface_ce);
+	zend_class_implements(phalcon_mvc_model_row_ce TSRMLS_CC, 1, zend_ce_arrayaccess);
 	return SUCCESS;
 
 }
 
 /**
  * Set the current object's state
- *
- * @param int dirtyState
  */
 PHP_METHOD(Phalcon_Mvc_Model_Row, setDirtyState) {
 
@@ -109,7 +92,7 @@ PHP_METHOD(Phalcon_Mvc_Model_Row, offsetGet) {
 	if (zephir_fetch_property_zval(&value, this_ptr, index, PH_SILENT_CC)) {
 		RETURN_CCTOR(value);
 	}
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "The index does not exist in the row", "phalcon/mvc/model/row.zep", 68);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_mvc_model_exception_ce, "The index does not exist in the row", "phalcon/mvc/model/row.zep", 67);
 	return;
 
 }
@@ -128,7 +111,7 @@ PHP_METHOD(Phalcon_Mvc_Model_Row, offsetSet) {
 
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_mvc_model_exception_ce, "Row is an immutable ArrayAccess object", "phalcon/mvc/model/row.zep", 79);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_mvc_model_exception_ce, "Row is an immutable ArrayAccess object", "phalcon/mvc/model/row.zep", 78);
 	return;
 
 }
@@ -148,8 +131,71 @@ PHP_METHOD(Phalcon_Mvc_Model_Row, offsetUnset) {
 	offset = zephir_get_intval(offset_param);
 
 
-	ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_mvc_model_exception_ce, "Row is an immutable ArrayAccess object", "phalcon/mvc/model/row.zep", 89);
+	ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_mvc_model_exception_ce, "Row is an immutable ArrayAccess object", "phalcon/mvc/model/row.zep", 88);
 	return;
+
+}
+
+/**
+ * Reads an attribute value by its name
+ *
+ *<code>
+ *  echo $robot->readAttribute('name');
+ *</code>
+ *
+ * @param string attribute
+ * @return mixed
+ */
+PHP_METHOD(Phalcon_Mvc_Model_Row, readAttribute) {
+
+	zval *attribute, *value;
+
+	ZEPHIR_MM_GROW();
+	zephir_fetch_params(1, 1, 0, &attribute);
+
+
+
+	ZEPHIR_OBS_VAR(value);
+	if (zephir_fetch_property_zval(&value, this_ptr, attribute, PH_SILENT_CC)) {
+		RETURN_CTOR(value);
+	}
+	RETURN_MM_NULL();
+
+}
+
+/**
+ * Writes an attribute value by its name
+ *
+ *<code>
+ *  $robot->writeAttribute('name', 'Rosey');
+ *</code>
+ *
+ * @param string attribute
+ * @param mixed value
+ */
+PHP_METHOD(Phalcon_Mvc_Model_Row, writeAttribute) {
+
+	zval *attribute_param = NULL, *value;
+	zval *attribute = NULL;
+
+	ZEPHIR_MM_GROW();
+	zephir_fetch_params(1, 2, 0, &attribute_param, &value);
+
+	if (unlikely(Z_TYPE_P(attribute_param) != IS_STRING && Z_TYPE_P(attribute_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'attribute' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(attribute_param) == IS_STRING)) {
+		zephir_get_strval(attribute, attribute_param);
+	} else {
+		ZEPHIR_INIT_VAR(attribute);
+		ZVAL_EMPTY_STRING(attribute);
+	}
+
+
+	zephir_update_property_zval_zval(this_ptr, attribute, value TSRMLS_CC);
+	ZEPHIR_MM_RESTORE();
 
 }
 
@@ -161,11 +207,10 @@ PHP_METHOD(Phalcon_Mvc_Model_Row, offsetUnset) {
 PHP_METHOD(Phalcon_Mvc_Model_Row, toArray) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 
 	ZEPHIR_MM_GROW();
 
-	ZEPHIR_RETURN_CALL_FUNCTION("get_object_vars", &_0, this_ptr);
+	ZEPHIR_RETURN_CALL_FUNCTION("get_object_vars", NULL, 23, this_ptr);
 	zephir_check_call_status();
 	RETURN_MM();
 

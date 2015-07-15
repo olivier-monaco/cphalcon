@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,8 +20,9 @@
 namespace Phalcon\Cache\Backend;
 
 use Phalcon\Cache\Backend;
-use Phalcon\Cache\BackendInterface;
 use Phalcon\Cache\Exception;
+use Phalcon\Cache\BackendInterface;
+use Phalcon\Cache\FrontendInterface;
 
 /**
  * Phalcon\Cache\Backend\Xcache
@@ -46,8 +47,8 @@ use Phalcon\Cache\Exception;
  *
  *</code>
  */
- class Xcache extends Backend implements BackendInterface
- {
+class Xcache extends Backend implements BackendInterface
+{
 
 	/**
 	 * Phalcon\Cache\Backend\Xcache constructor
@@ -55,7 +56,7 @@ use Phalcon\Cache\Exception;
 	 * @param Phalcon\Cache\FrontendInterface frontend
 	 * @param array options
 	 */
-	public function __construct(frontend, options = null)
+	public function __construct(<FrontendInterface> frontend, options = null)
 	{
 		if typeof options != "array" {
 			let options = [];
@@ -103,7 +104,7 @@ use Phalcon\Cache\Exception;
 	 * @param long lifetime
 	 * @param boolean stopBuffer
 	 */
-	public function save(keyName = null, content = null, lifetime = null, stopBuffer = true)
+	public function save(keyName = null, content = null, lifetime = null, boolean stopBuffer = true)
 	{
 		var lastKey, frontend, cachedContent, preparedContent, tmp, tt1, success, isBuffering,
 			options, keys, specialKey;
@@ -130,8 +131,8 @@ use Phalcon\Cache\Exception;
 		}
 
 		/**
-		* Take the lifetime from the frontend or read it from the set in start()
-		*/
+		 * Take the lifetime from the frontend or read it from the set in start()
+		 */
 		if !lifetime {
 			let tmp = this->_lastLifetime;
 			if !tmp {
@@ -151,11 +152,11 @@ use Phalcon\Cache\Exception;
 
 		let isBuffering = frontend->isBuffering();
 
-		if !stopBuffer {
+		if stopBuffer === true {
 			frontend->stop();
 		}
 
-		if isBuffering == true {
+		if isBuffering === true {
 			echo cachedContent;
 		}
 
@@ -165,8 +166,8 @@ use Phalcon\Cache\Exception;
 			let options = this->_options;
 
 			if !fetch specialKey, this->_options["statsKey"] {
-	                        throw new Exception("Unexpected inconsistency in options");
-        	        }
+				throw new Exception("Unexpected inconsistency in options");
+			}
 
 			/**
 			 * xcache_list() is available only to the administrator (unless XCache was
@@ -214,7 +215,7 @@ use Phalcon\Cache\Exception;
 	 * @param string prefix
 	 * @return array
 	 */
-	public function queryKeys(prefix = null)
+	public function queryKeys(prefix = null) -> array
 	{
 		var options, prefixed, specialKey, keys, retval, key, realKey;
 
@@ -224,10 +225,10 @@ use Phalcon\Cache\Exception;
 			let prefixed = "_PHCX" . prefix;
 		}
 
- 		let options = this->_options;
+		let options = this->_options;
 
 		if !fetch specialKey, this->_options["statsKey"] {
-                	throw new Exception("Unexpected inconsistency in options");
+			throw new Exception("Unexpected inconsistency in options");
 		}
 
 		let retval = [];
@@ -256,7 +257,7 @@ use Phalcon\Cache\Exception;
 	 * @param   long lifetime
 	 * @return boolean
 	 */
-	public function exists(var keyName = null, lifetime = null)
+	public function exists(var keyName = null, lifetime = null) -> boolean
 	{
 		var lastKey;
 
@@ -338,8 +339,6 @@ use Phalcon\Cache\Exception;
 
 	/**
 	 * Immediately invalidates all existing items.
-	 *
-	 * @return boolean
 	 */
 	public function flush() -> boolean
 	{

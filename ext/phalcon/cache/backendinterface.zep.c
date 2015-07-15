@@ -12,23 +12,6 @@
 #include "kernel/main.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\BackendInterface
  *
@@ -46,7 +29,7 @@ ZEPHIR_INIT_CLASS(Phalcon_Cache_BackendInterface) {
  * Starts a cache. The keyname allows to identify the created fragment
  *
  * @param int|string keyName
- * @param   long lifetime
+ * @param   int lifetime
  * @return  mixed
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, start);
@@ -74,15 +57,11 @@ ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, getOptions);
 
 /**
  * Checks whether the last cache is fresh or cached
- *
- * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, isFresh);
 
 /**
  * Checks whether the cache has starting buffering or not
- *
- * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, isStarted);
 
@@ -104,7 +83,7 @@ ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, getLastKey);
  * Returns a cached content
  *
  * @param int|string keyName
- * @param   long lifetime
+ * @param   int lifetime
  * @return  mixed
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, get);
@@ -114,7 +93,7 @@ ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, get);
  *
  * @param int|string keyName
  * @param string content
- * @param long lifetime
+ * @param int lifetime
  * @param boolean stopBuffer
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, save);
@@ -139,7 +118,7 @@ ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, queryKeys);
  * Checks if cache exists and it hasn't expired
  *
  * @param  string keyName
- * @param  long lifetime
+ * @param  int lifetime
  * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Cache_BackendInterface, exists);

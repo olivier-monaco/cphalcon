@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,8 +20,7 @@
 namespace Phalcon\Mvc\Model\Validator;
 
 use Phalcon\Mvc\Model;
-
-use Phalcon\Mvc\ModelInterface;
+use Phalcon\Mvc\EntityInterface;
 use Phalcon\Mvc\Model\Exception;
 use Phalcon\Mvc\Model\Validator;
 use Phalcon\Mvc\Model\ValidatorInterface;
@@ -33,9 +32,10 @@ use Phalcon\Mvc\Model\ValidatorInterface;
  * present more than once in the existing records of the related table
  *
  *<code>
- *use Phalcon\Mvc\Model\Validator\Uniqueness as Uniqueness;
+ *use Phalcon\Mvc\Model;
+ *use Phalcon\Mvc\Model\Validator\Uniqueness;
  *
- *class Subscriptors extends \Phalcon\Mvc\Model
+ *class Subscriptors extends Model
  *{
  *
  *  public function validation()
@@ -47,20 +47,15 @@ use Phalcon\Mvc\Model\ValidatorInterface;
  *          return false;
  *      }
  *  }
- *
  *}
  *</code>
- *
  */
 class Uniqueness extends Validator implements ValidatorInterface
 {
 	/**
 	 * Executes the validator
-	 *
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @return boolean
 	 */
-	public function validate(<ModelInterface> record) -> boolean
+	public function validate(<EntityInterface> record) -> boolean
 	{
 		var field, dependencyInjector, metaData, message, bindTypes, bindDataTypes,
 			columnMap, conditions, bindParams, number, composeField, columnField,
@@ -213,12 +208,15 @@ class Uniqueness extends Validator implements ValidatorInterface
 			 * Check if the developer has defined a custom message
 			 */
 			let message = this->getOption("message");
-			let replacePairs = [":field": field];
-			if empty message {
-				if typeof field == "array" {
-					let replacePairs = [":fields": join(", ", field)];
+
+			if typeof field == "array" {
+				let replacePairs = [":fields": join(", ", field)];
+				if empty message {
 					let message = "Value of fields: :fields are already present in another record";
-				} else {
+				}
+			} else {
+				let replacePairs = [":field": field];
+				if empty message {
 					let message = "Value of field: ':field' is already present in another record";
 				}
 			}

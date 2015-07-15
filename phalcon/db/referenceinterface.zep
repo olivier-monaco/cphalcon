@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -29,9 +29,6 @@ interface ReferenceInterface
 
 	/**
 	 * Phalcon\Db\ReferenceInterface constructor
-	 *
-	 * @param string referenceName
-	 * @param array definition
 	 */
 	public function __construct(string! referenceName, array! definition);
 
@@ -93,10 +90,7 @@ interface ReferenceInterface
 
 	/**
 	 * Restore a Phalcon\Db\Reference object from export
-	 *
-	 * @param array data
-	 * @return Phalcon\Db\ReferenceInterface
 	 */
-	public static function __set_state(array! data);
+	public static function __set_state(array! data) -> <ReferenceInterface>;
 
 }

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -64,8 +64,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Returns the service's name
-	 *
-	 * @param string
 	 */
 	public function getName() -> string
 	{
@@ -74,8 +72,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Sets if the service is shared or not
-	 *
-	 * @param boolean shared
 	 */
 	public function setShared(boolean shared) -> void
 	{
@@ -84,8 +80,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Check whether the service is shared or not
-	 *
-	 * @return boolean
 	 */
 	public function isShared() -> boolean
 	{
@@ -131,9 +125,8 @@ class Service implements ServiceInterface
 	 */
 	public function resolve(parameters = null, <DiInterface> dependencyInjector = null)
 	{
-
 		boolean found;
-		var shared, definition, sharedInstance, instance, builder, reflection;
+		var shared, definition, sharedInstance, instance, builder;
 
 		let shared = this->_shared;
 
@@ -159,27 +152,12 @@ class Service implements ServiceInterface
 			if class_exists(definition) {
 				if typeof parameters == "array" {
 					if count(parameters) {
-						if is_php_version("5.6") {
-							let reflection = new \ReflectionClass(definition),
-								instance = reflection->newInstanceArgs(parameters);
-						} else {
-							let instance = create_instance_params(definition, parameters);
-						}
-					} else {
-						if is_php_version("5.6") {
-							let reflection = new \ReflectionClass(definition),
-								instance = reflection->newInstance();
-						} else {
-							let instance = create_instance(definition);
-						}
-					}
-				} else {
-					if is_php_version("5.6") {
-						let reflection = new \ReflectionClass(definition),
-							instance = reflection->newInstance();
+						let instance = create_instance_params(definition, parameters);
 					} else {
 						let instance = create_instance(definition);
 					}
+				} else {
+					let instance = create_instance(definition);					
 				}
 			} else {
 				let found = false;
@@ -233,10 +211,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Changes a parameter in the definition without resolve the service
-	 *
-	 * @param int position
-	 * @param array parameter
-	 * @return Phalcon\Di\Service
 	 */
 	public function setParameter(int position, array! parameter) -> <Service>
 	{
@@ -298,8 +272,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Returns true if the service was resolved
-	 *
-	 * @return bool
 	 */
 	public function isResolved() -> boolean
 	{
@@ -308,9 +280,6 @@ class Service implements ServiceInterface
 
 	/**
 	 * Restore the internal state of a service
-	 *
-	 * @param array attributes
-	 * @return Phalcon\Di\Service
 	 */
 	public static function __set_state(array! attributes) -> <Service>
 	{
@@ -321,7 +290,7 @@ class Service implements ServiceInterface
 		}
 
 		if !fetch definition, attributes["_definition"] {
-			throw new Exception("The attribute '_name' is required");
+			throw new Exception("The attribute '_definition' is required");
 		}
 
 		if !fetch shared, attributes["_shared"] {
@@ -330,5 +299,4 @@ class Service implements ServiceInterface
 
 		return new self(name, definition, shared);
 	}
-
 }

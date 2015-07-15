@@ -19,28 +19,11 @@
 #include "kernel/file.h"
 #include "kernel/require.h"
 #include "kernel/operators.h"
-#include "kernel/exception.h"
 #include "kernel/variables.h"
+#include "kernel/exception.h"
 #include "ext/spl/spl_exceptions.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Annotations\Adapter\Files
  *
@@ -124,13 +107,10 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Files, read) {
 
 /**
  * Writes parsed annotations to files
- *
- * @param string key
- * @param Phalcon\Annotations\Reflection data
  */
 PHP_METHOD(Phalcon_Annotations_Adapter_Files, write) {
 
-	zval *key_param = NULL, *data, *path, *_0, *_1, _2, *_3, *_4, *_5;
+	zval *key_param = NULL, *data, *path, *_0, *_1, _2, *_3, *_4 = NULL, *_5;
 	zval *key = NULL;
 
 	ZEPHIR_MM_GROW();
@@ -149,10 +129,6 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Files, write) {
 	}
 
 
-	if (!(zephir_instance_of_ev(data, phalcon_annotations_reflection_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'data' must be an instance of 'Phalcon\\Annotations\\Reflection'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_annotationsDir"), PH_NOISY_CC);
 	ZEPHIR_INIT_VAR(_1);
 	ZEPHIR_SINIT_VAR(_2);
@@ -162,12 +138,13 @@ PHP_METHOD(Phalcon_Annotations_Adapter_Files, write) {
 	ZEPHIR_CONCAT_VVS(path, _0, _1, ".php");
 	ZEPHIR_INIT_VAR(_3);
 	ZEPHIR_INIT_VAR(_4);
+	ZEPHIR_INIT_NVAR(_4);
 	zephir_var_export_ex(_4, &(data) TSRMLS_CC);
 	ZEPHIR_INIT_VAR(_5);
 	ZEPHIR_CONCAT_SVS(_5, "<?php return ", _4, "; ");
 	zephir_file_put_contents(_3, path, _5 TSRMLS_CC);
 	if (ZEPHIR_IS_FALSE_IDENTICAL(_3)) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_annotations_exception_ce, "Annotations directory cannot be written", "phalcon/annotations/adapter/files.zep", 95);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_annotations_exception_ce, "Annotations directory cannot be written", "phalcon/annotations/adapter/files.zep", 92);
 		return;
 	}
 	ZEPHIR_MM_RESTORE();

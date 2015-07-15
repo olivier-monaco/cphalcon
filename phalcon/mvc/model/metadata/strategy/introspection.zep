@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,8 @@
 
 namespace Phalcon\Mvc\Model\MetaData\Strategy;
 
+use Phalcon\DiInterface;
+use Phalcon\Db\Column;
 use Phalcon\Mvc\ModelInterface;
 use Phalcon\Mvc\Model\Exception;
 use Phalcon\Mvc\Model\MetaData;
@@ -34,16 +36,13 @@ class Introspection implements StrategyInterface
 
 	/**
 	 * The meta-data is obtained by reading the column descriptions from the database information schema
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\DiInterface dependencyInjector
-	 * @return array
 	 */
-	public final function getMetaData(<ModelInterface> model, <\Phalcon\DiInterface> dependencyInjector) -> array
+	public final function getMetaData(<ModelInterface> model, <DiInterface> dependencyInjector) -> array
 	{
 		var schema, table, readConnection, columns, attributes,
 			primaryKeys, nonPrimaryKeys, completeTable, numericTyped, notNull,
-			fieldTypes, automaticDefault, identityField, fieldBindTypes, defaultValues, column, fieldName, defaultValue;
+			fieldTypes, automaticDefault, identityField, fieldBindTypes,
+			defaultValues, column, fieldName, defaultValue, emptyStringValues;
 
 		let schema    = model->getSchema(),
 			table     = model->getSource();
@@ -64,7 +63,7 @@ class Introspection implements StrategyInterface
 			/**
 			 * The table not exists
 			 */
-			throw new Exception("Table '" . completeTable . "' doesn't exist on database when dumping meta-data for " . get_class(model));
+			throw new Exception("Table '" . completeTable . "' doesn't exist in database when dumping meta-data for " . get_class(model));
 		}
 
 		/**
@@ -98,6 +97,7 @@ class Introspection implements StrategyInterface
 		let automaticDefault = [];
 		let identityField = false;
 		let defaultValues = [];
+		let emptyStringValues = [];
 
 		for column in columns {
 
@@ -150,7 +150,7 @@ class Introspection implements StrategyInterface
 			let defaultValue = column->getDefault();
 			if defaultValue !== null || column->isNotNull() === false {
 				if !column->isAutoIncrement() {
-					let defaultValues[fieldName] = defaultValue;
+					let defaultValues[fieldName] = defaultValue;					
 				}
 			}
 		}
@@ -169,16 +169,13 @@ class Introspection implements StrategyInterface
 			MetaData::MODELS_DATA_TYPES_BIND          : fieldBindTypes,
 			MetaData::MODELS_AUTOMATIC_DEFAULT_INSERT : automaticDefault,
 			MetaData::MODELS_AUTOMATIC_DEFAULT_UPDATE : automaticDefault,
-			MetaData::MODELS_DEFAULT_VALUES           : defaultValues
+			MetaData::MODELS_DEFAULT_VALUES           : defaultValues,
+			MetaData::MODELS_EMPTY_STRING_VALUES      : emptyStringValues
 		];
 	}
 
 	/**
-	 * Read the model's column map, this can't be infered
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\DiInterface dependencyInjector
-	 * @return array
+	 * Read the model's column map, this can't be inferred
 	 */
 	public final function getColumnMaps(<ModelInterface> model, <\Phalcon\DiInterface> dependencyInjector) -> array
 	{
@@ -208,6 +205,4 @@ class Introspection implements StrategyInterface
 		 */
 		return [orderedColumnMap, reversedColumnMap];
 	}
-
 }
-

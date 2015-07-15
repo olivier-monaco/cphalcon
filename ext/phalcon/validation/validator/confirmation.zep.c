@@ -12,31 +12,15 @@
 #include <Zend/zend_interfaces.h>
 
 #include "kernel/main.h"
-#include "kernel/object.h"
-#include "kernel/exception.h"
 #include "kernel/fcall.h"
 #include "kernel/memory.h"
 #include "kernel/operators.h"
 #include "kernel/array.h"
+#include "ext/spl/spl_exceptions.h"
+#include "kernel/exception.h"
+#include "kernel/object.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Validation\Validator\Confirmation
  *
@@ -55,93 +39,139 @@ ZEPHIR_INIT_CLASS(Phalcon_Validation_Validator_Confirmation) {
 
 	ZEPHIR_REGISTER_CLASS_EX(Phalcon\\Validation\\Validator, Confirmation, phalcon, validation_validator_confirmation, phalcon_validation_validator_ce, phalcon_validation_validator_confirmation_method_entry, 0);
 
-	zend_class_implements(phalcon_validation_validator_confirmation_ce TSRMLS_CC, 1, phalcon_validation_validatorinterface_ce);
 	return SUCCESS;
 
 }
 
 /**
  * Executes the validation
- *
- * @param Phalcon\Validation validation
- * @param string field
- * @return boolean
  */
 PHP_METHOD(Phalcon_Validation_Validator_Confirmation, validate) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_2 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
 	zval *field = NULL;
-	zval *validation, *field_param = NULL, *fieldWith = NULL, *value = NULL, *valueWith = NULL, *message = NULL, *label = NULL, *labelWith = NULL, *replacePairs, *_0 = NULL, *_1 = NULL, *_3;
+	zval *validation, *field_param = NULL, *fieldWith = NULL, *value = NULL, *valueWith = NULL, *message = NULL, *label = NULL, *labelWith = NULL, *replacePairs, *_0 = NULL, *_1 = NULL, *_2 = NULL, *_3;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 2, 0, &validation, &field_param);
 
-	zephir_get_strval(field, field_param);
-
-
-	if (!(zephir_instance_of_ev(validation, phalcon_validation_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'validation' must be an instance of 'Phalcon\\Validation'", "", 0);
-		return;
+	if (unlikely(Z_TYPE_P(field_param) != IS_STRING && Z_TYPE_P(field_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'field' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
 	}
+
+	if (likely(Z_TYPE_P(field_param) == IS_STRING)) {
+		zephir_get_strval(field, field_param);
+	} else {
+		ZEPHIR_INIT_VAR(field);
+		ZVAL_EMPTY_STRING(field);
+	}
+
+
 	ZEPHIR_INIT_VAR(_0);
 	ZVAL_STRING(_0, "with", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(&fieldWith, this_ptr, "getoption", NULL, _0);
+	ZEPHIR_CALL_METHOD(&fieldWith, this_ptr, "getoption", NULL, 0, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(&value, validation, "getvalue", NULL, field);
+	ZEPHIR_CALL_METHOD(&value, validation, "getvalue", NULL, 0, field);
 	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(&valueWith, validation, "getvalue", NULL, fieldWith);
+	ZEPHIR_CALL_METHOD(&valueWith, validation, "getvalue", NULL, 0, fieldWith);
 	zephir_check_call_status();
-	if (!ZEPHIR_IS_EQUAL(value, valueWith)) {
+	ZEPHIR_CALL_METHOD(&_1, this_ptr, "compare", NULL, 435, value, valueWith);
+	zephir_check_call_status();
+	if (!(zephir_is_true(_1))) {
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "label", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&label, this_ptr, "getoption", NULL, _0);
+		ZEPHIR_CALL_METHOD(&label, this_ptr, "getoption", NULL, 0, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_EMPTY(label)) {
-			ZEPHIR_CALL_METHOD(&label, validation, "getlabel", NULL, field);
+			ZEPHIR_CALL_METHOD(&label, validation, "getlabel", NULL, 0, field);
 			zephir_check_call_status();
 		}
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "labelWith", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&labelWith, this_ptr, "getoption", NULL, _0);
+		ZEPHIR_CALL_METHOD(&labelWith, this_ptr, "getoption", NULL, 0, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_EMPTY(labelWith)) {
-			ZEPHIR_CALL_METHOD(&labelWith, validation, "getlabel", NULL, fieldWith);
+			ZEPHIR_CALL_METHOD(&labelWith, validation, "getlabel", NULL, 0, fieldWith);
 			zephir_check_call_status();
 		}
 		ZEPHIR_INIT_NVAR(_0);
 		ZVAL_STRING(_0, "message", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(&message, this_ptr, "getoption", NULL, _0);
+		ZEPHIR_CALL_METHOD(&message, this_ptr, "getoption", NULL, 0, _0);
 		zephir_check_temp_parameter(_0);
 		zephir_check_call_status();
 		ZEPHIR_INIT_VAR(replacePairs);
-		array_init_size(replacePairs, 3);
+		zephir_create_array(replacePairs, 2, 0 TSRMLS_CC);
 		zephir_array_update_string(&replacePairs, SL(":field"), &label, PH_COPY | PH_SEPARATE);
 		zephir_array_update_string(&replacePairs, SL(":with"), &labelWith, PH_COPY | PH_SEPARATE);
 		if (ZEPHIR_IS_EMPTY(message)) {
 			ZEPHIR_INIT_NVAR(_0);
 			ZVAL_STRING(_0, "Confirmation", ZEPHIR_TEMP_PARAM_COPY);
-			ZEPHIR_CALL_METHOD(&message, validation, "getdefaultmessage", NULL, _0);
+			ZEPHIR_CALL_METHOD(&message, validation, "getdefaultmessage", NULL, 0, _0);
 			zephir_check_temp_parameter(_0);
 			zephir_check_call_status();
 		}
 		ZEPHIR_INIT_NVAR(_0);
 		object_init_ex(_0, phalcon_validation_message_ce);
-		ZEPHIR_CALL_FUNCTION(&_1, "strtr", &_2, message, replacePairs);
+		ZEPHIR_CALL_FUNCTION(&_2, "strtr", NULL, 53, message, replacePairs);
 		zephir_check_call_status();
 		ZEPHIR_INIT_VAR(_3);
 		ZVAL_STRING(_3, "Confirmation", ZEPHIR_TEMP_PARAM_COPY);
-		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, _1, field, _3);
+		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, 432, _2, field, _3);
 		zephir_check_temp_parameter(_3);
 		zephir_check_call_status();
-		ZEPHIR_CALL_METHOD(NULL, validation, "appendmessage", NULL, _0);
+		ZEPHIR_CALL_METHOD(NULL, validation, "appendmessage", NULL, 0, _0);
 		zephir_check_call_status();
 		RETURN_MM_BOOL(0);
 	}
 	RETURN_MM_BOOL(1);
+
+}
+
+/**
+ * Compare strings
+ */
+PHP_METHOD(Phalcon_Validation_Validator_Confirmation, compare) {
+
+	zephir_fcall_cache_entry *_5 = NULL;
+	int ZEPHIR_LAST_CALL_STATUS;
+	zval *a_param = NULL, *b_param = NULL, *_0 = NULL, *_1, *_2, _3 = zval_used_for_init, *_4 = NULL, *_6 = NULL;
+	zval *a = NULL, *b = NULL;
+
+	ZEPHIR_MM_GROW();
+	zephir_fetch_params(1, 2, 0, &a_param, &b_param);
+
+	zephir_get_strval(a, a_param);
+	zephir_get_strval(b, b_param);
+
+
+	ZEPHIR_INIT_VAR(_1);
+	ZVAL_STRING(_1, "ignoreCase", ZEPHIR_TEMP_PARAM_COPY);
+	ZEPHIR_INIT_VAR(_2);
+	ZVAL_BOOL(_2, 0);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "getoption", NULL, 0, _1, _2);
+	zephir_check_temp_parameter(_1);
+	zephir_check_call_status();
+	if (zephir_is_true(_0)) {
+		if (!((zephir_function_exists_ex(SS("mb_strtolower") TSRMLS_CC) == SUCCESS))) {
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_validation_exception_ce, "Extension 'mbstring' is required", "phalcon/validation/validator/confirmation.zep", 92);
+			return;
+		}
+		ZEPHIR_SINIT_VAR(_3);
+		ZVAL_STRING(&_3, "utf-8", 0);
+		ZEPHIR_CALL_FUNCTION(&_4, "mb_strtolower", &_5, 193, a, &_3);
+		zephir_check_call_status();
+		zephir_get_strval(a, _4);
+		ZEPHIR_SINIT_NVAR(_3);
+		ZVAL_STRING(&_3, "utf-8", 0);
+		ZEPHIR_CALL_FUNCTION(&_6, "mb_strtolower", &_5, 193, b, &_3);
+		zephir_check_call_status();
+		zephir_get_strval(b, _6);
+	}
+	RETURN_MM_BOOL(ZEPHIR_IS_EQUAL(a, b));
 
 }
 

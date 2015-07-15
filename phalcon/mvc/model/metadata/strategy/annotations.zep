@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -30,17 +30,13 @@ class Annotations implements StrategyInterface
 {
 	/**
 	 * The meta-data is obtained by reading the column descriptions from the database information schema
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\DiInterface dependencyInjector
-	 * @return array
 	 */
 	public final function getMetaData(<ModelInterface> model, <DiInterface> dependencyInjector) -> array
 	{
 		var annotations, className, reflection, propertiesAnnotations;
 		var property, propAnnotations, columnAnnotation, columnName, feature;
 		var fieldTypes, fieldBindTypes, numericTyped, primaryKeys, nonPrimaryKeys, identityField,
-			notNull, attributes, automaticDefault, defaultValues, defaultValue;
+			notNull, attributes, automaticDefault, defaultValues, defaultValue, emptyStringValues;
 
 		if typeof dependencyInjector != "object" {
 			throw new Exception("The dependency injector is invalid");
@@ -48,7 +44,9 @@ class Annotations implements StrategyInterface
 
 		let annotations = dependencyInjector->get("annotations");
 
-		let className = get_class(model), reflection = annotations->get(className);
+		let className = get_class(model),
+			reflection = annotations->get(className);
+
 		if typeof reflection != "object" {
 			throw new Exception("No annotations were found in class " . className);
 		}
@@ -57,6 +55,7 @@ class Annotations implements StrategyInterface
 		 * Get the properties defined in
 		 */
 		let propertiesAnnotations = reflection->getPropertiesAnnotations();
+
 		if !count(propertiesAnnotations) {
 			throw new Exception("No properties with annotations were found in class " . className);
 		}
@@ -73,7 +72,8 @@ class Annotations implements StrategyInterface
 			fieldBindTypes = [],
 			automaticDefault = [],
 			identityField = false,
-			defaultValues = [];
+			defaultValues = [],
+			emptyStringValues = [];
 
 		for property, propAnnotations in propertiesAnnotations {
 
@@ -103,31 +103,45 @@ class Annotations implements StrategyInterface
 			 */
 			let feature = columnAnnotation->getNamedParameter("type");
 
-			if feature == "integer" {
-				let fieldTypes[property] = Column::TYPE_INTEGER,
-					fieldBindTypes[columnName] = Column::BIND_PARAM_INT,
-					numericTyped[columnName] = true;
-			} else {
-				if feature == "decimal" {
+			switch feature {
+				case "integer":
+					let fieldTypes[property] = Column::TYPE_INTEGER,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_INT,
+						numericTyped[columnName] = true;
+					break;
+
+				case "decimal":
 					let fieldTypes[columnName] = Column::TYPE_DECIMAL,
 						fieldBindTypes[columnName] = Column::BIND_PARAM_DECIMAL,
 						numericTyped[columnName] = true;
-				} else {
-					if feature == "boolean" {
-						let fieldTypes[columnName] = 8,
-							fieldBindTypes[columnName] = 5;
-					} else {
-						if feature == "date" {
-							let fieldTypes[columnName] = 1;
-						} else {
-							/**
-							 * By default all columns are varchar/string
-							 */
-							let fieldTypes[columnName] = Column::TYPE_VARCHAR;
-						}
-						let fieldBindTypes[columnName] = Column::BIND_PARAM_STR;
-					}
-				}
+					break;
+
+				case "boolean":
+					let fieldTypes[columnName] = Column::TYPE_BOOLEAN,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_BOOL;
+					break;
+
+				case "date":
+					let fieldTypes[columnName] = Column::TYPE_DATE,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_STR;
+					break;
+
+				case "datetime":
+					let fieldTypes[columnName] = Column::TYPE_DATETIME,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_STR;
+					break;
+
+				case "text":
+					let fieldTypes[columnName] = Column::TYPE_TEXT,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_STR;
+					break;
+
+				default:
+					/**
+					 * By default all columns are varchar/string
+					 */
+					let fieldTypes[columnName] = Column::TYPE_VARCHAR,
+						fieldBindTypes[columnName] = Column::BIND_PARAM_STR;
 			}
 
 			/**
@@ -178,18 +192,15 @@ class Annotations implements StrategyInterface
 			MetaData::MODELS_DATA_TYPES_BIND          : fieldBindTypes,
 			MetaData::MODELS_AUTOMATIC_DEFAULT_INSERT : automaticDefault,
 			MetaData::MODELS_AUTOMATIC_DEFAULT_UPDATE : automaticDefault,
-			MetaData::MODELS_DEFAULT_VALUES           : defaultValues
+			MetaData::MODELS_DEFAULT_VALUES           : defaultValues,
+			MetaData::MODELS_EMPTY_STRING_VALUES      : emptyStringValues
 		];
 	}
 
 	/**
 	 * Read the model's column map, this can't be inferred
-	 *
-	 * @param Phalcon\Mvc\ModelInterface model
-	 * @param Phalcon\DiInterface dependencyInjector
-	 * @return array
 	 */
-	public final function getColumnMaps(<ModelInterface> model, <\Phalcon\DiInterface> dependencyInjector)
+	public final function getColumnMaps(<ModelInterface> model, <DiInterface> dependencyInjector) -> array
 	{
 		var annotations, className, reflection, propertiesAnnotations;
 		var property, propAnnotations, columnAnnotation, columnName;

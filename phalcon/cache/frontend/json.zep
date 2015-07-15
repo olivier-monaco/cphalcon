@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -70,10 +70,8 @@ class Json implements FrontendInterface
 
 	/**
 	 * Returns the cache lifetime
-	 *
-	 * @return integer
 	 */
-	public function getLifetime()
+	public function getLifetime() -> int
 	{
 		var options, lifetime;
 		let options = this->_frontendOptions;
@@ -87,8 +85,6 @@ class Json implements FrontendInterface
 
 	/**
 	 * Check whether if frontend is buffering output
-	 *
-	 * @return boolean
 	 */
 	public function isBuffering() -> boolean
 	{

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -26,7 +26,7 @@ namespace Phalcon;
  */
 class Debug
 {
-	public _uri = "http://static.phalconphp.com/debug/1.2.0/";
+	public _uri = "//static.phalconphp.com/www/debug/2.0.0/";
 
 	public _theme = "default";
 
@@ -44,9 +44,6 @@ class Debug
 
 	/**
 	 * Change the base URI for static resources
-	 *
-	 * @param string uri
-	 * @return Phalcon\Debug
 	 */
 	public function setUri(string! uri) -> <Debug>
 	{
@@ -56,9 +53,6 @@ class Debug
 
 	/**
 	 * Sets if files the exception"s backtrace must be showed
-	 *
-	 * @param boolean showBackTrace
-	 * @return Phalcon\Debug
 	 */
 	public function setShowBackTrace(boolean showBackTrace) -> <Debug>
 	{
@@ -68,9 +62,6 @@ class Debug
 
 	/**
 	 * Set if files part of the backtrace must be shown in the output
-	 *
-	 * @param boolean showFiles
-	 * @return Phalcon\Debug
 	 */
 	public function setShowFiles(boolean showFiles) -> <Debug>
 	{
@@ -81,9 +72,6 @@ class Debug
 	/**
 	 * Sets if files must be completely opened and showed in the output
 	 * or just the fragment related to the exception
-	 *
-	 * @param boolean showFileFragment
-	 * @return Phalcon\Debug
 	 */
 	public function setShowFileFragment(boolean showFileFragment) -> <Debug>
 	{
@@ -93,10 +81,6 @@ class Debug
 
 	/**
 	 * Listen for uncaught exceptions and unsilent notices or warnings
-	 *
-	 * @param boolean exceptions
-	 * @param boolean lowSeverity
-	 * @return Phalcon\Debug
 	 */
 	public function listen(boolean exceptions = true, boolean lowSeverity = false) -> <Debug>
 	{
@@ -111,8 +95,6 @@ class Debug
 
 	/**
 	 * Listen for uncaught exceptions
-	 *
-	 * @return Phalcon\Debug
 	 */
 	public function listenExceptions() -> <Debug>
 	{
@@ -122,18 +104,16 @@ class Debug
 
 	/**
 	 * Listen for unsilent notices or warnings
-	 *
-	 * @return Phalcon\Debug
 	 */
 	public function listenLowSeverity() -> <Debug>
 	{
-		set_exception_handler([this, "onUncaughtLowSeverity"]);
+		set_error_handler([this, "onUncaughtLowSeverity"]);
+		set_exception_handler([this, "onUncaughtException"]);
 		return this;
 	}
 
 	/**
 	 * Halts the request showing a backtrace
-	 *
 	 */
 	public function halt()
 	{
@@ -142,12 +122,8 @@ class Debug
 
 	/**
 	 * Adds a variable to the debug output
-	 *
-	 * @param mixed varz
-	 * @param string key
-	 * @return Phalcon\Debug
 	 */
-	public function debugVar(varz, var key = null) -> <Debug>
+	public function debugVar(varz, string key = null) -> <Debug>
 	{
 		let this->_data[] = [varz, debug_backtrace(), time()];
 		return this;
@@ -155,8 +131,6 @@ class Debug
 
 	/**
 	 * Clears are variables added previously
-	 *
-	 * @return Phalcon\Debug
 	 */
 	public function clearVars() -> <Debug>
 	{
@@ -166,9 +140,6 @@ class Debug
 
 	/**
 	 * Escapes a string with htmlentities
-	 *
-	 * @param string value
-	 * @return string
 	 */
 	protected function _escapeString(var value) -> string
 	{
@@ -180,64 +151,59 @@ class Debug
 
 	/**
 	 * Produces a recursive representation of an array
-	 *
-	 * @param array argument
-	 * @return string
 	 */
-	protected function _getArrayDump(argument, n = 0) -> string | null
+	protected function _getArrayDump(array! argument, n = 0) -> string | null
 	{
 		var numberArguments, dump, varDump, k, v;
 
 		let numberArguments = count(argument);
-		if n < 3 {
-			if numberArguments > 0 {
-				if numberArguments < 10 {
 
-					let dump = [];
-					for  k, v in argument {
-						if is_scalar(v) {
-							if v == "" {
-								let varDump = "[" . k . "] =&gt; (empty string)";
-							} else {
-								let varDump = "[" . k . "] =&gt; " . this->_escapeString(v);
-							}
-							let dump[] = varDump;
-						} else {
-
-							if typeof v == "array" {
-								let dump[] = "[" . k . "] =&gt; Array(" . this->_getArrayDump(v, n + 1) . ")";
-								continue;
-							}
-
-							if typeof v == "object" {
-								let dump[] = "[" . k . "] =&gt; Object(" . get_class(v) . ")";
-								continue;
-							}
-
-							if typeof v == "null" {
-								let dump[] = "[" . k . "] =&gt; null";
-								continue;
-							}
-
-							let dump[] = "[" . k . "] =&gt; " . v;
-						}
-					}
-
-					return join(", ", dump);
-				}
-				return numberArguments;
-			}
+		if n >= 3 || numberArguments == 0 {
+			return null;
 		}
-		return null;
+
+		if numberArguments >= 10 {
+			return numberArguments;
+		}
+
+		let dump = [];
+		for k, v in argument {
+
+			if is_scalar(v) {
+				if v == "" {
+					let varDump = "[" . k . "] =&gt; (empty string)";
+				} else {
+					let varDump = "[" . k . "] =&gt; " . this->_escapeString(v);
+				}
+				let dump[] = varDump;
+				continue;
+			}
+
+			if typeof v == "array" {
+				let dump[] = "[" . k . "] =&gt; Array(" . this->_getArrayDump(v, n + 1) . ")";
+				continue;
+			}
+
+			if typeof v == "object" {
+				let dump[] = "[" . k . "] =&gt; Object(" . get_class(v) . ")";
+				continue;
+			}
+
+			if typeof v == "null" {
+				let dump[] = "[" . k . "] =&gt; null";
+				continue;
+			}
+
+			let dump[] = "[" . k . "] =&gt; " . v;
+		}
+
+		return join(", ", dump);
 	}
 
 	/**
 	 * Produces an string representation of a variable
-	 *
-	 * @param mixed variable
-	 * @return string
 	 */
-	protected function _getVarDump(var variable)
+	protected function _getVarDump(var variable) -> string
 	{
 		var className, dumpedObject, dump;
 
@@ -315,8 +281,6 @@ class Debug
 
 	/**
 	 * Returns the major framework's version
-	 *
-	 * @return string
 	 */
 	public function getMajorVersion() -> string
 	{
@@ -328,20 +292,16 @@ class Debug
 
 	/**
 	 * Generates a link to the current version documentation
-	 *
-	 * @return string
 	 */
 	public function getVersion() -> string
 	{
-		return "<div class=\"version\">Phalcon Framework <a target=\"_new\" href=\"http://docs.phalconphp.com/en/" .
+		return "<div class=\"version\">Phalcon Framework <a target=\"_new\" href=\"//docs.phalconphp.com/en/" .
 			this->getMajorVersion() . "/\">" .
 			\Phalcon\Version::get() . "</a></div>";
 	}
 
 	/**
 	 * Returns the css sources
-	 *
-	 * @return string
 	 */
 	public function getCssSources() -> string
 	{
@@ -355,8 +315,6 @@ class Debug
 
 	/**
 	 * Returns the javascript sources
-	 *
-	 * @return string
 	 */
 	public function getJsSources() -> string
 	{
@@ -373,14 +331,10 @@ class Debug
 
 	/**
 	 * Shows a backtrace item
-	 *
-	 * @param int n
-	 * @param array trace
 	 */
-	protected final function showTraceItem(n, trace)
+	protected final function showTraceItem(int n, array! trace)
 	{
-
-		var space, twoSpaces, underscore, minus, className, namespaceSeparator,
+		var space, twoSpaces, underscore, minus, className,
 			prepareInternalClass, preparedFunctionName, html, classReflection, prepareUriClass,
 			functionName, functionReflection, traceArgs, arguments, argument,
 			filez, line, showFiles, lines, numberLines, showFileFragment,
@@ -402,21 +356,19 @@ class Debug
 			let className = trace["class"];
 
 			/**
-			 * We assume that classes starting by Phalcon are framework"s classes
+			 * We assume that classes starting by Phalcon are framework's classes
 			 */
 			if preg_match("/^Phalcon/", className) {
 
-				let namespaceSeparator = "\\";
-
 				/**
-				 * Prepare the class name according to the Phalcon"s conventions
+				 * Prepare the class name according to the Phalcon's conventions
 				 */
-				let prepareUriClass = str_replace(namespaceSeparator, underscore, className);
+				let prepareUriClass = str_replace("\\", "/", className);
 
 				/**
 				 * Generate a link to the official docs
 				 */
-				let html .= "<span class=\"error-class\"><a target=\"_new\" href=\"http://docs.phalconphp.com/en/latest/api/" . prepareUriClass . ".html\">" . className . "</a></span>";
+				let html .= "<span class=\"error-class\"><a target=\"_new\" href=\"//api.phalconphp.com/class/" . prepareUriClass . ".html\">" . className . "</a></span>";
 			} else {
 
 				let classReflection = new \ReflectionClass(className);
@@ -632,12 +584,19 @@ class Debug
 	}
 
 	/**
-	 * Handles uncaught exceptions
-	 *
-	 * @param \Exception exception
-	 * @return boolean
+	 * Throws an exception when a notice or warning is raised
 	 */
-	public function onUncaughtException(var exception) -> boolean
+	public function onUncaughtLowSeverity(severity, message, file, line)
+	{
+		if error_reporting() & severity {
+			throw new \ErrorException(message, 0, severity, file, line);
+		}
+	}
+
+	/**
+	 * Handles uncaught exceptions
+	 */
+	public function onUncaughtException(<\Exception> exception) -> boolean
 	{
 		var obLevel, className, escapedMessage, html, showBackTrace,
 		dataVars, n, traceItem, keyRequest, value, keyServer, keyFile, keyVar, dataVar;
@@ -660,7 +619,7 @@ class Debug
 		}
 
 		/**
-		 * Globally block the debug component to avoid other exceptions must be shown
+		 * Globally block the debug component to avoid other exceptions to be shown
 		 */
 		let self::_isActive = true;
 
@@ -669,7 +628,7 @@ class Debug
 		/**
 		 * Escape the exception's message avoiding possible XSS injections?
 		 */
-		let escapedMessage = $this->_escapeString(exception->getMessage());
+		let escapedMessage = this->_escapeString(exception->getMessage());
 
 		/**
 		 * CSS static sources to style the error presentation
@@ -732,7 +691,11 @@ class Debug
 			let html .= "<div id=\"error-tabs-2\"><table cellspacing=\"0\" align=\"center\" class=\"superglobal-detail\">";
 			let html .= "<tr><th>Key</th><th>Value</th></tr>";
 			for keyRequest, value in _REQUEST {
-				let html .= "<tr><td class=\"key\">" . keyRequest . "</td><td>" . value . "</td></tr>";
+				if typeof value != "array" {
+					let html .= "<tr><td class=\"key\">" . keyRequest . "</td><td>" . value . "</td></tr>";
+				} else {
+					let html .= "<tr><td class=\"key\">" . keyRequest . "</td><td>" . print_r(value, true) . "</td></tr>";
+				}
 			}
 			let html .= "</table></div>";
 
@@ -742,14 +705,13 @@ class Debug
 			let html .= "<div id=\"error-tabs-3\"><table cellspacing=\"0\" align=\"center\" class=\"superglobal-detail\">";
 			let html .= "<tr><th>Key</th><th>Value</th></tr>";
 			for keyServer, value in _SERVER {
-				let html .= "<tr><td class=\"key\">" . keyServer . "</td><td>" . value . "</td></tr>";
+				let html .= "<tr><td class=\"key\">" . keyServer . "</td><td>" . this->_getVarDump(value) . "</td></tr>";
 			}
 			let html .= "</table></div>";
 
 			/**
 			 * Show included files
 			 */
-
 			let html .= "<div id=\"error-tabs-4\"><table cellspacing=\"0\" align=\"center\" class=\"superglobal-detail\">";
 			let html .= "<tr><th>#</th><th>Path</th></tr>";
 			for keyFile, value in get_included_files() {
@@ -796,5 +758,4 @@ class Debug
 
 		return true;
 	}
-
 }

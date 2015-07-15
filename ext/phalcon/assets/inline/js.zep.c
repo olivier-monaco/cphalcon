@@ -14,30 +14,14 @@
 #include "kernel/main.h"
 #include "kernel/operators.h"
 #include "kernel/memory.h"
+#include "kernel/array.h"
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Assets\Inline\Js
  *
- * Represents inline Javascript
+ * Represents an inline Javascript
  */
 ZEPHIR_INIT_CLASS(Phalcon_Assets_Inline_Js) {
 
@@ -57,7 +41,7 @@ ZEPHIR_INIT_CLASS(Phalcon_Assets_Inline_Js) {
 PHP_METHOD(Phalcon_Assets_Inline_Js, __construct) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
+	zephir_fcall_cache_entry *_0 = NULL;
 	zend_bool filter;
 	zval *content_param = NULL, *filter_param = NULL, *attributes = NULL, *_1;
 	zval *content = NULL;
@@ -80,12 +64,12 @@ PHP_METHOD(Phalcon_Assets_Inline_Js, __construct) {
 
 	if (Z_TYPE_P(attributes) == IS_NULL) {
 		ZEPHIR_INIT_NVAR(attributes);
-		array_init_size(attributes, 2);
+		zephir_create_array(attributes, 1, 0 TSRMLS_CC);
 		add_assoc_stringl_ex(attributes, SS("type"), SL("text/javascript"), 1);
 	}
 	ZEPHIR_INIT_VAR(_1);
 	ZVAL_STRING(_1, "js", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_PARENT(NULL, phalcon_assets_inline_js_ce, this_ptr, "__construct", &_0, _1, content, (filter ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), attributes);
+	ZEPHIR_CALL_PARENT(NULL, phalcon_assets_inline_js_ce, this_ptr, "__construct", &_0, 94, _1, content, (filter ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)), attributes);
 	zephir_check_temp_parameter(_1);
 	zephir_check_call_status();
 	ZEPHIR_MM_RESTORE();

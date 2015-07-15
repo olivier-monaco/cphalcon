@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -23,6 +23,9 @@ use Phalcon\Assets\Resource;
 use Phalcon\Assets\FilterInterface;
 use Phalcon\Assets\Inline;
 use Phalcon\Assets\Resource\Css as ResourceCss;
+use Phalcon\Assets\Resource\Js as ResourceJs;
+use Phalcon\Assets\Inline\Js as InlineJs;
+use Phalcon\Assets\Inline\Css as InlineCss;
 
 /**
  * Phalcon\Assets\Collection
@@ -58,9 +61,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Adds a resource to the collection
-	 *
-	 * @param Phalcon\Assets\Resource resource
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function add(<$Resource> $resource) -> <Collection>
 	{
@@ -70,9 +70,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Adds a inline code to the collection
-	 *
-	 * @param Phalcon\Assets\Inline code
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function addInline(<$Inline> code) -> <Collection>
 	{
@@ -82,12 +79,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Adds a CSS resource to the collection
-	 *
-	 * @param string path
-	 * @param boolean local
-	 * @param boolean filter
-	 * @param array attributes
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function addCss(string! path, var local = null, boolean filter = false, attributes = null) -> <Collection>
 	{
@@ -116,11 +107,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Adds a inline CSS to the collection
-	 *
-	 * @param string content
-	 * @param boolean filter
-	 * @param array attributes
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function addInlineCss(string content, boolean filter = false, attributes = null) -> <Collection>
 	{
@@ -136,7 +122,7 @@ class Collection implements \Countable, \Iterator
 			let collectionAttributes = this->_attributes;
 		}
 
-		let this->_codes[] = new \Phalcon\Assets\Inline\Css(content, filter, collectionAttributes);
+		let this->_codes[] = new InlineCss(content, filter, collectionAttributes);
 		return this;
 	}
 
@@ -169,18 +155,13 @@ class Collection implements \Countable, \Iterator
 			let collectionAttributes = this->_attributes;
 		}
 
-		let this->_resources[] = new \Phalcon\Assets\Resource\Js(path, collectionLocal, filter, collectionAttributes);
+		let this->_resources[] = new ResourceJs(path, collectionLocal, filter, collectionAttributes);
 
 		return this;
 	}
 
 	/**
 	 * Adds a inline javascript to the collection
-	 *
-	 * @param string content
-	 * @param boolean filter
-	 * @param array attributes
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function addInlineJs(string content, boolean filter = false, attributes = null) -> <Collection>
 	{
@@ -190,22 +171,19 @@ class Collection implements \Countable, \Iterator
 			let filter = true;
 		}
 
-
 		if typeof attributes == "array" {
 			let collectionAttributes = attributes;
 		} else {
 			let collectionAttributes = this->_attributes;
 		}
 
-		let this->_codes[] = new \Phalcon\Assets\Inline\Js(content, filter, collectionAttributes);
+		let this->_codes[] = new InlineJs(content, filter, collectionAttributes);
 
 		return this;
 	}
 
 	/**
 	 * Returns the number of elements in the form
-	 *
-	 * @return int
 	 */
 	public function count() -> int
 	{
@@ -222,8 +200,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Returns the current resource in the iterator
-	 *
-	 * @return Phalcon\Assets\Resource
 	 */
 	public function current() -> <$Resource>
 	{
@@ -244,7 +220,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Moves the internal iteration pointer to the next position
-	 *
 	 */
 	public function next() -> void
 	{
@@ -253,8 +228,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Check if the current element in the iterator is valid
-	 *
-	 * @return boolean
 	 */
 	public function valid() -> boolean
 	{
@@ -263,9 +236,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets the target path of the file for the filtered/join output
-	 *
-	 * @param string $targetPath
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setTargetPath(string! targetPath) -> <Collection>
 	{
@@ -275,9 +245,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets a base source path for all the resources in this collection
-	 *
-	 * @param string $sourcePath
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setSourcePath(string! sourcePath) -> <Collection>
 	{
@@ -287,9 +254,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets a target uri for the generated HTML
-	 *
-	 * @param string $targetUri
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setTargetUri(string! targetUri) -> <Collection>
 	{
@@ -299,9 +263,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets a common prefix for all the resources
-	 *
-	 * @param string $prefix
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setPrefix(string! prefix) -> <Collection>
 	{
@@ -311,9 +272,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets if the collection uses local resources by default
-	 *
-	 * @param boolean $local
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setLocal(boolean! local) -> <Collection>
 	{
@@ -323,9 +281,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets extra HTML attributes
-	 *
-	 * @param array $attributes
-	 * @return $this
 	 */
 	public function setAttributes(array! attributes) -> <Collection>
 	{
@@ -335,9 +290,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets an array of filters in the collection
-	 *
-	 * @param array $filters
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setFilters(array! filters) -> <Collection>
 	{
@@ -347,9 +299,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets the target local
-	 *
-	 * @param boolean $targetLocal
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function setTargetLocal(boolean! targetLocal) -> <Collection>
 	{
@@ -359,9 +308,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Sets if all filtered resources in the collection must be joined in a single result file
-	 *
-	 * @param boolean join
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function join(boolean join) -> <Collection>
 	{
@@ -371,9 +317,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Returns the complete location where the joined/filtered collection must be written
-	 *
-	 * @param string basePath
-	 * @return string
 	 */
 	public function getRealTargetPath(string! basePath) -> string
 	{
@@ -398,9 +341,6 @@ class Collection implements \Countable, \Iterator
 
 	/**
 	 * Adds a filter to the collection
-	 *
-	 * @param Phalcon\Assets\FilterInterface filter
-	 * @return Phalcon\Assets\Collection
 	 */
 	public function addFilter(<FilterInterface> filter) -> <Collection>
 	{

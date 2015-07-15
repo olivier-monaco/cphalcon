@@ -14,27 +14,11 @@
 #include "kernel/main.h"
 #include "kernel/memory.h"
 #include "kernel/fcall.h"
+#include "kernel/time.h"
 #include "kernel/object.h"
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Db\Profiler
  *
@@ -105,9 +89,8 @@ ZEPHIR_INIT_CLASS(Phalcon_Db_Profiler) {
  */
 PHP_METHOD(Phalcon_Db_Profiler, startProfile) {
 
-	zephir_nts_static zephir_fcall_cache_entry *_1 = NULL;
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *sqlStatement, *sqlVariables = NULL, *sqlBindTypes = NULL, *activeProfile, *_0 = NULL;
+	zval *sqlStatement, *sqlVariables = NULL, *sqlBindTypes = NULL, *activeProfile, *_0;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 1, 2, &sqlStatement, &sqlVariables, &sqlBindTypes);
@@ -123,25 +106,25 @@ PHP_METHOD(Phalcon_Db_Profiler, startProfile) {
 	ZEPHIR_INIT_VAR(activeProfile);
 	object_init_ex(activeProfile, phalcon_db_profiler_item_ce);
 	if (zephir_has_constructor(activeProfile TSRMLS_CC)) {
-		ZEPHIR_CALL_METHOD(NULL, activeProfile, "__construct", NULL);
+		ZEPHIR_CALL_METHOD(NULL, activeProfile, "__construct", NULL, 0);
 		zephir_check_call_status();
 	}
-	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlstatement", NULL, sqlStatement);
+	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlstatement", NULL, 143, sqlStatement);
 	zephir_check_call_status();
 	if (Z_TYPE_P(sqlVariables) == IS_ARRAY) {
-		ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlvariables", NULL, sqlVariables);
+		ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlvariables", NULL, 144, sqlVariables);
 		zephir_check_call_status();
 	}
 	if (Z_TYPE_P(sqlBindTypes) == IS_ARRAY) {
-		ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlbindtypes", NULL, sqlBindTypes);
+		ZEPHIR_CALL_METHOD(NULL, activeProfile, "setsqlbindtypes", NULL, 145, sqlBindTypes);
 		zephir_check_call_status();
 	}
-	ZEPHIR_CALL_FUNCTION(&_0, "microtime", &_1, ZEPHIR_GLOBAL(global_true));
-	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setinitialtime", NULL, _0);
+	ZEPHIR_INIT_VAR(_0);
+	zephir_microtime(_0, ZEPHIR_GLOBAL(global_true) TSRMLS_CC);
+	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setinitialtime", NULL, 146, _0);
 	zephir_check_call_status();
 	if ((zephir_method_exists_ex(this_ptr, SS("beforestartprofile") TSRMLS_CC) == SUCCESS)) {
-		ZEPHIR_CALL_METHOD(NULL, this_ptr, "beforestartprofile", NULL, activeProfile);
+		ZEPHIR_CALL_METHOD(NULL, this_ptr, "beforestartprofile", NULL, 0, activeProfile);
 		zephir_check_call_status();
 	}
 	zephir_update_property_this(this_ptr, SL("_activeProfile"), activeProfile TSRMLS_CC);
@@ -151,34 +134,31 @@ PHP_METHOD(Phalcon_Db_Profiler, startProfile) {
 
 /**
  * Stops the active profile
- *
- * @return Phalcon\Db\Profiler
  */
 PHP_METHOD(Phalcon_Db_Profiler, stopProfile) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
-	zval *finalTime = NULL, *initialTime = NULL, *activeProfile = NULL, *_1, *_2, *_3;
+	zval *finalTime, *initialTime = NULL, *activeProfile = NULL, *_0, *_1, *_2;
 
 	ZEPHIR_MM_GROW();
 
-	ZEPHIR_CALL_FUNCTION(&finalTime, "microtime", &_0, ZEPHIR_GLOBAL(global_true));
+	ZEPHIR_INIT_VAR(finalTime);
+	zephir_microtime(finalTime, ZEPHIR_GLOBAL(global_true) TSRMLS_CC);
+	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_activeProfile"), PH_NOISY_CC);
+	ZEPHIR_CPY_WRT(activeProfile, _0);
+	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setfinaltime", NULL, 0, finalTime);
 	zephir_check_call_status();
-	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_activeProfile"), PH_NOISY_CC);
-	ZEPHIR_CPY_WRT(activeProfile, _1);
-	ZEPHIR_CALL_METHOD(NULL, activeProfile, "setfinaltime", NULL, finalTime);
+	ZEPHIR_CALL_METHOD(&initialTime, activeProfile, "getinitialtime", NULL, 0);
 	zephir_check_call_status();
-	ZEPHIR_CALL_METHOD(&initialTime, activeProfile, "getinitialtime", NULL);
-	zephir_check_call_status();
-	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_totalSeconds"), PH_NOISY_CC);
+	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_totalSeconds"), PH_NOISY_CC);
+	ZEPHIR_INIT_VAR(_1);
+	sub_function(_1, finalTime, initialTime TSRMLS_CC);
 	ZEPHIR_INIT_VAR(_2);
-	sub_function(_2, finalTime, initialTime TSRMLS_CC);
-	ZEPHIR_INIT_VAR(_3);
-	zephir_add_function_ex(_3, _1, _2 TSRMLS_CC);
-	zephir_update_property_this(this_ptr, SL("_totalSeconds"), _3 TSRMLS_CC);
+	zephir_add_function_ex(_2, _0, _1 TSRMLS_CC);
+	zephir_update_property_this(this_ptr, SL("_totalSeconds"), _2 TSRMLS_CC);
 	zephir_update_property_array_append(this_ptr, SL("_allProfiles"), activeProfile TSRMLS_CC);
 	if ((zephir_method_exists_ex(this_ptr, SS("afterendprofile") TSRMLS_CC) == SUCCESS)) {
-		ZEPHIR_CALL_METHOD(NULL, this_ptr, "afterendprofile", NULL, activeProfile);
+		ZEPHIR_CALL_METHOD(NULL, this_ptr, "afterendprofile", NULL, 0, activeProfile);
 		zephir_check_call_status();
 	}
 	RETURN_THIS();
@@ -187,8 +167,6 @@ PHP_METHOD(Phalcon_Db_Profiler, stopProfile) {
 
 /**
  * Returns the total number of SQL statements processed
- *
- * @return integer
  */
 PHP_METHOD(Phalcon_Db_Profiler, getNumberTotalStatements) {
 
@@ -202,8 +180,6 @@ PHP_METHOD(Phalcon_Db_Profiler, getNumberTotalStatements) {
 
 /**
  * Returns the total time in seconds spent by the profiles
- *
- * @return double
  */
 PHP_METHOD(Phalcon_Db_Profiler, getTotalElapsedSeconds) {
 
@@ -214,8 +190,6 @@ PHP_METHOD(Phalcon_Db_Profiler, getTotalElapsedSeconds) {
 
 /**
  * Returns all the processed profiles
- *
- * @return Phalcon\Db\Profiler\Item[]
  */
 PHP_METHOD(Phalcon_Db_Profiler, getProfiles) {
 
@@ -226,8 +200,6 @@ PHP_METHOD(Phalcon_Db_Profiler, getProfiles) {
 
 /**
  * Resets the profiler, cleaning up all the profiles
- *
- * @return Phalcon\Db\Profiler
  */
 PHP_METHOD(Phalcon_Db_Profiler, reset) {
 
@@ -244,8 +216,6 @@ PHP_METHOD(Phalcon_Db_Profiler, reset) {
 
 /**
  * Returns the last profile executed in the profiler
- *
- * @return	Phalcon\Db\Profiler\Item
  */
 PHP_METHOD(Phalcon_Db_Profiler, getLastProfile) {
 

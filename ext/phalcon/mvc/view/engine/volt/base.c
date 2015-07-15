@@ -1,98 +1,104 @@
 
 /*
   +------------------------------------------------------------------------+
-  | Phalcon Framework                                                      |
+  | Phalcon Framework													   |
   +------------------------------------------------------------------------+
-  | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+  | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)	   |
   +------------------------------------------------------------------------+
-  | This source file is subject to the New BSD License that is bundled     |
-  | with this package in the file docs/LICENSE.txt.                        |
-  |                                                                        |
-  | If you did not receive a copy of the license and are unable to         |
-  | obtain it through the world-wide-web, please send an email             |
-  | to license@phalconphp.com so we can send you a copy immediately.       |
+  | This source file is subject to the New BSD License that is bundled	   |
+  | with this package in the file docs/LICENSE.txt.					       |
+  |																	       |
+  | If you did not receive a copy of the license and are unable to		   |
+  | obtain it through the world-wide-web, please send an email			   |
+  | to license@phalconphp.com so we can send you a copy immediately.	   |
   +------------------------------------------------------------------------+
-  | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
-  |          Eduar Carvajal <eduar@phalconphp.com>                         |
+  | Authors: Andres Gutierrez <andres@phalconphp.com>					   |
+  |		  Eduar Carvajal <eduar@phalconphp.com>						       |
   +------------------------------------------------------------------------+
 */
 
 const phvolt_token_names phvolt_tokens[] =
 {
-  { SL("INTEGER"),        PHVOLT_T_INTEGER },
-  { SL("DOUBLE"),         PHVOLT_T_DOUBLE },
-  { SL("STRING"),         PHVOLT_T_STRING },
-  { SL("IDENTIFIER"),     PHVOLT_T_IDENTIFIER },
-  { SL("MINUS"),          PHVOLT_T_MINUS },
-  { SL("+"),              PHVOLT_T_ADD },
-  { SL("-"),              PHVOLT_T_SUB },
-  { SL("*"),              PHVOLT_T_MUL },
-  { SL("/"),              PHVOLT_T_DIV },
-  { SL("%%"),             PHVOLT_T_MOD },
-  { SL("!"),              PHVOLT_T_NOT },
-  { SL("~"),              PHVOLT_T_CONCAT },
-  { SL("AND"),            PHVOLT_T_AND },
-  { SL("OR"),             PHVOLT_T_OR },
-  { SL("DOT"),            PHVOLT_T_DOT },
-  { SL("COMMA"),          PHVOLT_T_COMMA },
-  { SL("EQUALS"),         PHVOLT_T_EQUALS },
-  { SL("NOT EQUALS"),     PHVOLT_T_NOTEQUALS },
-  { SL("IDENTICAL"),      PHVOLT_T_IDENTICAL },
+  { SL("INTEGER"),		PHVOLT_T_INTEGER },
+  { SL("DOUBLE"),		 PHVOLT_T_DOUBLE },
+  { SL("STRING"),		 PHVOLT_T_STRING },
+  { SL("IDENTIFIER"),	 PHVOLT_T_IDENTIFIER },
+  { SL("MINUS"),		  PHVOLT_T_MINUS },
+  { SL("+"),			  PHVOLT_T_ADD },
+  { SL("-"),			  PHVOLT_T_SUB },
+  { SL("*"),			  PHVOLT_T_MUL },
+  { SL("/"),			  PHVOLT_T_DIV },
+  { SL("%%"),			 PHVOLT_T_MOD },
+  { SL("!"),			  PHVOLT_T_NOT },
+  { SL("~"),			  PHVOLT_T_CONCAT },
+  { SL("AND"),			PHVOLT_T_AND },
+  { SL("OR"),			 PHVOLT_T_OR },
+  { SL("DOT"),			PHVOLT_T_DOT },
+  { SL("COMMA"),		  PHVOLT_T_COMMA },
+  { SL("EQUALS"),		 PHVOLT_T_EQUALS },
+  { SL("NOT EQUALS"),	 PHVOLT_T_NOTEQUALS },
+  { SL("IDENTICAL"),	  PHVOLT_T_IDENTICAL },
   { SL("NOT IDENTICAL"),  PHVOLT_T_NOTIDENTICAL },
-  { SL("NOT"),            PHVOLT_T_NOT },
-  { SL("RANGE"),          PHVOLT_T_RANGE },
-  { SL("COLON"),          PHVOLT_T_COLON },
+  { SL("NOT"),			PHVOLT_T_NOT },
+  { SL("RANGE"),		  PHVOLT_T_RANGE },
+  { SL("COLON"),		  PHVOLT_T_COLON },
   { SL("QUESTION MARK"),  PHVOLT_T_QUESTION },
-  { SL("<"),              PHVOLT_T_LESS },
-  { SL("<="),             PHVOLT_T_LESSEQUAL },
-  { SL(">"),              PHVOLT_T_GREATER },
-  { SL(">="),             PHVOLT_T_GREATEREQUAL },
-  { SL("("),              PHVOLT_T_PARENTHESES_OPEN },
-  { SL(")"),              PHVOLT_T_PARENTHESES_CLOSE },
-  { SL("["),              PHVOLT_T_SBRACKET_OPEN },
-  { SL("]"),              PHVOLT_T_SBRACKET_CLOSE },
-  { SL("{"),              PHVOLT_T_CBRACKET_OPEN },
-  { SL("}"),              PHVOLT_T_CBRACKET_CLOSE },
-  { SL("{%"),             PHVOLT_T_OPEN_DELIMITER },
-  { SL("%}"),             PHVOLT_T_CLOSE_DELIMITER },
-  { SL("{{"),             PHVOLT_T_OPEN_EDELIMITER },
-  { SL("}}"),             PHVOLT_T_CLOSE_EDELIMITER },
-  { SL("IF"),             PHVOLT_T_IF },
-  { SL("ELSE"),           PHVOLT_T_ELSE },
-  { SL("ELSEIF"),         PHVOLT_T_ELSEIF },
-  { SL("ELSEFOR"),        PHVOLT_T_ELSEFOR },
-  { SL("ENDIF"),          PHVOLT_T_ENDIF },
-  { SL("FOR"),            PHVOLT_T_FOR },
-  { SL("IN"),             PHVOLT_T_IN },
-  { SL("ENDFOR"),         PHVOLT_T_ENDFOR },
-  { SL("SET"),            PHVOLT_T_SET },
-  { SL("ASSIGN"),         PHVOLT_T_ASSIGN },
-  { SL("+="),             PHVOLT_T_ADD_ASSIGN },
-  { SL("-="),             PHVOLT_T_SUB_ASSIGN },
-  { SL("*="),             PHVOLT_T_MUL_ASSIGN },
-  { SL("/="),             PHVOLT_T_DIV_ASSIGN },
-  { SL("++"),             PHVOLT_T_INCR },
-  { SL("--"),             PHVOLT_T_DECR },
-  { SL("BLOCK"),          PHVOLT_T_BLOCK },
-  { SL("ENDBLOCK"),       PHVOLT_T_ENDBLOCK },
-  { SL("CACHE"),          PHVOLT_T_CACHE },
-  { SL("ENDCACHE"),       PHVOLT_T_ENDCACHE },
-  { SL("EXTENDS"),        PHVOLT_T_EXTENDS },
-  { SL("IS"),             PHVOLT_T_IS },
-  { SL("DEFINED"),        PHVOLT_T_DEFINED },
-  { SL("INCLUDE"),        PHVOLT_T_INCLUDE },
-  { SL("DO"),             PHVOLT_T_DO },
-  { SL("WHITESPACE"),     PHVOLT_T_IGNORE },
-  { SL("AUTOESCAPE"),     PHVOLT_T_AUTOESCAPE },
+  { SL("<"),			  PHVOLT_T_LESS },
+  { SL("<="),			 PHVOLT_T_LESSEQUAL },
+  { SL(">"),			  PHVOLT_T_GREATER },
+  { SL(">="),			 PHVOLT_T_GREATEREQUAL },
+  { SL("("),			  PHVOLT_T_PARENTHESES_OPEN },
+  { SL(")"),			  PHVOLT_T_PARENTHESES_CLOSE },
+  { SL("["),			  PHVOLT_T_SBRACKET_OPEN },
+  { SL("]"),			  PHVOLT_T_SBRACKET_CLOSE },
+  { SL("{"),			  PHVOLT_T_CBRACKET_OPEN },
+  { SL("}"),			  PHVOLT_T_CBRACKET_CLOSE },
+  { SL("{%"),			 PHVOLT_T_OPEN_DELIMITER },
+  { SL("%}"),			 PHVOLT_T_CLOSE_DELIMITER },
+  { SL("{{"),			 PHVOLT_T_OPEN_EDELIMITER },
+  { SL("}}"),			 PHVOLT_T_CLOSE_EDELIMITER },
+  { SL("IF"),			 PHVOLT_T_IF },
+  { SL("ELSE"),		   PHVOLT_T_ELSE },
+  { SL("ELSEIF"),		 PHVOLT_T_ELSEIF },
+  { SL("ELSEFOR"),		PHVOLT_T_ELSEFOR },
+  { SL("ENDIF"),		  PHVOLT_T_ENDIF },
+  { SL("FOR"),			PHVOLT_T_FOR },
+  { SL("IN"),			 PHVOLT_T_IN },
+  { SL("ENDFOR"),		 PHVOLT_T_ENDFOR },
+  { SL("SET"),			PHVOLT_T_SET },
+  { SL("ASSIGN"),		 PHVOLT_T_ASSIGN },
+  { SL("+="),			 PHVOLT_T_ADD_ASSIGN },
+  { SL("-="),			 PHVOLT_T_SUB_ASSIGN },
+  { SL("*="),			 PHVOLT_T_MUL_ASSIGN },
+  { SL("/="),			 PHVOLT_T_DIV_ASSIGN },
+  { SL("++"),			 PHVOLT_T_INCR },
+  { SL("--"),			 PHVOLT_T_DECR },
+  { SL("BLOCK"),		  PHVOLT_T_BLOCK },
+  { SL("ENDBLOCK"),	   PHVOLT_T_ENDBLOCK },
+  { SL("CACHE"),		  PHVOLT_T_CACHE },
+  { SL("ENDCACHE"),	   PHVOLT_T_ENDCACHE },
+  { SL("EXTENDS"),		PHVOLT_T_EXTENDS },
+  { SL("IS"),			 PHVOLT_T_IS },
+  { SL("DEFINED"),		PHVOLT_T_DEFINED },
+  { SL("EMPTY"),		  PHVOLT_T_EMPTY },
+  { SL("EVEN"),		   PHVOLT_T_EVEN },
+  { SL("ODD"),			PHVOLT_T_ODD },
+  { SL("NUMERIC"),		PHVOLT_T_NUMERIC },
+  { SL("SCALAR"),		 PHVOLT_T_SCALAR },
+  { SL("ITERABLE"),	   PHVOLT_T_ITERABLE },
+  { SL("INCLUDE"),		PHVOLT_T_INCLUDE },
+  { SL("DO"),			 PHVOLT_T_DO },
+  { SL("WHITESPACE"),	 PHVOLT_T_IGNORE },
+  { SL("AUTOESCAPE"),	 PHVOLT_T_AUTOESCAPE },
   { SL("ENDAUTOESCAPE"),  PHVOLT_T_ENDAUTOESCAPE },
-  { SL("CONTINUE"),       PHVOLT_T_CONTINUE },
-  { SL("BREAK"),          PHVOLT_T_BREAK },
-  { SL("WITH"),           PHVOLT_T_WITH },
-  { SL("RETURN"),         PHVOLT_T_RETURN },
-  { SL("MACRO"),          PHVOLT_T_MACRO },
-  { SL("ENDMACRO"),       PHVOLT_T_ENDMACRO },
-  { SL("CALL"),           PHVOLT_T_CALL },
-  { SL("WITH"),           PHVOLT_T_WITH },
+  { SL("CONTINUE"),	   PHVOLT_T_CONTINUE },
+  { SL("BREAK"),		  PHVOLT_T_BREAK },
+  { SL("WITH"),		   PHVOLT_T_WITH },
+  { SL("RETURN"),		 PHVOLT_T_RETURN },
+  { SL("MACRO"),		  PHVOLT_T_MACRO },
+  { SL("ENDMACRO"),	   PHVOLT_T_ENDMACRO },
+  { SL("CALL"),		   PHVOLT_T_CALL },
+  { SL("WITH"),		   PHVOLT_T_WITH },
   { NULL, 0, 0 }
 };
 
@@ -245,6 +251,11 @@ int phvolt_internal_parse_view(zval **result, zval *view_code, zval *template_pa
 
 	/** Start the reentrant parser */
 	phvolt_parser = phvolt_Alloc(phvolt_wrapper_alloc);
+	if (unlikely(!phvolt_parser)) {
+		MAKE_STD_ZVAL(*error_msg);
+		ZVAL_STRING(*error_msg, "Memory allocation error", 1);
+		return FAILURE;
+	}
 
 	parser_status = emalloc(sizeof(phvolt_parser_status));
 	state = emalloc(sizeof(phvolt_scanner_state));
@@ -273,6 +284,7 @@ int phvolt_internal_parse_view(zval **result, zval *view_code, zval *template_pa
 	state->if_level = 0;
 	state->for_level = 0;
 	state->whitespace_control = 0;
+	state->forced_raw_state = 0;
 
 	state->end = state->start;
 
@@ -583,6 +595,15 @@ int phvolt_internal_parse_view(zval **result, zval *view_code, zval *template_pa
 				phvolt_(phvolt_parser, PHVOLT_ENDCACHE, NULL, parser_status);
 				break;
 
+			case PHVOLT_T_RAW:
+				phvolt_(phvolt_parser, PHVOLT_RAW, NULL, parser_status);
+				state->forced_raw_state++;
+				break;
+			case PHVOLT_T_ENDRAW:
+				phvolt_(phvolt_parser, PHVOLT_ENDRAW, NULL, parser_status);
+				state->forced_raw_state--;
+				break;
+
 			case PHVOLT_T_INCLUDE:
 				phvolt_(phvolt_parser, PHVOLT_INCLUDE, NULL, parser_status);
 				break;
@@ -593,6 +614,30 @@ int phvolt_internal_parse_view(zval **result, zval *view_code, zval *template_pa
 
 			case PHVOLT_T_DEFINED:
 				phvolt_(phvolt_parser, PHVOLT_DEFINED, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_EMPTY:
+				phvolt_(phvolt_parser, PHVOLT_EMPTY, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_EVEN:
+				phvolt_(phvolt_parser, PHVOLT_EVEN, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_ODD:
+				phvolt_(phvolt_parser, PHVOLT_ODD, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_NUMERIC:
+				phvolt_(phvolt_parser, PHVOLT_NUMERIC, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_SCALAR:
+				phvolt_(phvolt_parser, PHVOLT_SCALAR, NULL, parser_status);
+				break;
+
+			case PHVOLT_T_ITERABLE:
+				phvolt_(phvolt_parser, PHVOLT_ITERABLE, NULL, parser_status);
 				break;
 
 			case PHVOLT_T_DO:

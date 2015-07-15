@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,7 @@
 
 namespace Phalcon\Session;
 
+use Phalcon\Di;
 use Phalcon\DiInterface;
 use Phalcon\Di\InjectionAwareInterface;
 
@@ -34,7 +35,7 @@ use Phalcon\Di\InjectionAwareInterface;
  *	$user->age = 22;
  *</code>
  */
-class Bag implements InjectionAwareInterface, BagInterface
+class Bag implements InjectionAwareInterface, BagInterface, \IteratorAggregate, \ArrayAccess, \Countable
 {
 
 	protected _dependencyInjector;
@@ -43,14 +44,12 @@ class Bag implements InjectionAwareInterface, BagInterface
 
 	protected _data;
 
-	protected _initalized = false;
+	protected _initialized = false;
 
 	protected _session;
 
 	/**
 	 * Phalcon\Session\Bag constructor
-	 *
-	 * @param string name
 	 */
 	public function __construct(string! name)
 	{
@@ -59,8 +58,6 @@ class Bag implements InjectionAwareInterface, BagInterface
 
 	/**
 	 * Sets the DependencyInjector container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -69,8 +66,6 @@ class Bag implements InjectionAwareInterface, BagInterface
 
 	/**
 	 * Returns the DependencyInjector container
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -89,7 +84,7 @@ class Bag implements InjectionAwareInterface, BagInterface
 
 			let dependencyInjector = this->_dependencyInjector;
 			if typeof dependencyInjector != "object" {
-				let dependencyInjector = \Phalcon\DI::getDefault();
+				let dependencyInjector = Di::getDefault();
 				if typeof dependencyInjector != "object" {
 					throw new Exception("A dependency injection object is required to access the 'session' service");
 				}
@@ -104,7 +99,7 @@ class Bag implements InjectionAwareInterface, BagInterface
 			let data = [];
 		}
 		let this->_data = data;
-		let this->_initalized = true;
+		let this->_initialized = true;
 	}
 
 	/**
@@ -116,7 +111,7 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 */
 	public function destroy()
 	{
-		if this->_initalized === false {
+		if this->_initialized === false {
 			this->initialize();
 		}
 		this->_session->remove(this->_name);
@@ -134,7 +129,7 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 */
 	public function set(string! property, value)
 	{
-		if this->_initalized === false {
+		if this->_initialized === false {
 			this->initialize();
 		}
 		let this->_data[property] = value;
@@ -174,7 +169,7 @@ class Bag implements InjectionAwareInterface, BagInterface
 		/**
 		 * Check first if the bag is initialized
 		 */
-		if this->_initalized === false {
+		if this->_initialized === false {
 			this->initialize();
 		}
 
@@ -209,13 +204,10 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 *<code>
 	 * var_dump($user->has('name'));
 	 *</code>
-	 *
-	 * @param string property
-	 * @return boolean
 	 */
 	public function has(string! property) -> boolean
 	{
-		if this->_initalized === false {
+		if this->_initialized === false {
 			this->initialize();
 		}
 
@@ -228,9 +220,6 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 *<code>
 	 * var_dump(isset($user['name']));
 	 *</code>
-	 *
-	 * @param string property
-	 * @return boolean
 	 */
 	public function __isset(string! property) -> boolean
 	{
@@ -243,9 +232,6 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 *<code>
 	 * $user->remove('name');
 	 *</code>
-	 *
-	 * @param string property
-	 * @return boolean
 	 */
 	public function remove(string! property) -> boolean
 	{
@@ -263,13 +249,71 @@ class Bag implements InjectionAwareInterface, BagInterface
 	 *<code>
 	 * unset($user['name']);
 	 *</code>
-	 *
-	 * @param string property
-	 * @return boolean
 	 */
 	public function __unset(string! property) -> boolean
 	{
 		return this->remove(property);
 	}
 
+	/**
+	 * Return length of bag
+	 *
+	 *<code>
+	 * echo $user->count();
+	 *</code>
+	 */
+	public final function count() -> int
+	{
+		if this->_initialized === false {
+			this->initialize();
+		}
+		return count(this->_data);
+	}
+
+	/**
+	 * Returns the bag iterator
+	 *
+	 * @return \ArrayIterator
+	 */
+	public final function getIterator()
+	{
+		if this->_initialized === false {
+			this->initialize();
+		}
+
+		return new \ArrayIterator(this->_data);
+	}
+
+	/**
+	 * @param string property
+	 * @param mixed value
+	 */
+	public final function offsetSet(string! property, var value)
+	{
+		return this->set(property, value);
+	}
+
+	/**
+	 * @param string property
+	 */
+	public final function offsetExists(string! property)
+	{
+		return this->has(property);
+	}
+
+	/**
+	 * @param string property
+	 */
+	public final function offsetUnset(string! property)
+	{
+		return this->remove(property);
+	}
+
+	/**
+	 * @param string property	 
+	 */
+	public final function offsetGet(string! property)
+	{
+		return this->get(property);
+	}
 }

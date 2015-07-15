@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,7 +19,7 @@
 
 namespace Phalcon\Mvc\Model\Validator;
 
-use Phalcon\Mvc\ModelInterface;
+use Phalcon\Mvc\EntityInterface;
 use Phalcon\Mvc\Model\Exception;
 use Phalcon\Mvc\Model\Validator;
 use Phalcon\Mvc\Model\ValidatorInterface;
@@ -37,11 +37,11 @@ use Phalcon\Mvc\Model\ValidatorInterface;
  *
  *		public function validation()
  *		{
- *			this->validate(new InclusionInValidator(array(
+ *			$this->validate(new InclusionInValidator(array(
  *				"field" => 'status',
  *				'domain' => array('A', 'I')
  *			)));
- *			if (this->validationHasFailed() == true) {
+ *			if ($this->validationHasFailed() == true) {
  *				return false;
  *			}
  *		}
@@ -53,11 +53,8 @@ class Inclusionin extends Validator implements ValidatorInterface
 {
 	/**
 	 * Executes validator
-	 *
-	 * @param Phalcon\Mvc\ModelInterface record
-	 * @return boolean
 	 */
-	public function validate(<ModelInterface> record) -> boolean
+	public function validate(<EntityInterface> record) -> boolean
 	{
 		var field, domain, value, message, strict;
 

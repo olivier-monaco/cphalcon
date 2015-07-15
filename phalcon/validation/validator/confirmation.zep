@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,11 @@
 
 namespace Phalcon\Validation\Validator;
 
+use Phalcon\Validation;
+use Phalcon\Validation\Message;
+use Phalcon\Validation\Exception;
+use Phalcon\Validation\Validator;
+
 /**
  * Phalcon\Validation\Validator\Confirmation
  *
@@ -33,17 +38,13 @@ namespace Phalcon\Validation\Validator;
  *)));
  *</code>
  */
-class Confirmation extends \Phalcon\Validation\Validator implements \Phalcon\Validation\ValidatorInterface
+class Confirmation extends Validator
 {
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param Phalcon\Validation validation
-	 * @param string field
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validation, string field) -> boolean
+	public function validate(<Validation> validation, string! field) -> boolean
 	{
 		var fieldWith, value, valueWith, message, label, labelWith, replacePairs;
 
@@ -51,7 +52,7 @@ class Confirmation extends \Phalcon\Validation\Validator implements \Phalcon\Val
 			value = validation->getValue(field),
 			valueWith = validation->getValue(fieldWith);
 
-		if value != valueWith {
+		if !this->compare(value, valueWith) {
 
 			let label = this->getOption("label");
 			if empty label {
@@ -65,14 +66,36 @@ class Confirmation extends \Phalcon\Validation\Validator implements \Phalcon\Val
 
 			let message = this->getOption("message");
 			let replacePairs = [":field": label, ":with":  labelWith];
+
 			if empty message {
 				let message = validation->getDefaultMessage("Confirmation");
 			}
 
-			validation->appendMessage(new \Phalcon\Validation\Message(strtr(message, replacePairs), field, "Confirmation"));
+			validation->appendMessage(new Message(strtr(message, replacePairs), field, "Confirmation"));
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Compare strings
+	 */
+	protected final function compare(string a, string b) -> boolean
+	{
+		if this->getOption("ignoreCase", false) {
+
+			/**
+			 * mbstring is required here
+			 */
+			if !function_exists("mb_strtolower") {
+				throw new Exception("Extension 'mbstring' is required");
+			}
+
+			let a = mb_strtolower(a, "utf-8");
+			let b = mb_strtolower(b, "utf-8");
+		}
+
+		return a == b;
 	}
 }

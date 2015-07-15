@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -21,13 +21,14 @@ namespace Phalcon\Mvc\View;
 
 use Phalcon\Di\Injectable;
 use Phalcon\Mvc\View\Exception;
+use Phalcon\Mvc\ViewBaseInterface;
 use Phalcon\Cache\BackendInterface;
 use Phalcon\Mvc\View\Engine\Php as PhpEngine;
 
 /**
  * Phalcon\Mvc\View\Simple
  *
- * This component allows to render views without hicherquical levels
+ * This component allows to render views without hierarchical levels
  *
  *<code>
  * $view = new \Phalcon\Mvc\View\Simple();
@@ -35,9 +36,8 @@ use Phalcon\Mvc\View\Engine\Php as PhpEngine;
  * //or with filename with extension
  * echo $view->render('templates/my-view.volt', array('content' => $html));
  *</code>
- *
  */
-class Simple extends Injectable
+class Simple extends Injectable implements ViewBaseInterface
 {
 
 	protected _options;
@@ -74,8 +74,6 @@ class Simple extends Injectable
 
 	/**
 	 * Sets views directory. Depending of your platform, always add a trailing slash or backslash
-	 *
-	 * @param string viewsDir
 	 */
 	public function setViewsDir(string! viewsDir)
 	{
@@ -84,10 +82,8 @@ class Simple extends Injectable
 
 	/**
 	 * Gets views directory
-	 *
-	 * @return string
 	 */
-	public function getViewsDir()
+	public function getViewsDir() -> string
 	{
 		return this->_viewsDir;
 	}
@@ -102,8 +98,6 @@ class Simple extends Injectable
 	 *  ".mhtml" => "MyCustomEngine"
 	 *));
 	 *</code>
-	 *
-	 * @param array engines
 	 */
 	public function registerEngines(array! engines)
 	{
@@ -226,7 +220,10 @@ class Simple extends Injectable
 			if file_exists(viewsDirPath . extension) {
 				let viewEnginePath = viewsDirPath . extension;
 			} else {
-				//if passed filename with engine extension
+
+				/**
+				 * if passed filename with engine extension
+				 */
 				if extension && substr(viewsDirPath, -strlen(extension)) == extension && file_exists(viewsDirPath) {
 					let viewEnginePath = viewsDirPath;
 				} else {
@@ -390,12 +387,12 @@ class Simple extends Injectable
 	 * @param string partialPath
 	 * @param array  params
 	 */
-	public function partial(string! partialPath, params = null)
+	public function partial(string! partialPath, var params = null)
 	{
-	    var viewParams, mergedParams;
+		var viewParams, mergedParams;
 
 		/**
-		 * Start ouput buffering
+		 * Start output buffering
 		 */
 		ob_start();
 
@@ -471,12 +468,10 @@ class Simple extends Injectable
 
 	/**
 	 * Create a Phalcon\Cache based on the internal cache options
-	 *
-	 * @return Phalcon\Cache\BackendInterface
 	 */
 	protected function _createCache() -> <BackendInterface>
 	{
-        var dependencyInjector, cacheService, cacheOptions, viewCache;
+		var dependencyInjector, cacheService, cacheOptions, viewCache;
 
 		let dependencyInjector = this->_dependencyInjector;
 		if typeof dependencyInjector != "object" {
@@ -505,12 +500,10 @@ class Simple extends Injectable
 
 	/**
 	 * Returns the cache instance used to cache
-	 *
-	 * @return Phalcon\Cache\BackendInterface
 	 */
-	public function getCache()
+	public function getCache() -> <BackendInterface>
 	{
-	    var cache;
+		var cache;
 
 		let cache = this->_cache;
 		if cache {
@@ -527,9 +520,6 @@ class Simple extends Injectable
 	 *<code>
 	 *  $this->view->cache(array('key' => 'my-key', 'lifetime' => 86400));
 	 *</code>
-	 *
-	 * @param boolean|array options
-	 * @return Phalcon\Mvc\View\Simple
 	 */
 	public function cache(var options = true) -> <Simple>
 	{
@@ -551,10 +541,6 @@ class Simple extends Injectable
 	 *<code>
 	 *	$this->view->setParamToView('products', $products);
 	 *</code>
-	 *
-	 * @param string $key
-	 * @param mixed $value
-	 * @return Phalcon\Mvc\View\Simple
 	 */
 	public function setParamToView(string! key, var value) -> <Simple>
 	{
@@ -568,14 +554,10 @@ class Simple extends Injectable
 	 *<code>
 	 *	$this->view->setVars(array('products' => $products));
 	 *</code>
-	 *
-	 * @param  array params
-	 * @param  boolean merge
-	 * @return Phalcon\Mvc\View\Simple
 	 */
 	public function setVars(array! params, boolean merge = true) -> <Simple>
 	{
-	    var viewParams, mergedParams;
+		var viewParams, mergedParams;
 
 		if merge {
 			let viewParams = this->_viewParams;
@@ -598,10 +580,6 @@ class Simple extends Injectable
 	 *<code>
 	 *	$this->view->setVar('products', $products);
 	 *</code>
-	 *
-	 * @param string key
-	 * @param mixed  value
-	 * @return Phalcon\Mvc\View\Simple
 	 */
 	public function setVar(string! key, value) -> <Simple>
 	{
@@ -631,7 +609,7 @@ class Simple extends Injectable
 	 */
 	public function getParamsToView()
 	{
-		return $this->_viewParams;
+		return this->_viewParams;
 	}
 
 	/**
@@ -640,9 +618,6 @@ class Simple extends Injectable
 	 *<code>
 	 *	$this->view->setContent("<h1>hello</h1>");
 	 *</code>
-	 *
-	 * @param  string content
-	 * @return Phalcon\Mvc\View\Simple
 	 */
 	public function setContent(string! content) -> <Simple>
 	{
@@ -651,11 +626,9 @@ class Simple extends Injectable
 	}
 
 	/**
-	 * Returns cached ouput from another view stage
-	 *
-	 * @return string
+	 * Returns cached output from another view stage
 	 */
-	public function getContent()
+	public function getContent() -> string
 	{
 		return this->_content;
 	}
@@ -676,11 +649,8 @@ class Simple extends Injectable
 	 *<code>
 	 *	$this->view->products = $products;
 	 *</code>
-	 *
-	 * @param string key
-	 * @param mixed  value
 	 */
-	public function __set(string! key, value)
+	public function __set(string! key, var value)
 	{
 		let this->_viewParams[key] = value;
 	}

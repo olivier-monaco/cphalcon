@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,8 @@
 
 namespace Phalcon\Mvc;
 
+use Phalcon\DiInterface;
+
 /**
  * Phalcon\Mvc\ModuleDefinitionInterface
  *
@@ -29,16 +31,11 @@ interface ModuleDefinitionInterface
 
 	/**
 	 * Registers an autoloader related to the module
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
-	public function registerAutoloaders(<\Phalcon\DiInterface> dependencyInjector=null);
+	public function registerAutoloaders(<DiInterface> dependencyInjector = null);
 
 	/**
-	 * Registers an autoloader related to the module
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
+	 * Registers services related to the module
 	 */
-	public function registerServices(<\Phalcon\DiInterface> dependencyInjector);
-
+	public function registerServices(<DiInterface> dependencyInjector);
 }

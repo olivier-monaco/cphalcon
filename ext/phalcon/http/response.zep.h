@@ -7,6 +7,7 @@ PHP_METHOD(Phalcon_Http_Response, __construct);
 PHP_METHOD(Phalcon_Http_Response, setDI);
 PHP_METHOD(Phalcon_Http_Response, getDI);
 PHP_METHOD(Phalcon_Http_Response, setStatusCode);
+PHP_METHOD(Phalcon_Http_Response, getStatusCode);
 PHP_METHOD(Phalcon_Http_Response, setHeaders);
 PHP_METHOD(Phalcon_Http_Response, getHeaders);
 PHP_METHOD(Phalcon_Http_Response, setCookies);
@@ -87,6 +88,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phalcon_http_response_setjsoncontent, 0, 0, 1)
 	ZEND_ARG_INFO(0, content)
 	ZEND_ARG_INFO(0, jsonOptions)
+	ZEND_ARG_INFO(0, depth)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phalcon_http_response_appendcontent, 0, 0, 1)
@@ -104,6 +106,7 @@ ZEPHIR_INIT_FUNCS(phalcon_http_response_method_entry) {
 	PHP_ME(Phalcon_Http_Response, setDI, arginfo_phalcon_http_response_setdi, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, getDI, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, setStatusCode, arginfo_phalcon_http_response_setstatuscode, ZEND_ACC_PUBLIC)
+	PHP_ME(Phalcon_Http_Response, getStatusCode, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, setHeaders, arginfo_phalcon_http_response_setheaders, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, getHeaders, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, setCookies, arginfo_phalcon_http_response_setcookies, ZEND_ACC_PUBLIC)
@@ -125,5 +128,5 @@ ZEPHIR_INIT_FUNCS(phalcon_http_response_method_entry) {
 	PHP_ME(Phalcon_Http_Response, sendCookies, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, send, NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(Phalcon_Http_Response, setFileToSend, arginfo_phalcon_http_response_setfiletosend, ZEND_ACC_PUBLIC)
-  PHP_FE_END
+	PHP_FE_END
 };

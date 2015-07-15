@@ -24,23 +24,6 @@
 #include "kernel/string.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Db\Adapter
  *
@@ -60,7 +43,7 @@ ZEPHIR_INIT_CLASS(Phalcon_Db_Adapter) {
 	/**
 	 * Descriptor used to connect to a database
 	 *
-	 * @var stdClassxcvb
+	 * @var \stdClass
 	 */
 	zend_declare_property_null(phalcon_db_adapter_ce, SL("_descriptor"), ZEND_ACC_PROTECTED TSRMLS_CC);
 
@@ -161,8 +144,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getSqlVariables) {
 
 /**
  * Phalcon\Db\Adapter constructor
- *
- * @param array descriptor
  */
 PHP_METHOD(Phalcon_Db_Adapter, __construct) {
 
@@ -196,10 +177,14 @@ PHP_METHOD(Phalcon_Db_Adapter, __construct) {
 		_3 = zend_fetch_class(Z_STRVAL_P(_2), Z_STRLEN_P(_2), ZEND_FETCH_CLASS_AUTO TSRMLS_CC);
 		object_init_ex(_1, _3);
 		if (zephir_has_constructor(_1 TSRMLS_CC)) {
-			ZEPHIR_CALL_METHOD(NULL, _1, "__construct", NULL);
+			ZEPHIR_CALL_METHOD(NULL, _1, "__construct", NULL, 0);
 			zephir_check_call_status();
 		}
 		zephir_update_property_this(this_ptr, SL("_dialect"), _1 TSRMLS_CC);
+	} else {
+		if (Z_TYPE_P(dialectClass) == IS_OBJECT) {
+			zephir_update_property_this(this_ptr, SL("_dialect"), dialectClass TSRMLS_CC);
+		}
 	}
 	zephir_update_property_this(this_ptr, SL("_descriptor"), descriptor TSRMLS_CC);
 	ZEPHIR_MM_RESTORE();
@@ -208,8 +193,6 @@ PHP_METHOD(Phalcon_Db_Adapter, __construct) {
 
 /**
  * Sets the event manager
- *
- * @param Phalcon\Events\ManagerInterface eventsManager
  */
 PHP_METHOD(Phalcon_Db_Adapter, setEventsManager) {
 
@@ -219,18 +202,12 @@ PHP_METHOD(Phalcon_Db_Adapter, setEventsManager) {
 
 
 
-	if (!(zephir_instance_of_ev(eventsManager, phalcon_events_managerinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'eventsManager' must be an instance of 'Phalcon\\Events\\ManagerInterface'", "", 0);
-		return;
-	}
 	zephir_update_property_this(this_ptr, SL("_eventsManager"), eventsManager TSRMLS_CC);
 
 }
 
 /**
  * Returns the internal event manager
- *
- * @return Phalcon\Events\ManagerInterface
  */
 PHP_METHOD(Phalcon_Db_Adapter, getEventsManager) {
 
@@ -241,8 +218,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getEventsManager) {
 
 /**
  * Sets the dialect used to produce the SQL
- *
- * @param Phalcon\Db\DialectInterface
  */
 PHP_METHOD(Phalcon_Db_Adapter, setDialect) {
 
@@ -252,18 +227,12 @@ PHP_METHOD(Phalcon_Db_Adapter, setDialect) {
 
 
 
-	if (!(zephir_instance_of_ev(dialect, phalcon_db_dialectinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'dialect' must be an instance of 'Phalcon\\Db\\DialectInterface'", "", 0);
-		return;
-	}
 	zephir_update_property_this(this_ptr, SL("_dialect"), dialect TSRMLS_CC);
 
 }
 
 /**
  * Returns internal dialect instance
- *
- * @return Phalcon\Db\DialectInterface
  */
 PHP_METHOD(Phalcon_Db_Adapter, getDialect) {
 
@@ -323,14 +292,14 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchOne) {
 	}
 
 
-	ZEPHIR_CALL_METHOD(&result, this_ptr, "query", NULL, sqlQuery, bindParams, bindTypes);
+	ZEPHIR_CALL_METHOD(&result, this_ptr, "query", NULL, 0, sqlQuery, bindParams, bindTypes);
 	zephir_check_call_status();
 	if (Z_TYPE_P(result) == IS_OBJECT) {
 		if (Z_TYPE_P(fetchMode) != IS_NULL) {
-			ZEPHIR_CALL_METHOD(NULL, result, "setfetchmode", NULL, fetchMode);
+			ZEPHIR_CALL_METHOD(NULL, result, "setfetchmode", NULL, 0, fetchMode);
 			zephir_check_call_status();
 		}
-		ZEPHIR_RETURN_CALL_METHOD(result, "fetch", NULL);
+		ZEPHIR_RETURN_CALL_METHOD(result, "fetch", NULL, 0);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
@@ -390,21 +359,20 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchAll) {
 
 	ZEPHIR_INIT_VAR(results);
 	array_init(results);
-	ZEPHIR_CALL_METHOD(&result, this_ptr, "query", NULL, sqlQuery, bindParams, bindTypes);
+	ZEPHIR_CALL_METHOD(&result, this_ptr, "query", NULL, 0, sqlQuery, bindParams, bindTypes);
 	zephir_check_call_status();
 	if (Z_TYPE_P(result) == IS_OBJECT) {
 		if (Z_TYPE_P(fetchMode) != IS_NULL) {
-			ZEPHIR_CALL_METHOD(NULL, result, "setfetchmode", NULL, fetchMode);
+			ZEPHIR_CALL_METHOD(NULL, result, "setfetchmode", NULL, 0, fetchMode);
 			zephir_check_call_status();
 		}
 		while (1) {
-			ZEPHIR_CALL_METHOD(&row, result, "fetch", &_0);
+			ZEPHIR_CALL_METHOD(&row, result, "fetch", &_0, 0);
 			zephir_check_call_status();
 			if (!(zephir_is_true(row))) {
 				break;
-			} else {
-				zephir_array_append(&results, row, PH_SEPARATE, "phalcon/db/adapter.zep", 252);
 			}
+			zephir_array_append(&results, row, PH_SEPARATE, "phalcon/db/adapter.zep", 249);
 		}
 	}
 	RETURN_CCTOR(results);
@@ -415,13 +383,13 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchAll) {
  * Returns the n'th field of first row in a SQL query result
  *
  *<code>
- *    //Getting count of robots
- *    $robotsCount = $connection->fetchColumn("SELECT count(*) FROM robots");
- *    print_r($robotsCount);
+ *	//Getting count of robots
+ *	$robotsCount = $connection->fetchColumn("SELECT count(*) FROM robots");
+ *	print_r($robotsCount);
  *
- *    //Getting name of last edited robot
- *    $robot = $connection->fetchColumn("SELECT id, name FROM robots order by modified desc");
- *    print_r($robot);
+ *	//Getting name of last edited robot
+ *	$robot = $connection->fetchColumn("SELECT id, name FROM robots order by modified desc", 1);
+ *	print_r($robot);
  *</code>
  *
  * @param  string sqlQuery
@@ -433,7 +401,7 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchColumn) {
 
 	zend_bool _1;
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *sqlQuery, *placeholders = NULL, *column = NULL, *row = NULL, *_0, *_2;
+	zval *sqlQuery, *placeholders = NULL, *column = NULL, *row = NULL, *columnValue, *_0;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 1, 2, &sqlQuery, &placeholders, &column);
@@ -448,16 +416,15 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchColumn) {
 
 
 	ZEPHIR_INIT_VAR(_0);
-	ZVAL_LONG(_0, 2);
-	ZEPHIR_CALL_METHOD(&row, this_ptr, "fetchone", NULL, sqlQuery, _0, placeholders);
+	ZVAL_LONG(_0, 4);
+	ZEPHIR_CALL_METHOD(&row, this_ptr, "fetchone", NULL, 0, sqlQuery, _0, placeholders);
 	zephir_check_call_status();
-	_1 = !ZEPHIR_IS_EMPTY(row);
+	_1 = !(ZEPHIR_IS_EMPTY(row));
 	if (_1) {
-		_1 = zephir_array_isset(row, column);
+		_1 = zephir_array_isset_fetch(&columnValue, row, column, 1 TSRMLS_CC);
 	}
 	if (_1) {
-		zephir_array_fetch(&_2, row, column, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 282 TSRMLS_CC);
-		RETURN_CTOR(_2);
+		RETURN_CTOR(columnValue);
 	}
 	RETURN_MM_BOOL(0);
 
@@ -467,14 +434,14 @@ PHP_METHOD(Phalcon_Db_Adapter, fetchColumn) {
  * Inserts data into a table using custom RBDM SQL syntax
  *
  * <code>
- * //Inserting a new robot
+ * // Inserting a new robot
  * $success = $connection->insert(
- *     "robots",
- *     array("Astro Boy", 1952),
- *     array("name", "year")
+ *	 "robots",
+ *	 array("Astro Boy", 1952),
+ *	 array("name", "year")
  * );
  *
- * //Next SQL sentence is sent to the database system
+ * // Next SQL sentence is sent to the database system
  * INSERT INTO `robots` (`name`, `year`) VALUES ("Astro boy", 1952);
  * </code>
  *
@@ -492,7 +459,7 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 	HashPosition _2, _6;
 	int ZEPHIR_LAST_CALL_STATUS;
 	zval *values = NULL;
-	zval *table, *values_param = NULL, *fields = NULL, *dataTypes = NULL, *placeholders, *insertValues, *bindDataTypes = NULL, *bindType = NULL, *position = NULL, *value = NULL, *escapedTable = NULL, *joinedValues, *escapedFields = NULL, *field = NULL, *insertSql, *_0 = NULL, *_1, **_4, **_8, *_9 = NULL;
+	zval *table, *values_param = NULL, *fields = NULL, *dataTypes = NULL, *placeholders, *insertValues, *bindDataTypes, *bindType = NULL, *position = NULL, *value = NULL, *escapedTable = NULL, *joinedValues, *escapedFields = NULL, *field = NULL, *insertSql, *_0 = NULL, *_1, **_4, **_8, *_9 = NULL;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 2, 2, &table, &values_param, &fields, &dataTypes);
@@ -512,9 +479,9 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 		object_init_ex(_0, phalcon_db_exception_ce);
 		ZEPHIR_INIT_VAR(_1);
 		ZEPHIR_CONCAT_SVS(_1, "Unable to insert into ", table, " without data");
-		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, _1);
+		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, 9, _1);
 		zephir_check_call_status();
-		zephir_throw_exception_debug(_0, "phalcon/db/adapter.zep", 318 TSRMLS_CC);
+		zephir_throw_exception_debug(_0, "phalcon/db/adapter.zep", 317 TSRMLS_CC);
 		ZEPHIR_MM_RESTORE();
 		return;
 	}
@@ -522,13 +489,9 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 	array_init(placeholders);
 	ZEPHIR_INIT_VAR(insertValues);
 	array_init(insertValues);
-	if (Z_TYPE_P(dataTypes) != IS_ARRAY) {
-		ZEPHIR_INIT_VAR(bindDataTypes);
-		array_init(bindDataTypes);
-	} else {
-		ZEPHIR_CPY_WRT(bindDataTypes, dataTypes);
-	}
-	zephir_is_iterable(values, &_3, &_2, 0, 0, "phalcon/db/adapter.zep", 352);
+	ZEPHIR_INIT_VAR(bindDataTypes);
+	array_init(bindDataTypes);
+	zephir_is_iterable(values, &_3, &_2, 0, 0, "phalcon/db/adapter.zep", 347);
 	for (
 	  ; zephir_hash_get_current_data_ex(_3, (void**) &_4, &_2) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_3, &_2)
@@ -537,30 +500,30 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 		ZEPHIR_GET_HVALUE(value, _4);
 		if (Z_TYPE_P(value) == IS_OBJECT) {
 			zephir_get_strval(_5, value);
-			zephir_array_append(&placeholders, _5, PH_SEPARATE, "phalcon/db/adapter.zep", 335);
+			zephir_array_append(&placeholders, _5, PH_SEPARATE, "phalcon/db/adapter.zep", 330);
 		} else {
 			if (Z_TYPE_P(value) == IS_NULL) {
 				ZEPHIR_INIT_NVAR(_0);
 				ZVAL_STRING(_0, "null", 1);
-				zephir_array_append(&placeholders, _0, PH_SEPARATE, "phalcon/db/adapter.zep", 338);
+				zephir_array_append(&placeholders, _0, PH_SEPARATE, "phalcon/db/adapter.zep", 333);
 			} else {
 				ZEPHIR_INIT_NVAR(_0);
 				ZVAL_STRING(_0, "?", 1);
-				zephir_array_append(&placeholders, _0, PH_SEPARATE, "phalcon/db/adapter.zep", 340);
-				zephir_array_append(&insertValues, value, PH_SEPARATE, "phalcon/db/adapter.zep", 341);
+				zephir_array_append(&placeholders, _0, PH_SEPARATE, "phalcon/db/adapter.zep", 335);
+				zephir_array_append(&insertValues, value, PH_SEPARATE, "phalcon/db/adapter.zep", 336);
 				if (Z_TYPE_P(dataTypes) == IS_ARRAY) {
 					ZEPHIR_OBS_NVAR(bindType);
 					if (!(zephir_array_isset_fetch(&bindType, dataTypes, position, 0 TSRMLS_CC))) {
-						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Incomplete number of bind types", "phalcon/db/adapter.zep", 344);
+						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Incomplete number of bind types", "phalcon/db/adapter.zep", 339);
 						return;
 					}
-					zephir_array_append(&bindDataTypes, bindType, PH_SEPARATE, "phalcon/db/adapter.zep", 346);
+					zephir_array_append(&bindDataTypes, bindType, PH_SEPARATE, "phalcon/db/adapter.zep", 341);
 				}
 			}
 		}
 	}
 	if (ZEPHIR_GLOBAL(db).escape_identifiers) {
-		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, table);
+		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, 0, table);
 		zephir_check_call_status();
 	} else {
 		ZEPHIR_CPY_WRT(escapedTable, table);
@@ -572,15 +535,15 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 		if (ZEPHIR_GLOBAL(db).escape_identifiers) {
 			ZEPHIR_INIT_VAR(escapedFields);
 			array_init(escapedFields);
-			zephir_is_iterable(fields, &_7, &_6, 0, 0, "phalcon/db/adapter.zep", 369);
+			zephir_is_iterable(fields, &_7, &_6, 0, 0, "phalcon/db/adapter.zep", 364);
 			for (
 			  ; zephir_hash_get_current_data_ex(_7, (void**) &_8, &_6) == SUCCESS
 			  ; zephir_hash_move_forward_ex(_7, &_6)
 			) {
 				ZEPHIR_GET_HVALUE(field, _8);
-				ZEPHIR_CALL_METHOD(&_9, this_ptr, "escapeidentifier", &_10, field);
+				ZEPHIR_CALL_METHOD(&_9, this_ptr, "escapeidentifier", &_10, 0, field);
 				zephir_check_call_status();
-				zephir_array_append(&escapedFields, _9, PH_SEPARATE, "phalcon/db/adapter.zep", 367);
+				zephir_array_append(&escapedFields, _9, PH_SEPARATE, "phalcon/db/adapter.zep", 362);
 			}
 		} else {
 			ZEPHIR_CPY_WRT(escapedFields, fields);
@@ -592,11 +555,11 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 		ZEPHIR_CONCAT_SVSVS(insertSql, "INSERT INTO ", escapedTable, " VALUES (", joinedValues, ")");
 	}
 	if (!(zephir_fast_count_int(bindDataTypes TSRMLS_CC))) {
-		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, insertSql, insertValues);
+		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, insertSql, insertValues);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, insertSql, insertValues, bindDataTypes);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, insertSql, insertValues, bindDataTypes);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -604,16 +567,15 @@ PHP_METHOD(Phalcon_Db_Adapter, insert) {
 
 /**
  * Inserts data into a table using custom RBDM SQL syntax
- * Another, more convenient syntax
  *
  * <code>
  * //Inserting a new robot
- * $success = $connection->insert(
- *     "robots",
- *     array(
- *          "name" => "Astro Boy",
- *          "year" => 1952
- *      )
+ * $success = $connection->insertAsDict(
+ *	 "robots",
+ *	 array(
+ *		  "name" => "Astro Boy",
+ *		  "year" => 1952
+ *	  )
  * );
  *
  * //Next SQL sentence is sent to the database system
@@ -652,17 +614,17 @@ PHP_METHOD(Phalcon_Db_Adapter, insertAsDict) {
 	if (_0) {
 		RETURN_MM_BOOL(0);
 	}
-	zephir_is_iterable(data, &_2, &_1, 0, 0, "phalcon/db/adapter.zep", 424);
+	zephir_is_iterable(data, &_2, &_1, 0, 0, "phalcon/db/adapter.zep", 419);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HMKEY(field, _2, _1);
 		ZEPHIR_GET_HVALUE(value, _3);
-		zephir_array_append(&fields, field, PH_SEPARATE, "phalcon/db/adapter.zep", 420);
-		zephir_array_append(&values, value, PH_SEPARATE, "phalcon/db/adapter.zep", 421);
+		zephir_array_append(&fields, field, PH_SEPARATE, "phalcon/db/adapter.zep", 415);
+		zephir_array_append(&values, value, PH_SEPARATE, "phalcon/db/adapter.zep", 416);
 	}
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "insert", NULL, table, values, fields, dataTypes);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "insert", NULL, 0, table, values, fields, dataTypes);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -674,10 +636,10 @@ PHP_METHOD(Phalcon_Db_Adapter, insertAsDict) {
  * <code>
  * //Updating existing robot
  * $success = $connection->update(
- *     "robots",
- *     array("name"),
- *     array("New Astro Boy"),
- *     "id = 101"
+ *	 "robots",
+ *	 array("name"),
+ *	 array("New Astro Boy"),
+ *	 "id = 101"
  * );
  *
  * //Next SQL sentence is sent to the database system
@@ -685,15 +647,15 @@ PHP_METHOD(Phalcon_Db_Adapter, insertAsDict) {
  *
  * //Updating existing robot with array condition and $dataTypes
  * $success = $connection->update(
- *     "robots",
- *     array("name"),
- *     array("New Astro Boy"),
- *     array(
- *         'conditions' => "id = ?",
- *         'bind' => array($some_unsafe_id),
- *         'bindTypes' => array(PDO::PARAM_INT) //use only if you use $dataTypes param
- *     ),
- *     array(PDO::PARAM_STR)
+ *	 "robots",
+ *	 array("name"),
+ *	 array("New Astro Boy"),
+ *	 array(
+ *		 'conditions' => "id = ?",
+ *		 'bind' => array($some_unsafe_id),
+ *		 'bindTypes' => array(PDO::PARAM_INT) //use only if you use $dataTypes param
+ *	 ),
+ *	 array(PDO::PARAM_STR)
  * );
  *
  * </code>
@@ -713,7 +675,7 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 	int ZEPHIR_LAST_CALL_STATUS;
 	HashTable *_1;
 	HashPosition _0;
-	zval *table, *fields, *values, *whereCondition = NULL, *dataTypes = NULL, *placeholders, *updateValues, *position = NULL, *value = NULL, *field = NULL, *bindDataTypes = NULL, *escapedField = NULL, *bindType = NULL, *escapedTable = NULL, *setClause, *updateSql, *conditions, *whereBind, *whereTypes, **_2, *_4 = NULL, *_5 = NULL;
+	zval *table, *fields, *values, *whereCondition = NULL, *dataTypes = NULL, *placeholders, *updateValues, *position = NULL, *value = NULL, *field = NULL, *bindDataTypes, *escapedField = NULL, *bindType = NULL, *escapedTable = NULL, *setClause, *updateSql, *conditions, *whereBind, *whereTypes, **_2, *_4 = NULL, *_5 = NULL;
 
 	ZEPHIR_MM_GROW();
 	zephir_fetch_params(1, 3, 2, &table, &fields, &values, &whereCondition, &dataTypes);
@@ -730,13 +692,9 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 	array_init(placeholders);
 	ZEPHIR_INIT_VAR(updateValues);
 	array_init(updateValues);
-	if (Z_TYPE_P(dataTypes) == IS_ARRAY) {
-		ZEPHIR_INIT_VAR(bindDataTypes);
-		array_init(bindDataTypes);
-	} else {
-		ZEPHIR_CPY_WRT(bindDataTypes, dataTypes);
-	}
-	zephir_is_iterable(values, &_1, &_0, 0, 0, "phalcon/db/adapter.zep", 514);
+	ZEPHIR_INIT_VAR(bindDataTypes);
+	array_init(bindDataTypes);
+	zephir_is_iterable(values, &_1, &_0, 0, 0, "phalcon/db/adapter.zep", 505);
 	for (
 	  ; zephir_hash_get_current_data_ex(_1, (void**) &_2, &_0) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_1, &_0)
@@ -745,11 +703,11 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 		ZEPHIR_GET_HVALUE(value, _2);
 		ZEPHIR_OBS_NVAR(field);
 		if (!(zephir_array_isset_fetch(&field, fields, position, 0 TSRMLS_CC))) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The number of values in the update is not the same as fields", "phalcon/db/adapter.zep", 487);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The number of values in the update is not the same as fields", "phalcon/db/adapter.zep", 478);
 			return;
 		}
 		if (ZEPHIR_GLOBAL(db).escape_identifiers) {
-			ZEPHIR_CALL_METHOD(&escapedField, this_ptr, "escapeidentifier", &_3, field);
+			ZEPHIR_CALL_METHOD(&escapedField, this_ptr, "escapeidentifier", &_3, 0, field);
 			zephir_check_call_status();
 		} else {
 			ZEPHIR_CPY_WRT(escapedField, field);
@@ -757,30 +715,30 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 		if (Z_TYPE_P(value) == IS_OBJECT) {
 			ZEPHIR_INIT_LNVAR(_4);
 			ZEPHIR_CONCAT_VSV(_4, escapedField, " = ", value);
-			zephir_array_append(&placeholders, _4, PH_SEPARATE, "phalcon/db/adapter.zep", 497);
+			zephir_array_append(&placeholders, _4, PH_SEPARATE, "phalcon/db/adapter.zep", 488);
 		} else {
 			if (Z_TYPE_P(value) == IS_NULL) {
 				ZEPHIR_INIT_LNVAR(_4);
 				ZEPHIR_CONCAT_VS(_4, escapedField, " = null");
-				zephir_array_append(&placeholders, _4, PH_SEPARATE, "phalcon/db/adapter.zep", 500);
+				zephir_array_append(&placeholders, _4, PH_SEPARATE, "phalcon/db/adapter.zep", 491);
 			} else {
-				zephir_array_append(&updateValues, value, PH_SEPARATE, "phalcon/db/adapter.zep", 502);
+				zephir_array_append(&updateValues, value, PH_SEPARATE, "phalcon/db/adapter.zep", 493);
 				if (Z_TYPE_P(dataTypes) == IS_ARRAY) {
 					ZEPHIR_OBS_NVAR(bindType);
 					if (!(zephir_array_isset_fetch(&bindType, dataTypes, position, 0 TSRMLS_CC))) {
-						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Incomplete number of bind types", "phalcon/db/adapter.zep", 505);
+						ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Incomplete number of bind types", "phalcon/db/adapter.zep", 496);
 						return;
 					}
-					zephir_array_append(&bindDataTypes, bindType, PH_SEPARATE, "phalcon/db/adapter.zep", 507);
+					zephir_array_append(&bindDataTypes, bindType, PH_SEPARATE, "phalcon/db/adapter.zep", 498);
 				}
 				ZEPHIR_INIT_LNVAR(_5);
 				ZEPHIR_CONCAT_VS(_5, escapedField, " = ?");
-				zephir_array_append(&placeholders, _5, PH_SEPARATE, "phalcon/db/adapter.zep", 509);
+				zephir_array_append(&placeholders, _5, PH_SEPARATE, "phalcon/db/adapter.zep", 500);
 			}
 		}
 	}
 	if (ZEPHIR_GLOBAL(db).escape_identifiers) {
-		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, table);
+		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, 0, table);
 		zephir_check_call_status();
 	} else {
 		ZEPHIR_CPY_WRT(escapedTable, table);
@@ -794,7 +752,7 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 			zephir_concat_self(&updateSql, whereCondition TSRMLS_CC);
 		} else {
 			if (Z_TYPE_P(whereCondition) != IS_ARRAY) {
-				ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Invalid WHERE clause conditions", "phalcon/db/adapter.zep", 537);
+				ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Invalid WHERE clause conditions", "phalcon/db/adapter.zep", 528);
 				return;
 			}
 			ZEPHIR_OBS_VAR(conditions);
@@ -814,11 +772,11 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
 		ZEPHIR_CONCAT_SVSV(updateSql, "UPDATE ", escapedTable, " SET ", setClause);
 	}
 	if (!(zephir_fast_count_int(bindDataTypes TSRMLS_CC))) {
-		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, updateSql, updateValues);
+		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, updateSql, updateValues);
 		zephir_check_call_status();
 		RETURN_MM();
 	}
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, updateSql, updateValues, bindDataTypes);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, updateSql, updateValues, bindDataTypes);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -831,11 +789,11 @@ PHP_METHOD(Phalcon_Db_Adapter, update) {
  * <code>
  * //Updating existing robot
  * $success = $connection->update(
- *     "robots",
- *     array(
- *          "name" => "New Astro Boy"
- *      ),
- *     "id = 101"
+ *	 "robots",
+ *	 array(
+ *		  "name" => "New Astro Boy"
+ *	  ),
+ *	 "id = 101"
  * );
  *
  * //Next SQL sentence is sent to the database system
@@ -878,17 +836,17 @@ PHP_METHOD(Phalcon_Db_Adapter, updateAsDict) {
 	if (_0) {
 		RETURN_MM_BOOL(0);
 	}
-	zephir_is_iterable(data, &_2, &_1, 0, 0, "phalcon/db/adapter.zep", 612);
+	zephir_is_iterable(data, &_2, &_1, 0, 0, "phalcon/db/adapter.zep", 604);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HMKEY(field, _2, _1);
 		ZEPHIR_GET_HVALUE(value, _3);
-		zephir_array_append(&fields, field, PH_SEPARATE, "phalcon/db/adapter.zep", 608);
-		zephir_array_append(&values, value, PH_SEPARATE, "phalcon/db/adapter.zep", 609);
+		zephir_array_append(&fields, field, PH_SEPARATE, "phalcon/db/adapter.zep", 600);
+		zephir_array_append(&values, value, PH_SEPARATE, "phalcon/db/adapter.zep", 601);
 	}
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "update", NULL, table, fields, values, whereCondition, dataTypes);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "update", NULL, 0, table, fields, values, whereCondition, dataTypes);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -900,8 +858,8 @@ PHP_METHOD(Phalcon_Db_Adapter, updateAsDict) {
  * <code>
  * //Deleting existing robot
  * $success = $connection->delete(
- *     "robots",
- *     "id = 101"
+ *	 "robots",
+ *	 "id = 101"
  * );
  *
  * //Next SQL sentence is generated
@@ -934,7 +892,7 @@ PHP_METHOD(Phalcon_Db_Adapter, delete) {
 
 
 	if (ZEPHIR_GLOBAL(db).escape_identifiers) {
-		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, table);
+		ZEPHIR_CALL_METHOD(&escapedTable, this_ptr, "escapeidentifier", NULL, 0, table);
 		zephir_check_call_status();
 	} else {
 		ZEPHIR_CPY_WRT(escapedTable, table);
@@ -945,7 +903,7 @@ PHP_METHOD(Phalcon_Db_Adapter, delete) {
 	} else {
 		ZEPHIR_CONCAT_SV(sql, "DELETE FROM ", escapedTable);
 	}
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, sql, placeholders, dataTypes);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, sql, placeholders, dataTypes);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -968,7 +926,7 @@ PHP_METHOD(Phalcon_Db_Adapter, getColumnList) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "getcolumnlist", NULL, columnList);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "getcolumnlist", NULL, 0, columnList);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -980,10 +938,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getColumnList) {
  * <code>
  * 	echo $connection->limit("SELECT * FROM robots", 5);
  * </code>
- *
- * @param  	string sqlQuery
- * @param 	int number
- * @return 	string
  */
 PHP_METHOD(Phalcon_Db_Adapter, limit) {
 
@@ -1011,7 +965,7 @@ PHP_METHOD(Phalcon_Db_Adapter, limit) {
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
 	ZEPHIR_INIT_VAR(_1);
 	ZVAL_LONG(_1, number);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "limit", NULL, sqlQuery, _1);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "limit", NULL, 0, sqlQuery, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1023,10 +977,6 @@ PHP_METHOD(Phalcon_Db_Adapter, limit) {
  * <code>
  * 	var_dump($connection->tableExists("blog", "posts"));
  * </code>
- *
- * @param string tableName
- * @param string schemaName
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, tableExists) {
 
@@ -1067,13 +1017,13 @@ PHP_METHOD(Phalcon_Db_Adapter, tableExists) {
 
 
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "tableexists", NULL, tableName, schemaName);
+	ZEPHIR_CALL_METHOD(&_2, _1, "tableexists", NULL, 0, tableName, schemaName);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchone", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchone", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_array_fetch_long(&_4, _0, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 697 TSRMLS_CC);
+	zephir_array_fetch_long(&_4, _0, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 681 TSRMLS_CC);
 	RETURN_MM_BOOL(ZEPHIR_GT_LONG(_4, 0));
 
 }
@@ -1084,19 +1034,15 @@ PHP_METHOD(Phalcon_Db_Adapter, tableExists) {
  *<code>
  * var_dump($connection->viewExists("active_users", "posts"));
  *</code>
- *
- * @param string viewName
- * @param string schemaName
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, viewExists) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *viewName_param = NULL, *schemaName = NULL, *_0 = NULL, *_1, *_2 = NULL, *_3, *_4;
-	zval *viewName = NULL;
+	zval *viewName_param = NULL, *schemaName_param = NULL, *_0 = NULL, *_1, *_2 = NULL, *_3, *_4;
+	zval *viewName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &viewName_param, &schemaName);
+	zephir_fetch_params(1, 1, 1, &viewName_param, &schemaName_param);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -1109,28 +1055,38 @@ PHP_METHOD(Phalcon_Db_Adapter, viewExists) {
 		ZEPHIR_INIT_VAR(viewName);
 		ZVAL_EMPTY_STRING(viewName);
 	}
-	if (!schemaName) {
-		schemaName = ZEPHIR_GLOBAL(global_null);
+	if (!schemaName_param) {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+	if (unlikely(Z_TYPE_P(schemaName_param) != IS_STRING && Z_TYPE_P(schemaName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'schemaName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(schemaName_param) == IS_STRING)) {
+		zephir_get_strval(schemaName, schemaName_param);
+	} else {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	}
 	}
 
 
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "viewexists", NULL, viewName, schemaName);
+	ZEPHIR_CALL_METHOD(&_2, _1, "viewexists", NULL, 0, viewName, schemaName);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchone", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchone", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_array_fetch_long(&_4, _0, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 713 TSRMLS_CC);
+	zephir_array_fetch_long(&_4, _0, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 693 TSRMLS_CC);
 	RETURN_MM_BOOL(ZEPHIR_GT_LONG(_4, 0));
 
 }
 
 /**
  * Returns a SQL modified with a FOR UPDATE clause
- *
- * @param	string sqlQuery
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Adapter, forUpdate) {
 
@@ -1155,7 +1111,7 @@ PHP_METHOD(Phalcon_Db_Adapter, forUpdate) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "forupdate", NULL, sqlQuery);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "forupdate", NULL, 0, sqlQuery);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1163,9 +1119,6 @@ PHP_METHOD(Phalcon_Db_Adapter, forUpdate) {
 
 /**
  * Returns a SQL modified with a LOCK IN SHARE MODE clause
- *
- * @param	string sqlQuery
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Adapter, sharedLock) {
 
@@ -1190,7 +1143,7 @@ PHP_METHOD(Phalcon_Db_Adapter, sharedLock) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "sharedlock", NULL, sqlQuery);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "sharedlock", NULL, 0, sqlQuery);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1198,20 +1151,16 @@ PHP_METHOD(Phalcon_Db_Adapter, sharedLock) {
 
 /**
  * Creates a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	array definition
- * @return	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, createTable) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *tableName_param = NULL, *schemaName_param = NULL, *definition, *columns, *_0, *_2, *_3 = NULL;
-	zval *tableName = NULL, *schemaName = NULL, *_1;
+	zval *definition = NULL;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *definition_param = NULL, *columns, *_0, *_1 = NULL;
+	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &definition);
+	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &definition_param);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -1235,32 +1184,23 @@ PHP_METHOD(Phalcon_Db_Adapter, createTable) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	}
+	definition = definition_param;
 
 
-	if (Z_TYPE_P(definition) != IS_ARRAY) {
-		ZEPHIR_INIT_VAR(_0);
-		object_init_ex(_0, phalcon_db_exception_ce);
-		ZEPHIR_INIT_VAR(_1);
-		ZEPHIR_CONCAT_SVS(_1, "Invalid definition to create the table '", tableName, "'");
-		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, _1);
-		zephir_check_call_status();
-		zephir_throw_exception_debug(_0, "phalcon/db/adapter.zep", 751 TSRMLS_CC);
-		ZEPHIR_MM_RESTORE();
-		return;
-	}
+
 	ZEPHIR_OBS_VAR(columns);
 	if (!(zephir_array_isset_string_fetch(&columns, definition, SS("columns"), 0 TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 755);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 720);
 		return;
 	}
 	if (!(zephir_fast_count_int(columns TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 759);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 724);
 		return;
 	}
-	_2 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_3, _2, "createtable", NULL, tableName, schemaName, definition);
+	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
+	ZEPHIR_CALL_METHOD(&_1, _0, "createtable", NULL, 0, tableName, schemaName, definition);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _3);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1268,20 +1208,16 @@ PHP_METHOD(Phalcon_Db_Adapter, createTable) {
 
 /**
  * Drops a table from a schema/database
- *
- * @param	string tableName
- * @param   string schemaName
- * @param	boolean ifExists
- * @return	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropTable) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *tableName_param = NULL, *schemaName_param = NULL, *ifExists = NULL, *_0, *_1 = NULL;
+	zend_bool ifExists;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *ifExists_param = NULL, *_0, *_1 = NULL;
 	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 2, &tableName_param, &schemaName_param, &ifExists);
+	zephir_fetch_params(1, 1, 2, &tableName_param, &schemaName_param, &ifExists_param);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -1310,15 +1246,17 @@ PHP_METHOD(Phalcon_Db_Adapter, dropTable) {
 		ZVAL_EMPTY_STRING(schemaName);
 	}
 	}
-	if (!ifExists) {
-		ifExists = ZEPHIR_GLOBAL(global_true);
+	if (!ifExists_param) {
+		ifExists = 1;
+	} else {
+		ifExists = zephir_get_boolval(ifExists_param);
 	}
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "droptable", NULL, tableName, schemaName, ifExists);
+	ZEPHIR_CALL_METHOD(&_1, _0, "droptable", NULL, 0, tableName, schemaName, (ifExists ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)));
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1335,11 +1273,12 @@ PHP_METHOD(Phalcon_Db_Adapter, dropTable) {
 PHP_METHOD(Phalcon_Db_Adapter, createView) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *viewName_param = NULL, *definition, *schemaName = NULL, *_0, *_2, *_3 = NULL;
-	zval *viewName = NULL, *_1;
+	zval *definition = NULL;
+	zval *viewName_param = NULL, *definition_param = NULL, *schemaName = NULL, *_0, *_1 = NULL;
+	zval *viewName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 2, 1, &viewName_param, &definition, &schemaName);
+	zephir_fetch_params(1, 2, 1, &viewName_param, &definition_param, &schemaName);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -1352,30 +1291,21 @@ PHP_METHOD(Phalcon_Db_Adapter, createView) {
 		ZEPHIR_INIT_VAR(viewName);
 		ZVAL_EMPTY_STRING(viewName);
 	}
+	definition = definition_param;
+
 	if (!schemaName) {
 		schemaName = ZEPHIR_GLOBAL(global_null);
 	}
 
 
-	if (Z_TYPE_P(definition) != IS_ARRAY) {
-		ZEPHIR_INIT_VAR(_0);
-		object_init_ex(_0, phalcon_db_exception_ce);
-		ZEPHIR_INIT_VAR(_1);
-		ZEPHIR_CONCAT_SVS(_1, "Invalid definition to create the view '", viewName, "'");
-		ZEPHIR_CALL_METHOD(NULL, _0, "__construct", NULL, _1);
-		zephir_check_call_status();
-		zephir_throw_exception_debug(_0, "phalcon/db/adapter.zep", 789 TSRMLS_CC);
-		ZEPHIR_MM_RESTORE();
-		return;
-	}
 	if (!(zephir_array_isset_string(definition, SS("sql")))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 793);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "The table must contain at least one column", "phalcon/db/adapter.zep", 749);
 		return;
 	}
-	_2 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_3, _2, "createview", NULL, viewName, definition, schemaName);
+	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
+	ZEPHIR_CALL_METHOD(&_1, _0, "createview", NULL, 0, viewName, definition, schemaName);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _3);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1383,20 +1313,16 @@ PHP_METHOD(Phalcon_Db_Adapter, createView) {
 
 /**
  * Drops a view
- *
- * @param	string viewName
- * @param   string schemaName
- * @param	boolean ifExists
- * @return	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropView) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *viewName_param = NULL, *schemaName_param = NULL, *ifExists = NULL, *_0, *_1 = NULL;
+	zend_bool ifExists;
+	zval *viewName_param = NULL, *schemaName_param = NULL, *ifExists_param = NULL, *_0, *_1 = NULL;
 	zval *viewName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 2, &viewName_param, &schemaName_param, &ifExists);
+	zephir_fetch_params(1, 1, 2, &viewName_param, &schemaName_param, &ifExists_param);
 
 	if (unlikely(Z_TYPE_P(viewName_param) != IS_STRING && Z_TYPE_P(viewName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'viewName' must be a string") TSRMLS_CC);
@@ -1425,15 +1351,17 @@ PHP_METHOD(Phalcon_Db_Adapter, dropView) {
 		ZVAL_EMPTY_STRING(schemaName);
 	}
 	}
-	if (!ifExists) {
-		ifExists = ZEPHIR_GLOBAL(global_true);
+	if (!ifExists_param) {
+		ifExists = 1;
+	} else {
+		ifExists = zephir_get_boolval(ifExists_param);
 	}
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "dropview", NULL, viewName, schemaName, ifExists);
+	ZEPHIR_CALL_METHOD(&_1, _0, "dropview", NULL, 0, viewName, schemaName, (ifExists ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false)));
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1441,11 +1369,6 @@ PHP_METHOD(Phalcon_Db_Adapter, dropView) {
 
 /**
  * Adds a column to a table
- *
- * @param	string tableName
- * @param 	string schemaName
- * @param	Phalcon\Db\ColumnInterface column
- * @return	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, addColumn) {
 
@@ -1480,14 +1403,10 @@ PHP_METHOD(Phalcon_Db_Adapter, addColumn) {
 	}
 
 
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "addcolumn", NULL, tableName, schemaName, column);
+	ZEPHIR_CALL_METHOD(&_1, _0, "addcolumn", NULL, 0, tableName, schemaName, column);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1495,20 +1414,15 @@ PHP_METHOD(Phalcon_Db_Adapter, addColumn) {
 
 /**
  * Modifies a table column based on a definition
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\ColumnInterface column
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, modifyColumn) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *tableName_param = NULL, *schemaName_param = NULL, *column, *_0, *_1 = NULL;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *column, *currentColumn = NULL, *_0, *_1 = NULL;
 	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 3, 0, &tableName_param, &schemaName_param, &column);
+	zephir_fetch_params(1, 3, 1, &tableName_param, &schemaName_param, &column, &currentColumn);
 
 	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
 		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
@@ -1532,16 +1446,15 @@ PHP_METHOD(Phalcon_Db_Adapter, modifyColumn) {
 		ZEPHIR_INIT_VAR(schemaName);
 		ZVAL_EMPTY_STRING(schemaName);
 	}
-
-
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
+	if (!currentColumn) {
+		currentColumn = ZEPHIR_GLOBAL(global_null);
 	}
+
+
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "modifycolumn", NULL, tableName, schemaName, column);
+	ZEPHIR_CALL_METHOD(&_1, _0, "modifycolumn", NULL, 0, tableName, schemaName, column, currentColumn);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1549,11 +1462,6 @@ PHP_METHOD(Phalcon_Db_Adapter, modifyColumn) {
 
 /**
  * Drops a column from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string columnName
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropColumn) {
 
@@ -1590,9 +1498,9 @@ PHP_METHOD(Phalcon_Db_Adapter, dropColumn) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "dropcolumn", NULL, tableName, schemaName, columnName);
+	ZEPHIR_CALL_METHOD(&_1, _0, "dropcolumn", NULL, 0, tableName, schemaName, columnName);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1600,11 +1508,6 @@ PHP_METHOD(Phalcon_Db_Adapter, dropColumn) {
 
 /**
  * Adds an index to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\IndexInterface index
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, addIndex) {
 
@@ -1639,14 +1542,10 @@ PHP_METHOD(Phalcon_Db_Adapter, addIndex) {
 	}
 
 
-	if (!(zephir_instance_of_ev(index, phalcon_db_indexinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'index' must be an instance of 'Phalcon\\Db\\IndexInterface'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "addindex", NULL, tableName, schemaName, index);
+	ZEPHIR_CALL_METHOD(&_1, _0, "addindex", NULL, 0, tableName, schemaName, index);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1654,11 +1553,6 @@ PHP_METHOD(Phalcon_Db_Adapter, addIndex) {
 
 /**
  * Drop an index from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string indexName
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropIndex) {
 
@@ -1694,9 +1588,9 @@ PHP_METHOD(Phalcon_Db_Adapter, dropIndex) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "dropindex", NULL, tableName, schemaName, indexName);
+	ZEPHIR_CALL_METHOD(&_1, _0, "dropindex", NULL, 0, tableName, schemaName, indexName);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1704,11 +1598,6 @@ PHP_METHOD(Phalcon_Db_Adapter, dropIndex) {
 
 /**
  * Adds a primary key to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\IndexInterface index
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, addPrimaryKey) {
 
@@ -1743,14 +1632,10 @@ PHP_METHOD(Phalcon_Db_Adapter, addPrimaryKey) {
 	}
 
 
-	if (!(zephir_instance_of_ev(index, phalcon_db_indexinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'index' must be an instance of 'Phalcon\\Db\\IndexInterface'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "addprimarykey", NULL, tableName, schemaName, index);
+	ZEPHIR_CALL_METHOD(&_1, _0, "addprimarykey", NULL, 0, tableName, schemaName, index);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1758,10 +1643,6 @@ PHP_METHOD(Phalcon_Db_Adapter, addPrimaryKey) {
 
 /**
  * Drops a table's primary key
- *
- * @param	string tableName
- * @param	string schemaName
- * @return 	boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropPrimaryKey) {
 
@@ -1797,9 +1678,9 @@ PHP_METHOD(Phalcon_Db_Adapter, dropPrimaryKey) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "dropprimarykey", NULL, tableName, schemaName);
+	ZEPHIR_CALL_METHOD(&_1, _0, "dropprimarykey", NULL, 0, tableName, schemaName);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1807,11 +1688,6 @@ PHP_METHOD(Phalcon_Db_Adapter, dropPrimaryKey) {
 
 /**
  * Adds a foreign key to a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	Phalcon\Db\ReferenceInterface reference
- * @return	boolean true
  */
 PHP_METHOD(Phalcon_Db_Adapter, addForeignKey) {
 
@@ -1846,14 +1722,10 @@ PHP_METHOD(Phalcon_Db_Adapter, addForeignKey) {
 	}
 
 
-	if (!(zephir_instance_of_ev(reference, phalcon_db_referenceinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'reference' must be an instance of 'Phalcon\\Db\\ReferenceInterface'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "addforeignkey", NULL, tableName, schemaName, reference);
+	ZEPHIR_CALL_METHOD(&_1, _0, "addforeignkey", NULL, 0, tableName, schemaName, reference);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1861,11 +1733,6 @@ PHP_METHOD(Phalcon_Db_Adapter, addForeignKey) {
 
 /**
  * Drops a foreign key from a table
- *
- * @param	string tableName
- * @param	string schemaName
- * @param	string referenceName
- * @return	boolean true
  */
 PHP_METHOD(Phalcon_Db_Adapter, dropForeignKey) {
 
@@ -1912,9 +1779,9 @@ PHP_METHOD(Phalcon_Db_Adapter, dropForeignKey) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_1, _0, "dropforeignkey", NULL, tableName, schemaName, referenceName);
+	ZEPHIR_CALL_METHOD(&_1, _0, "dropforeignkey", NULL, 0, tableName, schemaName, referenceName);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1922,9 +1789,6 @@ PHP_METHOD(Phalcon_Db_Adapter, dropForeignKey) {
 
 /**
  * Returns the SQL column definition from a column
- *
- * @param	Phalcon\Db\ColumnInterface column
- * @return	string
  */
 PHP_METHOD(Phalcon_Db_Adapter, getColumnDefinition) {
 
@@ -1936,12 +1800,8 @@ PHP_METHOD(Phalcon_Db_Adapter, getColumnDefinition) {
 
 
 
-	if (!(zephir_instance_of_ev(column, phalcon_db_columninterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(spl_ce_InvalidArgumentException, "Parameter 'column' must be an instance of 'Phalcon\\Db\\ColumnInterface'", "", 0);
-		return;
-	}
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_RETURN_CALL_METHOD(_0, "getcolumndefinition", NULL, column);
+	ZEPHIR_RETURN_CALL_METHOD(_0, "getcolumndefinition", NULL, 0, column);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -1953,9 +1813,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getColumnDefinition) {
  *<code>
  * 	print_r($connection->listTables("blog"));
  *</code>
- *
- * @param string schemaName
- * @return array
  */
 PHP_METHOD(Phalcon_Db_Adapter, listTables) {
 
@@ -1989,20 +1846,20 @@ PHP_METHOD(Phalcon_Db_Adapter, listTables) {
 	ZEPHIR_INIT_VAR(allTables);
 	array_init(allTables);
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "listtables", NULL, schemaName);
+	ZEPHIR_CALL_METHOD(&_2, _1, "listtables", NULL, 0, schemaName);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 957);
+	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 858);
 	for (
 	  ; zephir_hash_get_current_data_ex(_5, (void**) &_6, &_4) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_5, &_4)
 	) {
 		ZEPHIR_GET_HVALUE(table, _6);
-		zephir_array_fetch_long(&_7, table, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 955 TSRMLS_CC);
-		zephir_array_append(&allTables, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 955);
+		zephir_array_fetch_long(&_7, table, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 856 TSRMLS_CC);
+		zephir_array_append(&allTables, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 856);
 	}
 	RETURN_CCTOR(allTables);
 
@@ -2014,9 +1871,6 @@ PHP_METHOD(Phalcon_Db_Adapter, listTables) {
  *<code>
  *	print_r($connection->listViews("blog"));
  *</code>
- *
- * @param string schemaName
- * @return array
  */
 PHP_METHOD(Phalcon_Db_Adapter, listViews) {
 
@@ -2050,20 +1904,20 @@ PHP_METHOD(Phalcon_Db_Adapter, listViews) {
 	ZEPHIR_INIT_VAR(allTables);
 	array_init(allTables);
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "listviews", NULL, schemaName);
+	ZEPHIR_CALL_METHOD(&_2, _1, "listviews", NULL, 0, schemaName);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 978);
+	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 876);
 	for (
 	  ; zephir_hash_get_current_data_ex(_5, (void**) &_6, &_4) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_5, &_4)
 	) {
 		ZEPHIR_GET_HVALUE(table, _6);
-		zephir_array_fetch_long(&_7, table, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 976 TSRMLS_CC);
-		zephir_array_append(&allTables, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 976);
+		zephir_array_fetch_long(&_7, table, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 874 TSRMLS_CC);
+		zephir_array_append(&allTables, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 874);
 	}
 	RETURN_CCTOR(allTables);
 
@@ -2111,33 +1965,33 @@ PHP_METHOD(Phalcon_Db_Adapter, describeIndexes) {
 	ZEPHIR_INIT_VAR(indexes);
 	array_init(indexes);
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "describeindexes", NULL, table, schema);
+	ZEPHIR_CALL_METHOD(&_2, _1, "describeindexes", NULL, 0, table, schema);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 1010);
+	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 908);
 	for (
 	  ; zephir_hash_get_current_data_ex(_5, (void**) &_6, &_4) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_5, &_4)
 	) {
 		ZEPHIR_GET_HVALUE(index, _6);
-		zephir_array_fetch_long(&keyName, index, 2, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 999 TSRMLS_CC);
+		zephir_array_fetch_long(&keyName, index, 2, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 897 TSRMLS_CC);
 		if (!(zephir_array_isset(indexes, keyName))) {
 			ZEPHIR_INIT_NVAR(columns);
 			array_init(columns);
 		} else {
 			ZEPHIR_OBS_NVAR(columns);
-			zephir_array_fetch(&columns, indexes, keyName, PH_NOISY, "phalcon/db/adapter.zep", 1003 TSRMLS_CC);
+			zephir_array_fetch(&columns, indexes, keyName, PH_NOISY, "phalcon/db/adapter.zep", 901 TSRMLS_CC);
 		}
-		zephir_array_fetch_long(&_7, index, 4, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1006 TSRMLS_CC);
-		zephir_array_append(&columns, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 1006);
+		zephir_array_fetch_long(&_7, index, 4, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 904 TSRMLS_CC);
+		zephir_array_append(&columns, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 904);
 		zephir_array_update_zval(&indexes, keyName, &columns, PH_COPY | PH_SEPARATE);
 	}
 	ZEPHIR_INIT_VAR(indexObjects);
 	array_init(indexObjects);
-	zephir_is_iterable(indexes, &_9, &_8, 0, 0, "phalcon/db/adapter.zep", 1019);
+	zephir_is_iterable(indexes, &_9, &_8, 0, 0, "phalcon/db/adapter.zep", 917);
 	for (
 	  ; zephir_hash_get_current_data_ex(_9, (void**) &_10, &_8) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_9, &_8)
@@ -2146,7 +2000,7 @@ PHP_METHOD(Phalcon_Db_Adapter, describeIndexes) {
 		ZEPHIR_GET_HVALUE(indexColumns, _10);
 		ZEPHIR_INIT_NVAR(_3);
 		object_init_ex(_3, phalcon_db_index_ce);
-		ZEPHIR_CALL_METHOD(NULL, _3, "__construct", &_11, name, indexColumns);
+		ZEPHIR_CALL_METHOD(NULL, _3, "__construct", &_11, 15, name, indexColumns);
 		zephir_check_call_status();
 		zephir_array_update_zval(&indexObjects, name, &_3, PH_COPY | PH_SEPARATE);
 	}
@@ -2160,10 +2014,6 @@ PHP_METHOD(Phalcon_Db_Adapter, describeIndexes) {
  *<code>
  * print_r($connection->describeReferences('robots_parts'));
  *</code>
- *
- * @param	string table
- * @param	string schema
- * @return	Phalcon\Db\Reference[]
  */
 PHP_METHOD(Phalcon_Db_Adapter, describeReferences) {
 
@@ -2210,48 +2060,48 @@ PHP_METHOD(Phalcon_Db_Adapter, describeReferences) {
 	ZEPHIR_INIT_VAR(references);
 	array_init(references);
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "describereferences", NULL, table, schema);
+	ZEPHIR_CALL_METHOD(&_2, _1, "describereferences", NULL, 0, table, schema);
 	zephir_check_call_status();
 	ZEPHIR_INIT_VAR(_3);
 	ZVAL_LONG(_3, 3);
-	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, _2, _3);
+	ZEPHIR_CALL_METHOD(&_0, this_ptr, "fetchall", NULL, 0, _2, _3);
 	zephir_check_call_status();
-	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 1067);
+	zephir_is_iterable(_0, &_5, &_4, 0, 0, "phalcon/db/adapter.zep", 961);
 	for (
 	  ; zephir_hash_get_current_data_ex(_5, (void**) &_6, &_4) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_5, &_4)
 	) {
 		ZEPHIR_GET_HVALUE(reference, _6);
-		zephir_array_fetch_long(&constraintName, reference, 2, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1043 TSRMLS_CC);
+		zephir_array_fetch_long(&constraintName, reference, 2, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 937 TSRMLS_CC);
 		if (!(zephir_array_isset(references, constraintName))) {
 			ZEPHIR_OBS_NVAR(referencedSchema);
-			zephir_array_fetch_long(&referencedSchema, reference, 3, PH_NOISY, "phalcon/db/adapter.zep", 1045 TSRMLS_CC);
+			zephir_array_fetch_long(&referencedSchema, reference, 3, PH_NOISY, "phalcon/db/adapter.zep", 939 TSRMLS_CC);
 			ZEPHIR_OBS_NVAR(referencedTable);
-			zephir_array_fetch_long(&referencedTable, reference, 4, PH_NOISY, "phalcon/db/adapter.zep", 1046 TSRMLS_CC);
+			zephir_array_fetch_long(&referencedTable, reference, 4, PH_NOISY, "phalcon/db/adapter.zep", 940 TSRMLS_CC);
 			ZEPHIR_INIT_NVAR(columns);
 			array_init(columns);
 			ZEPHIR_INIT_NVAR(referencedColumns);
 			array_init(referencedColumns);
 		} else {
-			zephir_array_fetch(&_7, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1050 TSRMLS_CC);
+			zephir_array_fetch(&_7, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 944 TSRMLS_CC);
 			ZEPHIR_OBS_NVAR(referencedSchema);
-			zephir_array_fetch_string(&referencedSchema, _7, SL("referencedSchema"), PH_NOISY, "phalcon/db/adapter.zep", 1050 TSRMLS_CC);
-			zephir_array_fetch(&_8, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1051 TSRMLS_CC);
+			zephir_array_fetch_string(&referencedSchema, _7, SL("referencedSchema"), PH_NOISY, "phalcon/db/adapter.zep", 944 TSRMLS_CC);
+			zephir_array_fetch(&_8, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 945 TSRMLS_CC);
 			ZEPHIR_OBS_NVAR(referencedTable);
-			zephir_array_fetch_string(&referencedTable, _8, SL("referencedTable"), PH_NOISY, "phalcon/db/adapter.zep", 1051 TSRMLS_CC);
-			zephir_array_fetch(&_9, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1052 TSRMLS_CC);
+			zephir_array_fetch_string(&referencedTable, _8, SL("referencedTable"), PH_NOISY, "phalcon/db/adapter.zep", 945 TSRMLS_CC);
+			zephir_array_fetch(&_9, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 946 TSRMLS_CC);
 			ZEPHIR_OBS_NVAR(columns);
-			zephir_array_fetch_string(&columns, _9, SL("columns"), PH_NOISY, "phalcon/db/adapter.zep", 1052 TSRMLS_CC);
-			zephir_array_fetch(&_10, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1053 TSRMLS_CC);
+			zephir_array_fetch_string(&columns, _9, SL("columns"), PH_NOISY, "phalcon/db/adapter.zep", 946 TSRMLS_CC);
+			zephir_array_fetch(&_10, references, constraintName, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 947 TSRMLS_CC);
 			ZEPHIR_OBS_NVAR(referencedColumns);
-			zephir_array_fetch_string(&referencedColumns, _10, SL("referencedColumns"), PH_NOISY, "phalcon/db/adapter.zep", 1053 TSRMLS_CC);
+			zephir_array_fetch_string(&referencedColumns, _10, SL("referencedColumns"), PH_NOISY, "phalcon/db/adapter.zep", 947 TSRMLS_CC);
 		}
-		zephir_array_fetch_long(&_7, reference, 1, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1056 TSRMLS_CC);
-		zephir_array_append(&columns, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 1056);
-		zephir_array_fetch_long(&_8, reference, 5, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1057 TSRMLS_CC);
-		zephir_array_append(&referencedColumns, _8, PH_SEPARATE, "phalcon/db/adapter.zep", 1057);
+		zephir_array_fetch_long(&_7, reference, 1, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 950 TSRMLS_CC);
+		zephir_array_append(&columns, _7, PH_SEPARATE, "phalcon/db/adapter.zep", 950);
+		zephir_array_fetch_long(&_8, reference, 5, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 951 TSRMLS_CC);
+		zephir_array_append(&referencedColumns, _8, PH_SEPARATE, "phalcon/db/adapter.zep", 951);
 		ZEPHIR_INIT_NVAR(_11);
-		array_init_size(_11, 7);
+		zephir_create_array(_11, 4, 0 TSRMLS_CC);
 		zephir_array_update_string(&_11, SL("referencedSchema"), &referencedSchema, PH_COPY | PH_SEPARATE);
 		zephir_array_update_string(&_11, SL("referencedTable"), &referencedTable, PH_COPY | PH_SEPARATE);
 		zephir_array_update_string(&_11, SL("columns"), &columns, PH_COPY | PH_SEPARATE);
@@ -2260,7 +2110,7 @@ PHP_METHOD(Phalcon_Db_Adapter, describeReferences) {
 	}
 	ZEPHIR_INIT_VAR(referenceObjects);
 	array_init(referenceObjects);
-	zephir_is_iterable(references, &_13, &_12, 0, 0, "phalcon/db/adapter.zep", 1077);
+	zephir_is_iterable(references, &_13, &_12, 0, 0, "phalcon/db/adapter.zep", 971);
 	for (
 	  ; zephir_hash_get_current_data_ex(_13, (void**) &_14, &_12) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_13, &_12)
@@ -2270,20 +2120,20 @@ PHP_METHOD(Phalcon_Db_Adapter, describeReferences) {
 		ZEPHIR_INIT_NVAR(_3);
 		object_init_ex(_3, phalcon_db_reference_ce);
 		ZEPHIR_INIT_NVAR(_11);
-		array_init_size(_11, 7);
+		zephir_create_array(_11, 4, 0 TSRMLS_CC);
 		ZEPHIR_OBS_NVAR(_15);
-		zephir_array_fetch_string(&_15, arrayReference, SL("referencedSchema"), PH_NOISY, "phalcon/db/adapter.zep", 1070 TSRMLS_CC);
+		zephir_array_fetch_string(&_15, arrayReference, SL("referencedSchema"), PH_NOISY, "phalcon/db/adapter.zep", 964 TSRMLS_CC);
 		zephir_array_update_string(&_11, SL("referencedSchema"), &_15, PH_COPY | PH_SEPARATE);
 		ZEPHIR_OBS_NVAR(_15);
-		zephir_array_fetch_string(&_15, arrayReference, SL("referencedTable"), PH_NOISY, "phalcon/db/adapter.zep", 1071 TSRMLS_CC);
+		zephir_array_fetch_string(&_15, arrayReference, SL("referencedTable"), PH_NOISY, "phalcon/db/adapter.zep", 965 TSRMLS_CC);
 		zephir_array_update_string(&_11, SL("referencedTable"), &_15, PH_COPY | PH_SEPARATE);
 		ZEPHIR_OBS_NVAR(_15);
-		zephir_array_fetch_string(&_15, arrayReference, SL("columns"), PH_NOISY, "phalcon/db/adapter.zep", 1072 TSRMLS_CC);
+		zephir_array_fetch_string(&_15, arrayReference, SL("columns"), PH_NOISY, "phalcon/db/adapter.zep", 966 TSRMLS_CC);
 		zephir_array_update_string(&_11, SL("columns"), &_15, PH_COPY | PH_SEPARATE);
 		ZEPHIR_OBS_NVAR(_15);
-		zephir_array_fetch_string(&_15, arrayReference, SL("referencedColumns"), PH_NOISY, "phalcon/db/adapter.zep", 1074 TSRMLS_CC);
+		zephir_array_fetch_string(&_15, arrayReference, SL("referencedColumns"), PH_NOISY, "phalcon/db/adapter.zep", 968 TSRMLS_CC);
 		zephir_array_update_string(&_11, SL("referencedColumns"), &_15, PH_COPY | PH_SEPARATE);
-		ZEPHIR_CALL_METHOD(NULL, _3, "__construct", &_16, name, _11);
+		ZEPHIR_CALL_METHOD(NULL, _3, "__construct", &_16, 16, name, _11);
 		zephir_check_call_status();
 		zephir_array_update_zval(&referenceObjects, name, &_3, PH_COPY | PH_SEPARATE);
 	}
@@ -2297,33 +2147,44 @@ PHP_METHOD(Phalcon_Db_Adapter, describeReferences) {
  *<code>
  * print_r($connection->tableOptions('robots'));
  *</code>
- *
- * @param	string tableName
- * @param	string schemaName
- * @return	array
  */
 PHP_METHOD(Phalcon_Db_Adapter, tableOptions) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zval *tableName, *schemaName = NULL, *sql = NULL, *_0, *_1 = NULL, *_2, *_3;
+	zval *tableName_param = NULL, *schemaName_param = NULL, *sql = NULL, *_0, *_1 = NULL, *_2, *_3;
+	zval *tableName = NULL, *schemaName = NULL;
 
 	ZEPHIR_MM_GROW();
-	zephir_fetch_params(1, 1, 1, &tableName, &schemaName);
+	zephir_fetch_params(1, 1, 1, &tableName_param, &schemaName_param);
 
-	if (!schemaName) {
-		schemaName = ZEPHIR_GLOBAL(global_null);
+	if (unlikely(Z_TYPE_P(tableName_param) != IS_STRING && Z_TYPE_P(tableName_param) != IS_NULL)) {
+		zephir_throw_exception_string(spl_ce_InvalidArgumentException, SL("Parameter 'tableName' must be a string") TSRMLS_CC);
+		RETURN_MM_NULL();
+	}
+
+	if (likely(Z_TYPE_P(tableName_param) == IS_STRING)) {
+		zephir_get_strval(tableName, tableName_param);
+	} else {
+		ZEPHIR_INIT_VAR(tableName);
+		ZVAL_EMPTY_STRING(tableName);
+	}
+	if (!schemaName_param) {
+		ZEPHIR_INIT_VAR(schemaName);
+		ZVAL_EMPTY_STRING(schemaName);
+	} else {
+		zephir_get_strval(schemaName, schemaName_param);
 	}
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&sql, _0, "tableoptions", NULL, tableName, schemaName);
+	ZEPHIR_CALL_METHOD(&sql, _0, "tableoptions", NULL, 0, tableName, schemaName);
 	zephir_check_call_status();
 	if (zephir_is_true(sql)) {
 		ZEPHIR_INIT_VAR(_2);
-		ZVAL_LONG(_2, 1);
-		ZEPHIR_CALL_METHOD(&_1, this_ptr, "fetchall", NULL, sql, _2);
+		ZVAL_LONG(_2, 2);
+		ZEPHIR_CALL_METHOD(&_1, this_ptr, "fetchall", NULL, 0, sql, _2);
 		zephir_check_call_status();
-		zephir_array_fetch_long(&_3, _1, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 1097 TSRMLS_CC);
+		zephir_array_fetch_long(&_3, _1, 0, PH_NOISY | PH_READONLY, "phalcon/db/adapter.zep", 987 TSRMLS_CC);
 		RETURN_CTOR(_3);
 	}
 	array_init(return_value);
@@ -2333,9 +2194,6 @@ PHP_METHOD(Phalcon_Db_Adapter, tableOptions) {
 
 /**
  * Creates a new savepoint
- *
- * @param string name
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, createSavepoint) {
 
@@ -2361,15 +2219,15 @@ PHP_METHOD(Phalcon_Db_Adapter, createSavepoint) {
 
 	ZEPHIR_OBS_VAR(dialect);
 	zephir_read_property_this(&dialect, this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL);
+	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL, 0);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_0))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter.", "phalcon/db/adapter.zep", 1115);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter.", "phalcon/db/adapter.zep", 1002);
 		return;
 	}
-	ZEPHIR_CALL_METHOD(&_1, dialect, "createsavepoint", NULL, name);
+	ZEPHIR_CALL_METHOD(&_1, dialect, "createsavepoint", NULL, 0, name);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -2377,9 +2235,6 @@ PHP_METHOD(Phalcon_Db_Adapter, createSavepoint) {
 
 /**
  * Releases given savepoint
- *
- * @param string name
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, releaseSavepoint) {
 
@@ -2405,20 +2260,20 @@ PHP_METHOD(Phalcon_Db_Adapter, releaseSavepoint) {
 
 	ZEPHIR_OBS_VAR(dialect);
 	zephir_read_property_this(&dialect, this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL);
+	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL, 0);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_0))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1134);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1018);
 		return;
 	}
-	ZEPHIR_CALL_METHOD(&_1, dialect, "supportsreleasesavepoints", NULL);
+	ZEPHIR_CALL_METHOD(&_1, dialect, "supportsreleasesavepoints", NULL, 0);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_1))) {
 		RETURN_MM_BOOL(0);
 	}
-	ZEPHIR_CALL_METHOD(&_2, dialect, "releasesavepoint", NULL, name);
+	ZEPHIR_CALL_METHOD(&_2, dialect, "releasesavepoint", NULL, 0, name);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _2);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _2);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -2426,9 +2281,6 @@ PHP_METHOD(Phalcon_Db_Adapter, releaseSavepoint) {
 
 /**
  * Rollbacks given savepoint
- *
- * @param string name
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, rollbackSavepoint) {
 
@@ -2454,15 +2306,15 @@ PHP_METHOD(Phalcon_Db_Adapter, rollbackSavepoint) {
 
 	ZEPHIR_OBS_VAR(dialect);
 	zephir_read_property_this(&dialect, this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL);
+	ZEPHIR_CALL_METHOD(&_0, dialect, "supportssavepoints", NULL, 0);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_0))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1157);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1038);
 		return;
 	}
-	ZEPHIR_CALL_METHOD(&_1, dialect, "rollbacksavepoint", NULL, name);
+	ZEPHIR_CALL_METHOD(&_1, dialect, "rollbacksavepoint", NULL, 0, name);
 	zephir_check_call_status();
-	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, _1);
+	ZEPHIR_RETURN_CALL_METHOD(this_ptr, "execute", NULL, 0, _1);
 	zephir_check_call_status();
 	RETURN_MM();
 
@@ -2470,9 +2322,6 @@ PHP_METHOD(Phalcon_Db_Adapter, rollbackSavepoint) {
 
 /**
  * Set if nested transactions should use savepoints
- *
- * @param boolean nestedTransactionsWithSavepoints
- * @return Phalcon\Db\AdapterInterface
  */
 PHP_METHOD(Phalcon_Db_Adapter, setNestedTransactionsWithSavepoints) {
 
@@ -2488,14 +2337,14 @@ PHP_METHOD(Phalcon_Db_Adapter, setNestedTransactionsWithSavepoints) {
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_transactionLevel"), PH_NOISY_CC);
 	if (ZEPHIR_GT_LONG(_0, 0)) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Nested transaction with savepoints behavior cannot be changed while a transaction is open", "phalcon/db/adapter.zep", 1173);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Nested transaction with savepoints behavior cannot be changed while a transaction is open", "phalcon/db/adapter.zep", 1051);
 		return;
 	}
 	_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dialect"), PH_NOISY_CC);
-	ZEPHIR_CALL_METHOD(&_2, _1, "supportssavepoints", NULL);
+	ZEPHIR_CALL_METHOD(&_2, _1, "supportssavepoints", NULL, 0);
 	zephir_check_call_status();
 	if (!(zephir_is_true(_2))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1177);
+		ZEPHIR_THROW_EXCEPTION_DEBUG_STR(phalcon_db_exception_ce, "Savepoints are not supported by this database adapter", "phalcon/db/adapter.zep", 1055);
 		return;
 	}
 	zephir_update_property_this(this_ptr, SL("_transactionsWithSavepoints"), nestedTransactionsWithSavepoints ? ZEPHIR_GLOBAL(global_true) : ZEPHIR_GLOBAL(global_false) TSRMLS_CC);
@@ -2505,8 +2354,6 @@ PHP_METHOD(Phalcon_Db_Adapter, setNestedTransactionsWithSavepoints) {
 
 /**
  * Returns if nested transactions should use savepoints
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, isNestedTransactionsWithSavepoints) {
 
@@ -2517,8 +2364,6 @@ PHP_METHOD(Phalcon_Db_Adapter, isNestedTransactionsWithSavepoints) {
 
 /**
  * Returns the savepoint name to use for nested transactions
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Adapter, getNestedTransactionSavepointName) {
 
@@ -2537,13 +2382,11 @@ PHP_METHOD(Phalcon_Db_Adapter, getNestedTransactionSavepointName) {
  *<code>
  * //Inserting a new robot with a valid default value for the column 'id'
  * $success = $connection->insert(
- *     "robots",
- *     array($connection->getDefaultIdValue(), "Astro Boy", 1952),
- *     array("id", "name", "year")
+ *	 "robots",
+ *	 array($connection->getDefaultIdValue(), "Astro Boy", 1952),
+ *	 array("id", "name", "year")
  * );
  *</code>
- *
- * @return Phalcon\Db\RawValue
  */
 PHP_METHOD(Phalcon_Db_Adapter, getDefaultIdValue) {
 
@@ -2555,7 +2398,36 @@ PHP_METHOD(Phalcon_Db_Adapter, getDefaultIdValue) {
 	object_init_ex(return_value, phalcon_db_rawvalue_ce);
 	ZEPHIR_INIT_VAR(_0);
 	ZVAL_STRING(_0, "null", ZEPHIR_TEMP_PARAM_COPY);
-	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, _0);
+	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 17, _0);
+	zephir_check_temp_parameter(_0);
+	zephir_check_call_status();
+	RETURN_MM();
+
+}
+
+/**
+ * Returns the default value to make the RBDM use the default value declared in the table definition
+ *
+ *<code>
+ * //Inserting a new robot with a valid default value for the column 'year'
+ * $success = $connection->insert(
+ *	 "robots",
+ *	 array("Astro Boy", $connection->getDefaultValue()),
+ *	 array("name", "year")
+ * );
+ *</code>
+ */
+PHP_METHOD(Phalcon_Db_Adapter, getDefaultValue) {
+
+	int ZEPHIR_LAST_CALL_STATUS;
+	zval *_0;
+
+	ZEPHIR_MM_GROW();
+
+	object_init_ex(return_value, phalcon_db_rawvalue_ce);
+	ZEPHIR_INIT_VAR(_0);
+	ZVAL_STRING(_0, "DEFAULT", ZEPHIR_TEMP_PARAM_COPY);
+	ZEPHIR_CALL_METHOD(NULL, return_value, "__construct", NULL, 17, _0);
 	zephir_check_temp_parameter(_0);
 	zephir_check_call_status();
 	RETURN_MM();
@@ -2564,8 +2436,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getDefaultIdValue) {
 
 /**
  * Check whether the database system requires a sequence to produce auto-numeric values
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, supportSequences) {
 
@@ -2576,8 +2446,6 @@ PHP_METHOD(Phalcon_Db_Adapter, supportSequences) {
 
 /**
  * Check whether the database system requires an explicit value for identity columns
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Db_Adapter, useExplicitIdValue) {
 
@@ -2612,8 +2480,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getConnectionId) {
 
 /**
  * Active SQL statement in the object
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Adapter, getSQLStatement) {
 
@@ -2624,8 +2490,6 @@ PHP_METHOD(Phalcon_Db_Adapter, getSQLStatement) {
 
 /**
  * Active SQL statement in the object without replace bound paramters
- *
- * @return string
  */
 PHP_METHOD(Phalcon_Db_Adapter, getRealSQLStatement) {
 

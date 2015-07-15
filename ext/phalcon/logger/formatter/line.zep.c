@@ -19,23 +19,6 @@
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Logger\Formatter\Line
  *
@@ -184,31 +167,31 @@ PHP_METHOD(Phalcon_Logger_Formatter_Line, format) {
 		_1 = zephir_fetch_nproperty_this(this_ptr, SL("_dateFormat"), PH_NOISY_CC);
 		ZEPHIR_SINIT_VAR(_2);
 		ZVAL_LONG(&_2, timestamp);
-		ZEPHIR_CALL_FUNCTION(&_3, "date", NULL, _1, &_2);
+		ZEPHIR_CALL_FUNCTION(&_3, "date", NULL, 299, _1, &_2);
 		zephir_check_call_status();
 		ZEPHIR_SINIT_NVAR(_2);
 		ZVAL_STRING(&_2, "%date%", 0);
-		zephir_fast_str_replace(_0, &_2, _3, format TSRMLS_CC);
+		zephir_fast_str_replace(&_0, &_2, _3, format TSRMLS_CC);
 		ZEPHIR_CPY_WRT(format, _0);
 	}
 	if (zephir_memnstr_str(format, SL("%type%"), "phalcon/logger/formatter/line.zep", 88)) {
 		ZEPHIR_INIT_NVAR(_0);
 		ZEPHIR_INIT_VAR(_4);
 		ZVAL_LONG(_4, type);
-		ZEPHIR_CALL_METHOD(&_3, this_ptr, "gettypestring", NULL, _4);
+		ZEPHIR_CALL_METHOD(&_3, this_ptr, "gettypestring", NULL, 0, _4);
 		zephir_check_call_status();
 		ZEPHIR_SINIT_NVAR(_2);
 		ZVAL_STRING(&_2, "%type%", 0);
-		zephir_fast_str_replace(_0, &_2, _3, format TSRMLS_CC);
+		zephir_fast_str_replace(&_0, &_2, _3, format TSRMLS_CC);
 		ZEPHIR_CPY_WRT(format, _0);
 	}
 	ZEPHIR_INIT_NVAR(_0);
 	ZEPHIR_SINIT_NVAR(_2);
 	ZVAL_STRING(&_2, "%message%", 0);
-	zephir_fast_str_replace(_0, &_2, message, format TSRMLS_CC);
+	zephir_fast_str_replace(&_0, &_2, message, format TSRMLS_CC);
 	ZEPHIR_CPY_WRT(format, _0);
 	if (Z_TYPE_P(context) == IS_ARRAY) {
-		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "interpolate", NULL, format, context);
+		ZEPHIR_RETURN_CALL_METHOD(this_ptr, "interpolate", NULL, 0, format, context);
 		zephir_check_call_status();
 		RETURN_MM();
 	}

@@ -4,7 +4,7 @@
 	+------------------------------------------------------------------------+
 	| Phalcon Framework                                                      |
 	+------------------------------------------------------------------------+
-	| Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+	| Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
 	+------------------------------------------------------------------------+
 	| This source file is subject to the New BSD License that is bundled     |
 	| with this package in the file docs/LICENSE.txt.                        |
@@ -73,6 +73,8 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 
 		$validation->add('last_name', new PresenceOf());
 
+		$validation->add('number', new PresenceOf());
+
 		$messages = $validation->validate($_POST);
 
 		$expectedMessages = Phalcon\Validation\Message\Group::__set_state(array(
@@ -89,12 +91,20 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 					'_field' => 'last_name',
 					'_code' => '0',
 				)),
+				2 => Phalcon\Validation\Message::__set_state(array(
+					'_type' => 'PresenceOf',
+					'_message' => 'Field number is required',
+					'_field' => 'number',
+					'_code' => '0',
+				)),
 			)
 		));
 
 		$this->assertEquals($expectedMessages, $messages);
 
 		$_POST['last_name'] = 'Walter';
+
+		$_POST['number'] = '0';
 
 		$messages = $validation->validate($_POST);
 
@@ -172,7 +182,7 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 		$validation = new Phalcon\Validation();
 
 		$validation->add('name', new Identical(array(
-			'value' => 'Peter'
+			'accepted' => 'Peter'
 		)));
 
 		$messages = $validation->validate($_POST);
@@ -204,7 +214,7 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 		$validation = new Phalcon\Validation();
 
 		$validation->add('name', new Identical(array(
-			'value' => 'Peter',
+			'accepted' => 'Peter',
 			'message' => 'The name must be peter'
 		)));
 
@@ -996,5 +1006,11 @@ class ValidationTest extends PHPUnit_Framework_TestCase
 		));
 
 		$this->assertEquals($expectedMessages, $messages);
+	}
+
+	public function testGetDefaultValidationMessageShouldReturnEmptyStringIfNoneIsSet()
+	{
+		$validation = new \Phalcon\Validation();
+		$this->assertEmpty($validation->getDefaultMessage('_notexistentvalidationmessage_'));
 	}
 }

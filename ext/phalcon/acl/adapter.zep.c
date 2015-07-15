@@ -13,28 +13,10 @@
 
 #include "kernel/main.h"
 #include "kernel/object.h"
-#include "kernel/exception.h"
 #include "kernel/memory.h"
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Acl\Adapter
  *
@@ -42,7 +24,7 @@
  */
 ZEPHIR_INIT_CLASS(Phalcon_Acl_Adapter) {
 
-	ZEPHIR_REGISTER_CLASS(Phalcon\\Acl, Adapter, phalcon, acl_adapter, phalcon_acl_adapter_method_entry, 0);
+	ZEPHIR_REGISTER_CLASS(Phalcon\\Acl, Adapter, phalcon, acl_adapter, phalcon_acl_adapter_method_entry, ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 
 	/**
 	 * Events manager
@@ -76,10 +58,12 @@ ZEPHIR_INIT_CLASS(Phalcon_Acl_Adapter) {
 
 	/**
 	 * Active access which the list is checking if some role can access it
-	 * "@var mixed
+	 * @var mixed
 	 */
 	zend_declare_property_null(phalcon_acl_adapter_ce, SL("_activeAccess"), ZEND_ACC_PROTECTED TSRMLS_CC);
 
+	zend_class_implements(phalcon_acl_adapter_ce TSRMLS_CC, 1, phalcon_acl_adapterinterface_ce);
+	zend_class_implements(phalcon_acl_adapter_ce TSRMLS_CC, 1, phalcon_events_eventsawareinterface_ce);
 	return SUCCESS;
 
 }
@@ -108,7 +92,7 @@ PHP_METHOD(Phalcon_Acl_Adapter, getActiveResource) {
 
 /**
  * Active access which the list is checking if some role can access it
- * "@var mixed
+ * @var mixed
  */
 PHP_METHOD(Phalcon_Acl_Adapter, getActiveAccess) {
 
@@ -119,8 +103,6 @@ PHP_METHOD(Phalcon_Acl_Adapter, getActiveAccess) {
 
 /**
  * Sets the events manager
- *
- * @param Phalcon\Events\ManagerInterface eventsManager
  */
 PHP_METHOD(Phalcon_Acl_Adapter, setEventsManager) {
 
@@ -130,18 +112,12 @@ PHP_METHOD(Phalcon_Acl_Adapter, setEventsManager) {
 
 
 
-	if (!(zephir_instance_of_ev(eventsManager, phalcon_events_managerinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'eventsManager' must be an instance of 'Phalcon\\Events\\ManagerInterface'", "", 0);
-		return;
-	}
 	zephir_update_property_this(this_ptr, SL("_eventsManager"), eventsManager TSRMLS_CC);
 
 }
 
 /**
  * Returns the internal event manager
- *
- * @return Phalcon\Events\ManagerInterface
  */
 PHP_METHOD(Phalcon_Acl_Adapter, getEventsManager) {
 
@@ -152,8 +128,6 @@ PHP_METHOD(Phalcon_Acl_Adapter, getEventsManager) {
 
 /**
  * Sets the default access level (Phalcon\Acl::ALLOW or Phalcon\Acl::DENY)
- *
- * @param int defaultAccess
  */
 PHP_METHOD(Phalcon_Acl_Adapter, setDefaultAction) {
 
@@ -173,8 +147,6 @@ PHP_METHOD(Phalcon_Acl_Adapter, setDefaultAction) {
 
 /**
  * Returns the default ACL access level
- *
- * @return int
  */
 PHP_METHOD(Phalcon_Acl_Adapter, getDefaultAction) {
 

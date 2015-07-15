@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -14,42 +14,106 @@
  +------------------------------------------------------------------------+
  | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
  |          Eduar Carvajal <eduar@phalconphp.com>                         |
+ |          Stanislav Kiryukhin <korsar.zn@gmail.com>                     |
  +------------------------------------------------------------------------+
  */
 
 namespace Phalcon\Db;
 
-use Phalcon\Db\Exception;
-
 /**
  * Phalcon\Db\Dialect
  *
  * This is the base class to each database dialect. This implements
- * common methods to transform intermediate code into its RDBM related syntax
+ * common methods to transform intermediate code into its RDBMS related syntax
  */
-abstract class Dialect
+abstract class Dialect implements DialectInterface
 {
 
 	protected _escapeChar;
 
+	protected _customFunctions;
+
+	/**
+	 * Registers custom SQL functions
+	 */
+	public function registerCustomFunction(string name, callable customFunction) -> <Dialect>
+	{
+		let this->_customFunctions[name] = customFunction;
+		return this;
+	}
+
+	/**
+	 * Returns registered functions
+	 */
+	public function getCustomFunctions() -> array
+	{
+		return this->_customFunctions;
+	}
+
+	/**
+	 * Escape identifiers
+	 */
+	public final function escape(string! str, string escapeChar = null) -> string
+	{
+		var parts, key, part, newParts;
+
+		if !globals_get("db.escape_identifiers") {
+			return str;
+		}
+
+		if escapeChar == "" {
+			let escapeChar = (string) this->_escapeChar;
+		}
+
+		if !memstr(str, ".") {
+
+			if escapeChar != "" && str != "*" {
+				return escapeChar . str . escapeChar;
+			}
+
+			return str;
+		}
+
+		let parts = (array) explode(".", trim(str, escapeChar));
+
+		let newParts = parts;
+		for key, part in parts {
+
+			if escapeChar == "" || part == "" || part == "*" {
+				continue;
+			}
+
+			let newParts[key] = escapeChar . part . escapeChar;
+		}
+
+		return implode(".", newParts);
+	}
+
 	/**
 	 * Generates the SQL for LIMIT clause
 	 *
-	 *<code>
-	 * $sql = $dialect->limit('SELECT * FROM robots', 10);
-	 * echo $sql; // SELECT * FROM robots LIMIT 10
-	 *</code>
+	 * <code>
+	 *    $sql = $dialect->limit('SELECT * FROM robots', 10);
+	 *    echo $sql; // SELECT * FROM robots LIMIT 10
 	 *
-	 * @param string sqlQuery
-	 * @param int number
-	 * @return string
+	 *    $sql = $dialect->limit('SELECT * FROM robots', [10, 50]);
+	 *    echo $sql; // SELECT * FROM robots LIMIT 10 OFFSET 50
+	 * </code>
 	 */
-	public function limit(string! sqlQuery, int number) -> string
+	public function limit(string! sqlQuery, var number) -> string
 	{
-		if is_numeric(number) {
-			return sqlQuery . " LIMIT " . number;
+		if typeof number == "array" {
+
+			let sqlQuery .= " LIMIT " . number[0];
+
+			if isset number[1] && strlen(number[1]) {
+				let sqlQuery .= " OFFSET " . number[1];
+			}
+
+			return sqlQuery;
 		}
-		return sqlQuery;
+
+		return sqlQuery . " LIMIT " . number;
 	}
 
 	/**
@@ -59,9 +123,6 @@ abstract class Dialect
 	 * $sql = $dialect->forUpdate('SELECT * FROM robots');
 	 * echo $sql; // SELECT * FROM robots FOR UPDATE
 	 *</code>
-	 *
-	 * @param	string sqlQuery
-	 * @return	string
 	 */
 	public function forUpdate(string! sqlQuery) -> string
 	{
@@ -75,9 +136,6 @@ abstract class Dialect
 	 * $sql = $dialect->sharedLock('SELECT * FROM robots');
 	 * echo $sql; // SELECT * FROM robots LOCK IN SHARE MODE
 	 *</code>
-	 *
-	 * @param	string sqlQuery
-	 * @return	string
 	 */
 	public function sharedLock(string! sqlQuery) -> string
 	{
@@ -87,181 +145,203 @@ abstract class Dialect
 	/**
 	 * Gets a list of columns with escaped identifiers
 	 *
-	 *<code>
-	 * echo $dialect->getColumnList(array('column1', 'column'));
-	 *</code>
-	 *
-	 * @param	array columnList
-	 * @return	string
+	 * <code>
+	 *    echo $dialect->getColumnList(array('column1', 'column'));
+	 * </code>
 	 */
-	public final function getColumnList(array! columnList) -> string
+	public final function getColumnList(array! columnList, string escapeChar = null, bindCounts = null) -> string
 	{
-		var strList, escapeChar, column;
-		let strList = [],
-			escapeChar = this->_escapeChar;
+		var columns, column;
+		let columns = [];
+
 		for column in columnList {
-			let strList[] = escapeChar . column . escapeChar;
+			let columns[] = this->getSqlColumn(column, escapeChar, bindCounts);
 		}
-		return join(", ", strList);
+
+		return join(", ", columns);
+	}
+
+	/**
+	 * Resolve Column expressions
+	 */
+	public final function getSqlColumn(var column, string escapeChar = null, bindCounts = null) -> string
+	{
+		var columnExpression, columnAlias, columnField, columnDomain;
+
+		if typeof column != "array" {
+			return this->prepareQualified(column, null, escapeChar);
+		}
+
+		if !isset column["type"] {
+
+			/**
+			 * The index "0" is the column field
+			 */
+			let columnField = column[0];
+
+			if typeof columnField == "array" {
+				let columnExpression = [
+					"type": "scalar",
+					"value": columnField
+				];
+
+			} elseif columnField == "*" {
+				let columnExpression = [
+					"type": "all"
+				];
+
+			} else {
+				let columnExpression = [
+					"type": "qualified",
+					"name": columnField
+				];
+			}
+
+			/**
+			 * The index "1" is the domain column
+			 */
+			if fetch columnDomain, column[1] && columnDomain != "" {
+				let columnExpression["domain"] = columnDomain;
+			}
+
+			/**
+			 * The index "2" is the column alias
+			 */
+			if fetch columnAlias, column[2] && columnAlias {
+				let columnExpression["sqlAlias"] = columnAlias;
+			}
+		} else {
+			let columnExpression = column;
+		}
+
+		/**
+		 * Resolve column expressions
+		 */
+		let column = this->getSqlExpression(columnExpression, escapeChar, bindCounts);
+
+		/**
+		 * Escape alias and concatenate to value SQL
+		 */
+		if fetch columnAlias, columnExpression["sqlAlias"] || fetch columnAlias, columnExpression["alias"] {
+			return this->prepareColumnAlias(column, columnAlias, escapeChar);
+		}
+
+		return this->prepareColumnAlias(column, null, escapeChar);
 	}
 
 	/**
 	 * Transforms an intermediate representation for a expression into a database system valid expression
-	 *
-	 * @param array expression
-	 * @param string escapeChar
-	 * @return string
 	 */
-	public function getSqlExpression(array! expression, var escapeChar = null) -> string
+	public function getSqlExpression(array! expression, string escapeChar = null, bindCounts = null) -> string
 	{
-		var type, domain, operator, left, right, name, sqlItems,
-			escapedName, sqlArguments, arguments, argument, item;
-
-		if globals_get("db.escape_identifiers") {
-			if escapeChar === null{
-				let escapeChar = (string) this->_escapeChar;
-			}
-		}
+		int i;
+		var type, times, postTimes, placeholders, rawValue, value;
 
 		if !fetch type, expression["type"] {
 			throw new Exception("Invalid SQL expression");
 		}
 
-		/**
-		 * Resolve qualified expressions
-		 */
-		if type == "qualified" {
-
-			let name = expression["name"];
-			if globals_get("db.escape_identifiers") {
-				let escapedName = escapeChar . name . escapeChar;
-			} else {
-				let escapedName = name;
-			}
+		switch type {
 
 			/**
-			 * A domain could be a table/schema
+			 * Resolve scalar column expressions
 			 */
-			if fetch domain, expression["domain"] {
-				if globals_get("db.escape_identifiers") {
-					return escapeChar . domain . escapeChar . "." . escapedName;
-				} else {
-					return domain . "." . escapedName;
+			case "scalar":
+				return this->getSqlExpressionScalar(expression, escapeChar, bindCounts);
+
+			/**
+			 * Resolve object expressions
+			 */
+			case "object":
+				return this->getSqlExpressionObject(expression, escapeChar, bindCounts);
+
+			/**
+			 * Resolve qualified expressions
+			 */
+			case "qualified":
+				return this->getSqlExpressionQualified(expression, escapeChar);
+
+			/**
+			 * Resolve literal OR placeholder expressions
+			 */
+			case "literal":
+				return expression["value"];
+
+			case "placeholder":
+				if fetch times, expression["times"] {
+
+					let placeholders = [],
+						rawValue = expression["rawValue"],
+						value = expression["value"];
+
+					if fetch postTimes, bindCounts[rawValue] {
+						let times = postTimes;
+					}
+
+					for i in range(1, times) {
+						let placeholders[] = value . (i - 1);
+					}
+
+					return join(", ", placeholders);
 				}
-			}
-
-			return escapedName;
-		}
-
-		/**
-		 * Resolve literal expressions
-		 */
-		if type == "literal" {
-			return expression["value"];
-		}
-
-		/**
-		 * Resolve binary operations expressions
-		 */
-		if type == "binary-op" {
-
-			let left = this->getSqlExpression(expression["left"], escapeChar),
-				right = this->getSqlExpression(expression["right"], escapeChar);
-
-			return left . " " . expression["op"] . " " . right;
-		}
-
-		/**
-		 * Resolve unary operations expressions
-		 */
-		if type == "unary-op" {
-
-			let operator = expression["op"];
+				return expression["value"];
 
 			/**
-			 * Some unary operators use the left operand...
+			 * Resolve binary operations expressions
 			 */
-			if fetch left, expression["left"] {
-				return this->getSqlExpression(left, escapeChar) . operator;
-			}
+			case "binary-op":
+				return this->getSqlExpressionBinaryOperations(expression, escapeChar, bindCounts);
 
 			/**
-			 * ...Others use the right operand
+			 * Resolve unary operations expressions
 			 */
-			if fetch right, expression["right"] {
-				return operator . this->getSqlExpression(right, escapeChar);
-			}
+			case "unary-op":
+				return this->getSqlExpressionUnaryOperations(expression, escapeChar, bindCounts);
 
-			throw new Exception("Invalid SQL-unary expression");
-		}
+			/**
+			 * Resolve parentheses
+			 */
+			case "parentheses":
+				return "(" . this->getSqlExpression(expression["left"], escapeChar, bindCounts) . ")";
 
-		/**
-		 * Resolve placeholder
-		 */
-		if type == "placeholder" {
-			return expression["value"];
-		}
+			/**
+			 * Resolve function calls
+			 */
+			case "functionCall":
+				return this->getSqlExpressionFunctionCall(expression, escapeChar, bindCounts);
 
-		/**
-		 * Resolve parentheses
-		 */
-		if type == "parentheses" {
-			return "(" . this->getSqlExpression(expression["left"], escapeChar) . ")";
-		}
+			/**
+			 * Resolve lists
+			 */
+			case "list":
+				return this->getSqlExpressionList(expression, escapeChar, bindCounts);
 
-		/**
-		 * Resolve function calls
-		 */
-		if type == "functionCall" {
-			let name = expression["name"],
-				sqlArguments = [];
-			if fetch arguments, expression["arguments"] {
-				for argument in arguments {
-					let sqlArguments[] = this->getSqlExpression(argument, escapeChar);
-				}
-				return name . "(" . join(", ", sqlArguments) . ")";
-			}
-			return name . "()";
-		}
+			/**
+			 * Resolve *
+			 */
+			case "all":
+				return this->getSqlExpressionAll(expression, escapeChar);
 
-		/**
-		 * Resolve lists
-		 */
-		if type == "list" {
-			let sqlItems = [];
-			for item in expression[0] {
-				let sqlItems[] = this->getSqlExpression(item, escapeChar);
-			}
-			return "(" . join(", ", sqlItems) . ")";
-		}
+			/**
+			 * Resolve SELECT
+			 */
+			case "select":
+				return "(" . this->select(expression["value"]) . ")";
 
-		/**
-		 * Resolve *
-		 */
-		if type == "all" {
-			return "*";
-		}
+			/**
+			 * Resolve CAST of values
+			 */
+			case "cast":
+				return this->getSqlExpressionCastValue(expression, escapeChar, bindCounts);
 
-		/**
-		 * Resolve CAST of values
-		 */
-		if type == "cast" {
+			/**
+			 * Resolve CONVERT of values encodings
+			 */
+			case "convert":
+				return this->getSqlExpressionConvertValue(expression, escapeChar, bindCounts);
 
-			let left = this->getSqlExpression(expression["left"], escapeChar),
-				right = this->getSqlExpression(expression["right"], escapeChar);
-
-			return "CAST(" . left . " AS " . right . ")";
-		}
-
-		/**
-		 * Resolve CONVERT of values encodings
-		 */
-		if type == "convert" {
-
-			let left = this->getSqlExpression(expression["left"], escapeChar),
-				right = this->getSqlExpression(expression["right"], escapeChar);
-
-			return "CONVERT(" . left . " USING " . right . ")";
+			case "case":
+				return this->getSqlExpressionCase(expression, escapeChar, bindCounts);
 		}
 
 		/**
@@ -272,19 +352,10 @@ abstract class Dialect
 
 	/**
 	 * Transform an intermediate representation of a schema/table into a database system valid expression
-	 *
-	 * @param array table
-	 * @param string escapeChar
-	 * @return string
 	 */
 	public final function getSqlTable(var table, string escapeChar = null) -> string
 	{
-		var sqlTable, sqlSchema, aliasName, sqlTableAlias,
-			schemaName, tableName;
-
-		if escapeChar === null{
-			let escapeChar = (string) this->_escapeChar;
-		}
+		var tableName, schemaName, aliasName;
 
 		if typeof table == "array" {
 
@@ -293,66 +364,29 @@ abstract class Dialect
 			 */
 			let tableName = table[0];
 
-			if globals_get("db.escape_identifiers") {
-				let sqlTable = escapeChar . tableName . escapeChar;
-			} else {
-				let sqlTable = tableName;
-			}
-
 			/**
 			 * The index "1" is the schema name
 			 */
-			let schemaName = table[1];
-
-			if schemaName != null && schemaName != "" {
-				if globals_get("db.escape_identifiers") {
-					let sqlSchema = escapeChar . schemaName . escapeChar . "." . sqlTable;
-				} else {
-					let sqlSchema = schemaName . "." . sqlTable;
-				}
-			} else {
-				let sqlSchema = sqlTable;
-			}
+			fetch schemaName, table[1];
 
 			/**
 			 * The index "2" is the table alias
 			 */
-			if fetch aliasName, table[2] {
-				if globals_get("db.escape_identifiers") {
-					let sqlTableAlias = sqlSchema . " AS " . escapeChar . aliasName . escapeChar;
-				} else {
-					let sqlTableAlias = sqlSchema . " AS " . aliasName;
-				}
-			} else {
-				let sqlTableAlias = sqlSchema;
-			}
+			fetch aliasName, table[2];
 
-			return sqlTableAlias;
+			return this->prepareTable(tableName, schemaName, aliasName, escapeChar);
 		}
 
-		if globals_get("db.escape_identifiers") {
-			return escapeChar . table . escapeChar;
-		}
-
-		return table;
+		return this->escape(table, escapeChar);
 	}
 
 	/**
 	 * Builds a SELECT statement
-	 *
-	 * @param array definition
-	 * @return string
 	 */
 	public function select(array! definition) -> string
 	{
-		var tables, columns, escapeChar, columnItem, column,
-			selectedColumns, columnSql, columnDomainSql, columnAlias,
-			selectedTables, sqlJoin, joinExpressions, joinCondition,
-			joinConditionsArray, tablesSql, columnDomain, columnAliasSql,
-			columnsSql, table, sql, joins, join, sqlTable, whereConditions,
-			groupFields, groupField, groupItems, havingConditions,
-			orderFields, orderItem, orderItems, orderSqlItem, sqlOrderType,
-			orderSqlItemType, limitValue, number, offset;
+		var tables, columns, sql, distinct, joins, where, escapeChar,
+			groupBy, having, orderBy, limit, forUpdate, bindCounts;
 
 		if !fetch tables, definition["tables"] {
 			throw new Exception("The index 'tables' is required in the definition array");
@@ -362,206 +396,79 @@ abstract class Dialect
 			throw new Exception("The index 'columns' is required in the definition array");
 		}
 
-		if globals_get("db.escape_identifiers") {
-			let escapeChar = this->_escapeChar;
-		} else {
-			let escapeChar = null;
-		}
+		if fetch distinct, definition["distinct"] {
 
-		let columns = definition["columns"];
-		if typeof columns == "array" {
-
-			let selectedColumns = [];
-			for column in columns {
-
-				/**
-				 * Escape column name
-				 */
-				let columnItem = column[0];
-				if typeof columnItem == "array" {
-					let columnSql = this->getSqlExpression(columnItem, escapeChar);
-				} else {
-					if columnItem == "*" {
-						let columnSql = columnItem;
-					} else {
-						if globals_get("db.escape_identifiers") {
-							let columnSql = escapeChar . columnItem . escapeChar;
-						} else {
-							let columnSql = columnItem;
-						}
-					}
-				}
-
-				/**
-				 * Escape column domain
-				 */
-				if fetch columnDomain, column[1] {
-					if columnDomain {
-						if globals_get("db.escape_identifiers") {
-							let columnDomainSql = escapeChar . columnDomain . escapeChar . "." . columnSql;
-						} else {
-							let columnDomainSql = columnDomain . "." . columnSql;
-						}
-					} else {
-						let columnDomainSql = columnSql;
-					}
-				} else {
-					let columnDomainSql = columnSql;
-				}
-
-				/**
-				 * Escape column alias
-				 */
-				if fetch columnAlias, column[2] {
-					if columnAlias {
-						if globals_get("db.escape_identifiers") {
-							let columnAliasSql = columnDomainSql . " AS " . escapeChar . columnAlias . escapeChar;
-						} else {
-							let columnAliasSql = columnDomainSql . " AS " . columnAlias;
-						}
-					} else {
-						let columnAliasSql = columnDomainSql;
-					}
-				} else {
-					let columnAliasSql = columnDomainSql;
-				}
-				let selectedColumns[] = columnAliasSql;
-			}
-			let columnsSql = join(", ", selectedColumns);
-		} else {
-			let columnsSql = columns;
-		}
-
-		/**
-		 * Check and escape tables
-		 */
-		if typeof tables == "array" {
-			let selectedTables = [];
-			for table in tables {
-				let selectedTables[] = this->getSqlTable(table, escapeChar);
-			}
-			let tablesSql = join(", ", selectedTables);
-		} else {
-			let tablesSql = tables;
-		}
-
-		let sql = "SELECT " . columnsSql . " FROM " . tablesSql;
-
-		/**
-		 * Check for joins
-		 */
-		if fetch joins, definition["joins"] {
-			for join in joins {
-
-				let sqlTable = this->getSqlTable(join["source"], escapeChar),
-					selectedTables[] = sqlTable,
-					sqlJoin = " " . join["type"] . " JOIN " . sqlTable;
-
-				/**
-				 * Check if the join has conditions
-				 */
-				if fetch joinConditionsArray, join["conditions"] {
-					if count(joinConditionsArray) {
-						if !isset joinConditionsArray[0] {
-							let sqlJoin .= " ON " . this->getSqlExpression(joinConditionsArray, escapeChar) . " ";
-						} else {
-							let joinExpressions = [];
-							for joinCondition in joinConditionsArray {
-								let joinExpressions[] = this->getSqlExpression(joinCondition, escapeChar);
-							}
-							let sqlJoin .= " ON " . join(" AND ", joinExpressions) . " ";
-						}
-					}
-				}
-				let sql .= sqlJoin;
-			}
-		}
-
-		/**
-		 * Check for a WHERE clause
-		 */
-		if fetch whereConditions, definition["where"] {
-			if typeof whereConditions == "array" {
-				let sql .= " WHERE " . this->getSqlExpression(whereConditions, escapeChar);
+			if distinct {
+				let sql = "SELECT DISTINCT";
 			} else {
-				let sql .= " WHERE " . whereConditions;
+				let sql = "SELECT ALL";
 			}
+
+		} else {
+			let sql = "SELECT";
+		}
+
+		fetch bindCounts, definition["bindCounts"];
+
+		let escapeChar = this->_escapeChar;
+
+		/**
+		 * Resolve COLUMNS
+		 */
+		let sql .= " " . this->getColumnList(columns, escapeChar, bindCounts);
+
+		/**
+		 * Resolve FROM
+		 */
+		let sql .= " " . this->getSqlExpressionFrom(tables, escapeChar);
+
+		/**
+		 * Resolve JOINs
+		 */
+		if fetch joins, definition["joins"] && joins {
+			let sql .= " " . this->getSqlExpressionJoins(definition["joins"], escapeChar, bindCounts);
 		}
 
 		/**
-		 * Check for a GROUP clause
+		 * Resolve WHERE
 		 */
-		if fetch groupFields, definition["group"]{
-
-			let groupItems = [];
-			for groupField in groupFields {
-				if typeof groupField == "array" {
-					let groupItems[] = this->getSqlExpression(groupField, escapeChar);
-				} else {
-					throw new Exception("?");
-				}
-			}
-			let sql .= " GROUP BY " . join(", ", groupItems);
-
-			/**
-			 * Check for a HAVING clause
-			 */
-			if fetch havingConditions, definition["having"] {
-				if typeof havingConditions == "array" {
-					let sql .= " HAVING " . this->getSqlExpression(havingConditions, escapeChar);
-				} else {
-					throw new Exception("?");
-				}
-			}
+		if fetch where, definition["where"] && where {
+			let sql .= " " . this->getSqlExpressionWhere(where, escapeChar, bindCounts);
 		}
 
 		/**
-		 * Check for a ORDER clause
+		 * Resolve GROUP BY
 		 */
-		if fetch orderFields, definition["order"]{
-			let orderItems = [];
-			for orderItem in orderFields {
-
-				if typeof orderItem == "array" {
-					let orderSqlItem = this->getSqlExpression(orderItem[0], escapeChar);
-				} else {
-					throw new Exception("?");
-				}
-
-				/**
-				 * In the numeric 1 position could be a ASC/DESC clause
-				 */
-				if fetch sqlOrderType, orderItem[1] {
-					let orderSqlItemType = orderSqlItem . " " . sqlOrderType;
-				} else {
-					let orderSqlItemType = orderSqlItem;
-				}
-
-				let orderItems[] = orderSqlItemType;
-			}
-			let sql .= " ORDER BY " . join(", ", orderItems);
+		if fetch groupBy, definition["group"] && groupBy {
+			let sql .= " " . this->getSqlExpressionGroupBy(groupBy, escapeChar);
 		}
 
 		/**
-		 * Check for a LIMIT condition
+		 * Resolve HAVING
 		 */
-		if fetch limitValue, definition["limit"] {
+		if fetch having, definition["having"] && having {
+			let sql .= " " . this->getSqlExpressionHaving(having, escapeChar, bindCounts);
+		}
 
-			if typeof limitValue == "array" {
+		/**
+		 * Resolve ORDER BY
+		 */
+		if fetch orderBy, definition["order"] && orderBy {
+			let sql .= " " . this->getSqlExpressionOrderBy(orderBy, escapeChar, bindCounts);
+		}
 
-				let number = limitValue["number"]["value"];
+		/**
+		 * Resolve LIMIT
+		 */
+		if fetch limit, definition["limit"] && limit {
+			let sql = this->getSqlExpressionLimit(["sql": sql, "value": limit], escapeChar, bindCounts);
+		}
 
-				/**
-				 * Check for a OFFSET condition
-				 */
-				if fetch offset, limitValue["offset"] {
-					let sql .= " LIMIT " . number . " OFFSET " . offset["value"];
-				} else {
-					let sql .= " LIMIT " . number;
-				}
-			} else {
-				let sql .= " LIMIT " . limitValue;
-			}
+		/**
+		 * Resolve FOR UPDATE
+		 */
+		if fetch forUpdate, definition["forUpdate"] && forUpdate {
+			let sql .= " FOR UPDATE";
 		}
 
 		return sql;
@@ -569,8 +476,6 @@ abstract class Dialect
 
 	/**
 	 * Checks whether the platform supports savepoints
-	 *
-	 * @return boolean
 	 */
 	public function supportsSavepoints() -> boolean
 	{
@@ -579,8 +484,6 @@ abstract class Dialect
 
 	/**
 	 * Checks whether the platform supports releasing savepoints.
-	 *
-	 * @return boolean
 	 */
 	public function supportsReleaseSavepoints() -> boolean
 	{
@@ -589,9 +492,6 @@ abstract class Dialect
 
 	/**
 	 * Generate SQL to create a new savepoint
-	 *
-	 * @param string name
-	 * @return string
 	 */
 	public function createSavepoint(string! name) -> string
 	{
@@ -600,9 +500,6 @@ abstract class Dialect
 
 	/**
 	 * Generate SQL to release a savepoint
-	 *
-	 * @param string name
-	 * @return string
 	 */
 	public function releaseSavepoint(string! name) -> string
 	{
@@ -611,12 +508,467 @@ abstract class Dialect
 
 	/**
 	 * Generate SQL to rollback a savepoint
-	 *
-	 * @param string name
-	 * @return string
 	 */
 	public function rollbackSavepoint(string! name) -> string
 	{
 		return "ROLLBACK TO SAVEPOINT " . name;
+	}
+
+	/**
+	 * Resolve Column expressions
+	 */
+	protected final function getSqlExpressionScalar(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var value;
+
+		if isset expression["column"] {
+			return this->getSqlColumn(expression["column"]);
+		}
+
+		if !fetch value, expression["value"] {
+			throw new Exception("Invalid SQL expression");
+		}
+
+		if typeof value == "array" {
+			return this->getSqlExpression(value, escapeChar, bindCounts);
+		}
+
+		return value;
+	}
+
+	/**
+	 * Resolve object expressions
+	 */
+	protected final function getSqlExpressionObject(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var domain = null, objectExpression;
+
+		let objectExpression = [
+			"type": "all"
+		];
+
+		if (fetch domain, expression["column"] || fetch domain, expression["domain"]) && domain != "" {
+			let objectExpression["domain"] = domain;
+		}
+
+		return this->getSqlExpression(objectExpression, escapeChar, bindCounts);
+	}
+
+	/**
+	 * Resolve qualified expressions
+	 */
+	protected final function getSqlExpressionQualified(array! expression, string escapeChar = null) -> string
+	{
+		var column, domain;
+		let column = expression["name"];
+
+		/**
+		 * A domain could be a table/schema
+		 */
+		if !fetch domain, expression["domain"] {
+			let domain = null;
+		}
+
+		return this->prepareQualified(column, domain, escapeChar);
+	}
+
+	/**
+	 * Resolve binary operations expressions
+	 */
+	protected final function getSqlExpressionBinaryOperations(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var left, right;
+
+		let left  = this->getSqlExpression(expression["left"], escapeChar, bindCounts),
+			right = this->getSqlExpression(expression["right"], escapeChar, bindCounts);
+
+		return left . " " . expression["op"] . " " . right;
+	}
+
+	/**
+	 * Resolve unary operations expressions
+	 */
+	protected final function getSqlExpressionUnaryOperations(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var left, right;
+
+		/**
+		 * Some unary operators use the left operand...
+		 */
+		if fetch left, expression["left"] {
+			return this->getSqlExpression(left, escapeChar, bindCounts) . " " . expression["op"];
+		}
+
+		/**
+		 * ...Others use the right operand
+		 */
+		if fetch right, expression["right"] {
+			return expression["op"] . " " . this->getSqlExpression(right, escapeChar, bindCounts);
+		}
+
+		throw new Exception("Invalid SQL-unary expression");
+	}
+
+	/**
+	 * Resolve function calls
+	 */
+	protected final function getSqlExpressionFunctionCall(array! expression, string escapeChar = null, bindCounts) -> string
+	{
+		var name, customFunction, arguments;
+
+		let name = expression["name"];
+
+		if fetch customFunction, this->_customFunctions[name] {
+			return {customFunction}(this, expression, escapeChar);
+		}
+
+		if fetch arguments, expression["arguments"] && typeof arguments == "array" {
+
+			let arguments = this->getSqlExpression([
+				"type": "list",
+				"parentheses": false,
+				"value": arguments
+			], escapeChar, bindCounts);
+
+			if isset expression["distinct"] && expression["distinct"] {
+				return name . "(DISTINCT " . arguments . ")";
+			}
+
+			return name . "(" . arguments . ")";
+		}
+
+		return name . "()";
+	}
+
+	/**
+	 * Resolve Lists
+	 */
+	protected final function getSqlExpressionList(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var items, item, values, separator;
+
+		let items = [];
+		let separator = ", ";
+
+		if isset expression["separator"] {
+			let separator = expression["separator"];
+		}
+
+		if (fetch values, expression[0] || fetch values, expression["value"]) && typeof values == "array" {
+
+			for item in values {
+				let items[] = this->getSqlExpression(item, escapeChar, bindCounts);
+			}
+
+			if isset expression["parentheses"] && expression["parentheses"] === false {
+				return join(separator, items);
+			}
+
+			return "(" . join(separator, items) . ")";
+		}
+
+		throw new Exception("Invalid SQL-list expression");
+	}
+
+	/**
+	 * Resolve *
+	 */
+	protected final function getSqlExpressionAll(array! expression, string escapeChar = null) -> string
+	{
+		var domain;
+
+		fetch domain, expression["domain"];
+
+		return this->prepareQualified("*", domain, escapeChar);
+	}
+
+	/**
+	 * Resolve CAST of values
+	 */
+	protected final function getSqlExpressionCastValue(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var left, right;
+
+		let left  = this->getSqlExpression(expression["left"], escapeChar, bindCounts),
+			right = this->getSqlExpression(expression["right"], escapeChar, bindCounts);
+
+		return "CAST(" . left . " AS " . right . ")";
+	}
+
+	/**
+	 * Resolve CONVERT of values encodings
+	 */
+	protected final function getSqlExpressionConvertValue(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var left, right;
+
+		let left  = this->getSqlExpression(expression["left"], escapeChar, bindCounts),
+			right = this->getSqlExpression(expression["right"], escapeChar, bindCounts);
+
+		return "CONVERT(" . left . " USING " . right . ")";
+	}
+
+	/**
+	 * Resolve CASE expressions
+	 */
+	protected final function getSqlExpressionCase(array! expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var sql, whenClause;
+
+		let sql = "CASE " . this->getSqlExpression(expression["expr"], escapeChar, bindCounts);
+
+		for whenClause in expression["when-clauses"] {
+			if whenClause["type"] == "when" {
+				let sql .= " WHEN " .
+						this->getSqlExpression(whenClause["expr"], escapeChar, bindCounts) .
+						" THEN " .
+						this->getSqlExpression(whenClause["then"], escapeChar, bindCounts);
+			} else {
+				let sql .= " ELSE " . this->getSqlExpression(whenClause["expr"], escapeChar, bindCounts);
+			}
+		}
+
+		return sql . " END";
+	}
+
+	/**
+	 * Resolve a FROM clause
+	 */
+	protected final function getSqlExpressionFrom(var expression, string escapeChar = null) -> string
+	{
+		var table, tables;
+
+		if typeof expression == "array" {
+
+			let tables = [];
+
+			for table in expression {
+				let tables[] = this->getSqlTable(table, escapeChar);
+			}
+
+			let tables = join(", ", tables);
+
+		} else {
+			let tables = expression;
+		}
+
+		return "FROM " . tables;
+	}
+
+	/**
+	 * Resolve a JOINs clause
+	 */
+	protected final function getSqlExpressionJoins(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var condition, join, sql = "", joinCondition, joinTable, joinType = "", joinConditionsArray;
+
+		for join in expression {
+
+			/**
+			 * Check if the join has conditions
+			 */
+			if fetch joinConditionsArray, join["conditions"] && !empty joinConditionsArray {
+
+				if !isset joinConditionsArray[0] {
+					let joinCondition = this->getSqlExpression(joinConditionsArray, escapeChar, bindCounts);
+				} else {
+
+					let joinCondition = [];
+
+					for condition in joinConditionsArray {
+						let joinCondition[] = this->getSqlExpression(condition, escapeChar, bindCounts);
+					}
+
+					let joinCondition = join(" AND ", joinCondition);
+				}
+			} else {
+				let joinCondition = 1;
+			}
+
+			if fetch joinType, join["type"] && joinType {
+				let joinType .= " ";
+			}
+
+			let joinTable = this->getSqlTable(join["source"], escapeChar);
+
+			let sql .= " " . joinType . "JOIN " . joinTable . " ON " . joinCondition;
+		}
+
+		return sql;
+	}
+
+	/**
+	 * Resolve a WHERE clause
+	 */
+	protected final function getSqlExpressionWhere(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var whereSql;
+
+		if typeof expression == "array" {
+			let whereSql = this->getSqlExpression(expression, escapeChar, bindCounts);
+		} else {
+			let whereSql = expression;
+		}
+
+		return "WHERE " . whereSql;
+	}
+
+	/**
+	 * Resolve a GROUP BY clause
+	 */
+	protected final function getSqlExpressionGroupBy(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var filed, fields;
+
+		if typeof expression == "array" {
+
+			let fields = [];
+
+			for filed in expression {
+				if unlikely typeof filed != "array" {
+					throw new Exception("Invalid SQL-GROUP-BY expression");
+				} else {
+					let fields[] = this->getSqlExpression(filed, escapeChar, bindCounts);
+				}
+			}
+
+			let fields = join(", ", fields);
+
+		} else {
+			let fields = expression;
+		}
+
+		return  "GROUP BY " . fields;
+	}
+
+	/**
+	 * Resolve a HAVING clause
+	 */
+	protected final function getSqlExpressionHaving(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		if typeof expression == "array" {
+			return "HAVING " . this->getSqlExpression(expression, escapeChar, bindCounts);
+		}
+
+		throw new Exception("Invalid SQL-HAVING expression");
+	}
+
+	/**
+	 * Resolve a ORDER BY clause
+	 */
+	protected final function getSqlExpressionOrderBy(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var filed, fields, type, fieldSql = null;
+
+		if typeof expression == "array" {
+
+			let fields = [];
+
+			for filed in expression {
+
+				if unlikely typeof filed != "array" {
+					throw new Exception("Invalid SQL-ORDER-BY expression");
+				} else {
+					let fieldSql = this->getSqlExpression(filed[0], escapeChar, bindCounts);
+				}
+
+				/**
+				 * In the numeric 1 position could be a ASC/DESC clause
+				 */
+				if fetch type, filed[1] && type != "" {
+					let fieldSql .= " " . type;
+				}
+
+				let fields[] = fieldSql;
+			}
+
+			let fields = join(", ", fields);
+
+		} else {
+			let fields = expression;
+		}
+
+		return  "ORDER BY " . fields;
+	}
+
+	/**
+	 * Resolve a LIMIT clause
+	 */
+	protected final function getSqlExpressionLimit(var expression, string escapeChar = null, bindCounts = null) -> string
+	{
+		var sql = "", value, limit, offset = null;
+		let value = expression["value"];
+
+		if isset expression["sql"] {
+			let sql = expression["sql"];
+		}
+
+		if typeof value == "array" {
+
+			if typeof value["number"] == "array" {
+				let limit = this->getSqlExpression(value["number"], escapeChar, bindCounts);
+			} else {
+				let limit = value["number"];
+			}
+
+			/**
+			 * Check for a OFFSET condition
+			 */
+			if fetch offset, value["offset"] && typeof offset == "array" {
+				let offset = this->getSqlExpression(offset, escapeChar, bindCounts);
+			}
+
+		} else {
+			let limit = value;
+		}
+
+		return this->limit(sql, [limit, offset]);
+	}
+
+	/**
+	 * Prepares column for this RDBMS
+	 */
+	protected function prepareColumnAlias(string! qualified, string alias = null, string escapeChar = null) -> string
+	{
+		if alias != "" {
+			return qualified . " AS " . this->escape(alias, escapeChar);
+		}
+		return qualified;
+	}
+
+	/**
+	 * Prepares table for this RDBMS
+	 */
+	protected function prepareTable(string! table, string schema = null, string alias = null, string escapeChar = null) -> string
+	{
+		let table = this->escape(table, escapeChar);
+
+		/**
+		 * Schema
+		 */
+		if schema != "" {
+			let table = this->escape(schema, escapeChar) . "." . table;
+		}
+
+		/**
+		 * Alias
+		 */
+		if alias != "" {
+			let table = table . " AS " . this->escape(alias, escapeChar);
+		}
+
+		return table;
+	}
+
+	/**
+	 * Prepares qualified for this RDBMS
+	 */
+	protected function prepareQualified(string! column, string domain = null, string escapeChar = null) -> string
+	{
+		if domain != "" {
+			return this->escape(domain . "." . column, escapeChar);
+		}
+
+		return this->escape(column, escapeChar);
 	}
 }

@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -30,27 +30,25 @@ interface ValidatorInterface
 	/**
 	 * Checks if an option is defined
 	 *
-	 * @param string key
-	 * @return mixed
+	 * @deprecated since 2.1.0
+	 * @see \Phalcon\Validation\Validator::hasOption()
 	 */
 	public function isSetOption(string! key) -> boolean;
 
 	/**
-	 * Returns an option in the validator's options
-	 * Returns null if the option hasn't been set
-	 *
-	 * @param string key
-	 * @return mixed
+	 * Checks if an option is defined
 	 */
-	public function getOption(string! key);
+	public function hasOption(string! key) -> boolean;
+
+	/**
+	 * Returns an option in the validator's options
+	 * Returns null if the option hasn't set
+	 */
+	public function getOption(string! key, var defaultValue = null) -> var;
 
 	/**
 	 * Executes the validation
-	 *
-	 * @param Phalcon\Validation validator
-	 * @param string attribute
-	 * @return boolean
 	 */
-	public function validate(<\Phalcon\Validation> validator, string! attribute) -> boolean;
+	public function validate(<\Phalcon\Validation> validation, string! attribute) -> boolean;
 
 }

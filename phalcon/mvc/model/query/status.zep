@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -54,9 +54,6 @@ class Status implements StatusInterface
 
 	/**
 	 * Phalcon\Mvc\Model\Query\Status
-	 *
-	 * @param boolean success
-	 * @param Phalcon\Mvc\ModelInterface model
 	 */
 	public function __construct(boolean success, <ModelInterface> model = null)
 	{
@@ -66,8 +63,6 @@ class Status implements StatusInterface
 
 	/**
 	 * Returns the model that executed the action
-	 *
-	 * @return Phalcon\Mvc\ModelInterface
 	 */
 	public function getModel() -> <ModelInterface>
 	{
@@ -76,23 +71,19 @@ class Status implements StatusInterface
 
 	/**
 	 * Returns the messages produced because of a failed operation
-	 *
-	 * @return Phalcon\Mvc\Model\MessageInterface[]
 	 */
-	public function getMessages()
+	public function getMessages() -> <\Phalcon\Mvc\Model\MessageInterface[]>
 	{
 		var model;
 		let model = this->_model;
-		if typeof model == "object" {
-			return model->getMessages();
+		if typeof model != "object" {
+			return [];
 		}
-		return [];
+		return model->getMessages();
 	}
 
 	/**
 	 * Allows to check if the executed operation was successful
-	 *
-	 * @return boolean
 	 */
 	public function success() -> boolean
 	{

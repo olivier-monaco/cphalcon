@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -57,13 +57,7 @@ class Config implements \ArrayAccess, \Countable
 		var key, value;
 
 		for key, value in arrayConfig {
-
-			let key = strval(key);
-			if typeof value === "array" {
-				let this->{key} = new self(value);
-			} else {
-				let this->{key} = value;
-			}
+			this->offsetSet(key, value);
 		}
 	}
 
@@ -74,8 +68,10 @@ class Config implements \ArrayAccess, \Countable
 	 * var_dump(isset($config['database']));
 	 *</code>
 	 */
-	public function offsetExists(string! index) -> boolean
+	public function offsetExists(var index) -> boolean
 	{
+		let index = strval(index);
+
 		return isset this->{index};
 	}
 
@@ -87,8 +83,10 @@ class Config implements \ArrayAccess, \Countable
 	 * echo $config->get('controllersDir', '../app/controllers/');
 	 *</code>
 	 */
-	public function get(string! index, var defaultValue = null)
+	public function get(var index, var defaultValue = null)
 	{
+		let index = strval(index);
+
 		if isset this->{index} {
 			return this->{index};
 		}
@@ -103,8 +101,10 @@ class Config implements \ArrayAccess, \Countable
 	 * print_r($config['database']);
 	 *</code>
 	 */
-	public function offsetGet(string! index) -> string
+	public function offsetGet(var index) -> string
 	{
+		let index = strval(index);
+
 		return this->{index};
 	}
 
@@ -115,9 +115,15 @@ class Config implements \ArrayAccess, \Countable
 	 * $config['database'] = array('type' => 'Sqlite');
 	 *</code>
 	 */
-	public function offsetSet(string! index, var value)
+	public function offsetSet(var index, var value)
 	{
-	    let this->{index} = value;
+		let index = strval(index);
+
+		if typeof value === "array" {
+			let this->{index} = new self(value);
+		} else {
+			let this->{index} = value;
+		}
 	}
 
 	/**
@@ -127,8 +133,10 @@ class Config implements \ArrayAccess, \Countable
 	 * unset($config['database']);
 	 *</code>
 	 */
-	public function offsetUnset(string! index)
+	public function offsetUnset(var index)
 	{
+		let index = strval(index);
+
 		//unset(this->{index});
 		let this->{index} = null;
 	}
@@ -140,9 +148,6 @@ class Config implements \ArrayAccess, \Countable
 	 * $appConfig = new \Phalcon\Config(array('database' => array('host' => 'localhost')));
 	 * $globalConfig->merge($config2);
 	 *</code>
-	 *
-	 * @param Config config
-	 * @return this merged config
 	 */
 	public function merge(<Config> config) -> <Config>
 	{
@@ -209,18 +214,24 @@ class Config implements \ArrayAccess, \Countable
 	 *
 	 * @return Config merged config
 	 */
-	private function _merge(<Config> config, var instance = null) -> <Config>
+	protected final function _merge(<Config> config, var instance = null) -> <Config>
 	{
-		var key, value;
+		var key, value, number;
 
 		if typeof instance !== "object" {
 			let instance = this;
 		}
 
+		let number = instance->count();
+
 		for key, value in get_object_vars(config) {
 			if isset(instance->{key}) && typeof value === "object" && typeof instance->{key} === "object" {
 				this->_merge(value, instance->{key});
 			} else {
+				if typeof key == "integer" {
+					let key = strval(number);
+					let number++;
+				}
 				let instance->{key} = value;
 			}
 		}

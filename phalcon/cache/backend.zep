@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -68,7 +68,7 @@ abstract class Backend
 	 * Starts a cache. The keyname allows to identify the created fragment
 	 *
 	 * @param   int|string keyName
-	 * @param   long lifetime
+	 * @param   int lifetime
 	 * @return  mixed
 	 */
 	public function start(var keyName, lifetime = null)
@@ -79,6 +79,7 @@ abstract class Backend
 		 * Get the cache content verifying if it was expired
 		 */
 		let existingCache = this->{"get"}(keyName, lifetime);
+
 		if existingCache === null {
 			let fresh = true;
 			this->_frontend->start();
@@ -101,8 +102,6 @@ abstract class Backend
 
 	/**
 	 * Stops the frontend without store any cached content
-	 *
-	 * @param boolean stopBuffer
 	 */
 	public function stop(boolean stopBuffer = true) -> void
 	{
@@ -114,8 +113,6 @@ abstract class Backend
 
 	/**
 	 * Checks whether the last cache is fresh or cached
-	 *
-	 * @return boolean
 	 */
 	public function isFresh() -> boolean
 	{
@@ -124,8 +121,6 @@ abstract class Backend
 
 	/**
 	 * Checks whether the cache has starting buffering or not
-	 *
-	 * @return boolean
 	 */
 	public function isStarted() -> boolean
 	{
@@ -133,11 +128,11 @@ abstract class Backend
 	}
 
 	/**
-	* Gets the last lifetime set
-	*
-	* @return int
-	*/
-	public function getLifetime()
+	 * Gets the last lifetime set
+	 *
+	 * @return int
+	 */
+	public function getLifetime() -> int
 	{
 		return this->_lastLifetime;
 	}

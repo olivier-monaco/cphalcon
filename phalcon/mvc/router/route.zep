@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -53,12 +53,8 @@ class Route implements RouteInterface
 
 	/**
 	 * Phalcon\Mvc\Router\Route constructor
-	 *
-	 * @param string pattern
-	 * @param array paths
-	 * @param array|string httpMethods
 	 */
-	public function __construct(string! pattern, paths=null, httpMethods = null)
+	public function __construct(string! pattern, var paths = null, var httpMethods = null)
 	{
 		var routeId, uniqueId;
 
@@ -68,7 +64,7 @@ class Route implements RouteInterface
 		// Update the HTTP method constraints
 		let this->_methods = httpMethods;
 
-        // Get the unique Id from the static member _uniqueId
+		// Get the unique Id from the static member _uniqueId
 		let uniqueId = self::_uniqueId;
 		if uniqueId === null {
 			let uniqueId = 0;
@@ -82,11 +78,8 @@ class Route implements RouteInterface
 
 	/**
 	 * Replaces placeholders from pattern returning a valid PCRE regular expression
-	 *
-	 * @param string pattern
-	 * @return string
 	 */
-	public function compilePattern(string! pattern)
+	public function compilePattern(string! pattern) -> string
 	{
 		var idPattern;
 
@@ -147,11 +140,8 @@ class Route implements RouteInterface
 	 * $route->via('GET');
 	 * $route->via(array('GET', 'POST'));
 	 *</code>
-	 *
-	 * @param string|array httpMethods
-	 * @return Phalcon\Mvc\Router\Route
 	 */
-	public function via(httpMethods) -> <Route>
+	public function via(var httpMethods) -> <Route>
 	{
 		let this->_methods = httpMethods;
 		return this;
@@ -159,13 +149,9 @@ class Route implements RouteInterface
 
 	/**
 	 * Extracts parameters from a string
-	 *
-	 * @param string pattern
-	 * @return array|boolean
 	 */
 	public function extractNamedParams(string! pattern) -> array | boolean
 	{
-
 		char ch;
 		var tmp, matches;
 		boolean notValid;
@@ -246,7 +232,7 @@ class Route implements RouteInterface
 													break;
 												}
 											}
- 										}
+										}
 
 										if foundPattern != 2 {
 											let route .= '(',
@@ -297,15 +283,62 @@ class Route implements RouteInterface
 
 	/**
 	 * Reconfigure the route adding a new pattern and a set of paths
-	 *
-	 * @param string pattern
-	 * @param array paths
 	 */
-	public function reConfigure(string! pattern, paths = null)
+	public function reConfigure(string! pattern, var paths = null) -> void
+	{
+		var routePaths, pcrePattern, compiledPattern,
+			extracted;
+
+		let routePaths = self::getRoutePaths(paths);
+
+		/**
+		 * If the route starts with '#' we assume that it is a regular expression
+		 */
+		if !starts_with(pattern, "#") {
+
+			if memstr(pattern, "{") {
+				/**
+				 * The route has named parameters so we need to extract them
+				 */
+				let extracted = this->extractNamedParams(pattern),
+					pcrePattern = extracted[0],
+					routePaths = array_merge(routePaths, extracted[1]);
+			} else {
+				let pcrePattern = pattern;
+			}
+
+			/**
+			 * Transform the route's pattern to a regular expression
+			 */
+			let compiledPattern = this->compilePattern(pcrePattern);
+		} else {
+			let compiledPattern = pattern;
+		}
+
+		/**
+		 * Update the original pattern
+		 */
+		let this->_pattern = pattern;
+
+		/**
+		 * Update the compiled pattern
+		 */
+		let this->_compiledPattern = compiledPattern;
+
+		/**
+		 * Update the route's paths
+		 */
+		let this->_paths = routePaths;
+	}
+
+	/**
+	 * Returns routePaths
+	 */
+	public static function getRoutePaths(var paths = null) -> array
 	{
 		var moduleName, controllerName, actionName,
-			parts, routePaths, realClassName, namespaceName,
-			pcrePattern, compiledPattern, extracted;
+			parts, routePaths, realClassName,
+			namespaceName;
 
 		if paths !== null {
 			if typeof paths == "string" {
@@ -319,15 +352,18 @@ class Route implements RouteInterface
 
 				// Create the array paths dynamically
 				switch count(parts) {
+
 					case 3:
 						let moduleName = parts[0],
 							controllerName = parts[1],
 							actionName = parts[2];
 						break;
+
 					case 2:
 						let controllerName = parts[0],
 							actionName = parts[1];
 						break;
+
 					case 1:
 						let controllerName = parts[0];
 						break;
@@ -379,50 +415,11 @@ class Route implements RouteInterface
 			throw new Exception("The route contains invalid paths");
 		}
 
-		/**
-		 * If the route starts with '#' we assume that it is a regular expression
-		 */
-		if !starts_with(pattern, "#") {
-
-			if memstr(pattern, "{") {
-				/**
-				 * The route has named parameters so we need to extract them
-				 */
-				let extracted = this->extractNamedParams(pattern),
-					pcrePattern = extracted[0],
-					routePaths = array_merge(routePaths, extracted[1]);
-			} else {
-				let pcrePattern = pattern;
-			}
-
-			/**
-			 * Transform the route's pattern to a regular expression
-			 */
-			let compiledPattern = this->compilePattern(pcrePattern);
-		} else {
-			let compiledPattern = pattern;
-		}
-
-		/**
-		 * Update the original pattern
-		 */
-		let this->_pattern = pattern;
-
-		/**
-		 * Update the compiled pattern
-		 */
-		let this->_compiledPattern = compiledPattern;
-
-		/**
-		 * Update the route's paths
-		 */
-		let this->_paths = routePaths;
+		return routePaths;
 	}
 
 	/**
 	 * Returns the route's name
-	 *
-	 * @return string
 	 */
 	public function getName() -> string
 	{
@@ -437,11 +434,8 @@ class Route implements RouteInterface
 	 *     'controller' => 'about'
 	 * ))->setName('about');
 	 *</code>
-	 *
-	 * @param string name
-	 * @return Phalcon\Mvc\Router\Route
 	 */
-	public function setName(string! name) -> <Route>
+	public function setName(string name) -> <Route>
 	{
 		let this->_name = name;
 		return this;
@@ -450,12 +444,9 @@ class Route implements RouteInterface
 	/**
 	 * Sets a callback that is called if the route is matched.
 	 * The developer can implement any arbitrary conditions here
-	 * If the callback returns false the route is treaded as not matched
-	 *
-	 * @param callback callback
-	 * @return Phalcon\Mvc\Router\Route
+	 * If the callback returns false the route is treated as not matched
 	 */
-	public function beforeMatch(var callback) -> <Route>
+	public function beforeMatch(callable callback) -> <Route>
 	{
 		let this->_beforeMatch = callback;
 		return this;
@@ -463,18 +454,14 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the 'before match' callback if any
-	 *
-	 * @return mixed
 	 */
-	public function getBeforeMatch()
+	public function getBeforeMatch() -> callable
 	{
 		return this->_beforeMatch;
 	}
 
 	/**
 	 * Returns the route's id
-	 *
-	 * @return string
 	 */
 	public function getRouteId() -> string
 	{
@@ -483,8 +470,6 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the route's pattern
-	 *
-	 * @return string
 	 */
 	public function getPattern() -> string
 	{
@@ -493,8 +478,6 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the route's compiled pattern
-	 *
-	 * @return string
 	 */
 	public function getCompiledPattern() -> string
 	{
@@ -503,20 +486,16 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the paths
-	 *
-	 * @return array
 	 */
-	public function getPaths()
+	public function getPaths() -> array
 	{
 		return this->_paths;
 	}
 
 	/**
 	 * Returns the paths using positions as keys and names as values
-	 *
-	 * @return array
 	 */
-	public function getReversedPaths()
+	public function getReversedPaths() -> array
 	{
 		var reversed, path, position;
 
@@ -534,11 +513,8 @@ class Route implements RouteInterface
 	 * $route->setHttpMethods('GET');
 	 * $route->setHttpMethods(array('GET', 'POST'));
 	 *</code>
-	 *
-	 * @param string|array httpMethods
-	 * @return Phalcon\Mvc\Router\Route
 	 */
-	public function setHttpMethods(httpMethods) -> <Route>
+	public function setHttpMethods(var httpMethods) -> <Route>
 	{
 		let this->_methods = httpMethods;
 		return this;
@@ -546,10 +522,8 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the HTTP methods that constraint matching the route
-	 *
-	 * @return string|array
 	 */
-	public function getHttpMethods()
+	public function getHttpMethods() -> array | string
 	{
 		return this->_methods;
 	}
@@ -560,11 +534,8 @@ class Route implements RouteInterface
 	 *<code>
 	 * $route->setHostname('localhost');
 	 *</code>
-	 *
-	 * @param string|array httpMethods
-	 * @return Phalcon\Mvc\Router\Route
 	 */
-	public function setHostname(hostname) -> <Route>
+	public function setHostname(string! hostname) -> <Route>
 	{
 		let this->_hostname = hostname;
 		return this;
@@ -572,8 +543,6 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the hostname restriction if any
-	 *
-	 * @return string
 	 */
 	public function getHostname() -> string
 	{
@@ -582,11 +551,8 @@ class Route implements RouteInterface
 
 	/**
 	 * Sets the group associated with the route
-	 *
-	 * @param Phalcon\Mvc\Router\Group group
-	 * @return Phalcon\Mvc\RouteInterface
 	 */
-	public function setGroup(group) -> <Route>
+	public function setGroup(<GroupInterface> group) -> <Route>
 	{
 		let this->_group = group;
 		return this;
@@ -594,22 +560,16 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the group associated with the route
-	 *
-	 * @return Phalcon\Mvc\Router\Group|null
 	 */
-	public function getGroup()
+	public function getGroup() -> <GroupInterface> | null
 	{
 		return this->_group;
 	}
 
 	/**
 	 * Adds a converter to perform an additional transformation for certain parameter
-	 *
-	 * @param string name
-	 * @param callable converter
-	 * @return Phalcon\Mvc\Router\Route
 	 */
-	public function convert(string! name, converter) -> <Route>
+	public function convert(string! name, var converter) -> <Route>
 	{
 		let this->_converters[name] = converter;
 		return this;
@@ -617,10 +577,8 @@ class Route implements RouteInterface
 
 	/**
 	 * Returns the router converter
-	 *
-	 * @return array
 	 */
-	public function getConverters()
+	public function getConverters() -> array
 	{
 		return this->_converters;
 	}
@@ -628,7 +586,7 @@ class Route implements RouteInterface
 	/**
 	 * Resets the internal route id generator
 	 */
-	public static function reset()
+	public static function reset() -> void
 	{
 		let self::_uniqueId = null;
 	}

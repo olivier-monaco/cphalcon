@@ -61,7 +61,7 @@ PHP_METHOD(Phalcon_Tag, tagHtml);
 PHP_METHOD(Phalcon_Tag, tagHtmlClose);
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phalcon_tag_getescaper, 0, 0, 1)
-	ZEND_ARG_INFO(0, params)
+	ZEND_ARG_ARRAY_INFO(0, params, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_phalcon_tag_renderattributes, 0, 0, 2)
@@ -336,5 +336,5 @@ ZEPHIR_INIT_FUNCS(phalcon_tag_method_entry) {
 	PHP_ME(Phalcon_Tag, getDocType, NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(Phalcon_Tag, tagHtml, arginfo_phalcon_tag_taghtml, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	PHP_ME(Phalcon_Tag, tagHtmlClose, arginfo_phalcon_tag_taghtmlclose, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
-  PHP_FE_END
+	PHP_FE_END
 };

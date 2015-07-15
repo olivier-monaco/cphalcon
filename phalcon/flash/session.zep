@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -19,6 +19,7 @@
 
 namespace Phalcon\Flash;
 
+use Phalcon\Flash as FlashBase;
 use Phalcon\DiInterface;
 use Phalcon\FlashInterface;
 use Phalcon\Di\InjectionAwareInterface;
@@ -30,15 +31,13 @@ use Phalcon\Session\AdapterInterface as SessionInterface;
  *
  * Temporarily stores the messages in session, then messages can be printed in the next request
  */
-class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareInterface
+class Session extends FlashBase implements FlashInterface, InjectionAwareInterface
 {
 
 	protected _dependencyInjector;
 
 	/**
 	 * Sets the dependency injector
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -47,8 +46,6 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Returns the internal dependency injector
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -57,11 +54,8 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Returns the messages stored in session
-	 *
-	 * @param boolean remove
-	 * @return array
 	 */
-	protected function _getSessionMessages(boolean remove)
+	protected function _getSessionMessages(boolean remove) -> array
 	{
 		var dependencyInjector, session, messages;
 
@@ -82,8 +76,6 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Stores the messages in session
-	 *
-	 * @param array messages
 	 */
 	protected function _setSessionMessages(array! messages) -> array
 	{
@@ -101,9 +93,6 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Adds a message to the session flasher
-	 *
-	 * @param string type
-	 * @param string message
 	 */
 	public function message(string type, string message) -> void
 	{
@@ -123,9 +112,6 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Checks whether there are messages
-	 *
-	 * @param string type
-	 * @return boolean
 	 */
 	public function has(type = null) -> boolean
 	{
@@ -143,32 +129,26 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 
 	/**
 	 * Returns the messages in the session flasher
-	 *
-	 * @param string type
-	 * @param boolean remove
-	 * @return array
 	 */
-	public function getMessages(type = null, remove = true) -> array
+	public function getMessages(type = null, boolean remove = true) -> array
 	{
 		var messages, returnMessages;
 
 		let messages = this->_getSessionMessages(remove);
-		if typeof messages == "array" {
-			if typeof type == "string" {
-				if fetch returnMessages, messages[type] {
-					return returnMessages;
-				}
-			}
+
+		if typeof type != "string" {
 			return messages;
 		}
 
-		return [];
+		if !fetch returnMessages, messages[type] {
+			return [];
+		}
+
+		return returnMessages;
 	}
 
 	/**
 	 * Prints the messages in the session flasher
-	 *
-	 * @param boolean remove
 	 */
 	public function output(boolean remove = true) -> void
 	{
@@ -180,10 +160,16 @@ class Session extends \Phalcon\Flash implements FlashInterface, InjectionAwareIn
 				this->outputMessage(type, message);
 			}
 		}
+
+		parent::clear();
 	}
 
+	/**
+	 * Clear messages in the session messenger
+	 */
 	public function clear() -> void
 	{
 		this->_getSessionMessages(true);
+		parent::clear();
 	}
 }

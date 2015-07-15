@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -23,10 +23,10 @@ use Phalcon\Annotations\Annotation;
 use Phalcon\Annotations\Exception;
 
 /**
-* Phalcon\Annotations\Annotation
-*
-* Represents a single annotation in an annotations collection
-*/
+ * Phalcon\Annotations\Annotation
+ *
+ * Represents a single annotation in an annotations collection
+ */
 class Annotation
 {
 
@@ -50,8 +50,6 @@ class Annotation
 
 	/**
 	 * Phalcon\Annotations\Annotation constructor
-	 *
-	 * @param array reflectionData
 	 */
 	public function __construct(array! reflectionData)
 	{
@@ -79,8 +77,6 @@ class Annotation
 
 	/**
 	 * Returns the annotation's name
-	 *
-	 * @return string
 	 */
 	public function getName() -> string
 	{
@@ -163,8 +159,6 @@ class Annotation
 
 	/**
 	 * Returns the number of arguments that the annotation has
-	 *
-	 * @return int
 	 */
 	public function numberArguments() -> int
 	{

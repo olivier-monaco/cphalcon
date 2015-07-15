@@ -20,27 +20,10 @@
 #include "kernel/operators.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Multiple
  *
- * Allows to read to chained backends writing to multiple backends
+ * Allows to read to chained backend adapters writing to multiple backends
  *
  *<code>
  *   use Phalcon\Cache\Frontend\Data as DataFrontend,
@@ -109,7 +92,7 @@ PHP_METHOD(Phalcon_Cache_Multiple, __construct) {
 
 	if (Z_TYPE_P(backends) != IS_NULL) {
 		if (Z_TYPE_P(backends) != IS_ARRAY) {
-			ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_cache_exception_ce, "The backends must be an array", "phalcon/cache/multiple.zep", 84);
+			ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(phalcon_cache_exception_ce, "The backends must be an array", "phalcon/cache/multiple.zep", 83);
 			return;
 		}
 		zephir_update_property_this(this_ptr, SL("_backends"), backends TSRMLS_CC);
@@ -119,9 +102,6 @@ PHP_METHOD(Phalcon_Cache_Multiple, __construct) {
 
 /**
  * Adds a backend
- *
- * @param Phalcon\Cache\BackendInterface backend
- * @return Phalcon\Cache\Multiple
  */
 PHP_METHOD(Phalcon_Cache_Multiple, push) {
 
@@ -131,11 +111,7 @@ PHP_METHOD(Phalcon_Cache_Multiple, push) {
 
 
 
-	if (!(zephir_instance_of_ev(backend, phalcon_cache_backendinterface_ce TSRMLS_CC))) {
-		ZEPHIR_THROW_EXCEPTION_DEBUG_STRW(spl_ce_InvalidArgumentException, "Parameter 'backend' must be an instance of 'Phalcon\\Cache\\BackendInterface'", "", 0);
-		return;
-	}
-	zephir_update_property_this(this_ptr, SL("_backends"), backend TSRMLS_CC);
+	zephir_update_property_array_append(this_ptr, SL("_backends"), backend TSRMLS_CC);
 	RETURN_THISW();
 
 }
@@ -163,13 +139,13 @@ PHP_METHOD(Phalcon_Cache_Multiple, get) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_backends"), PH_NOISY_CC);
-	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 120);
+	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 116);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HVALUE(backend, _3);
-		ZEPHIR_CALL_METHOD(&content, backend, "get", NULL, keyName, lifetime);
+		ZEPHIR_CALL_METHOD(&content, backend, "get", NULL, 0, keyName, lifetime);
 		zephir_check_call_status();
 		if (Z_TYPE_P(content) != IS_NULL) {
 			RETURN_CCTOR(content);
@@ -201,13 +177,13 @@ PHP_METHOD(Phalcon_Cache_Multiple, start) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_backends"), PH_NOISY_CC);
-	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 136);
+	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 132);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HVALUE(backend, _3);
-		ZEPHIR_CALL_METHOD(NULL, backend, "start", NULL, keyName, lifetime);
+		ZEPHIR_CALL_METHOD(NULL, backend, "start", NULL, 0, keyName, lifetime);
 		zephir_check_call_status();
 	}
 	ZEPHIR_MM_RESTORE();
@@ -247,13 +223,13 @@ PHP_METHOD(Phalcon_Cache_Multiple, save) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_backends"), PH_NOISY_CC);
-	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 153);
+	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 149);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HVALUE(backend, _3);
-		ZEPHIR_CALL_METHOD(NULL, backend, "save", NULL, keyName, content, lifetime, stopBuffer);
+		ZEPHIR_CALL_METHOD(NULL, backend, "save", NULL, 0, keyName, content, lifetime, stopBuffer);
 		zephir_check_call_status();
 	}
 	ZEPHIR_MM_RESTORE();
@@ -279,13 +255,13 @@ PHP_METHOD(Phalcon_Cache_Multiple, delete) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_backends"), PH_NOISY_CC);
-	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 169);
+	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 165);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HVALUE(backend, _3);
-		ZEPHIR_CALL_METHOD(NULL, backend, "delete", NULL, keyName);
+		ZEPHIR_CALL_METHOD(NULL, backend, "delete", NULL, 0, keyName);
 		zephir_check_call_status();
 	}
 	RETURN_MM_BOOL(1);
@@ -318,13 +294,13 @@ PHP_METHOD(Phalcon_Cache_Multiple, exists) {
 
 
 	_0 = zephir_fetch_nproperty_this(this_ptr, SL("_backends"), PH_NOISY_CC);
-	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 189);
+	zephir_is_iterable(_0, &_2, &_1, 0, 0, "phalcon/cache/multiple.zep", 185);
 	for (
 	  ; zephir_hash_get_current_data_ex(_2, (void**) &_3, &_1) == SUCCESS
 	  ; zephir_hash_move_forward_ex(_2, &_1)
 	) {
 		ZEPHIR_GET_HVALUE(backend, _3);
-		ZEPHIR_CALL_METHOD(&_4, backend, "exists", NULL, keyName, lifetime);
+		ZEPHIR_CALL_METHOD(&_4, backend, "exists", NULL, 0, keyName, lifetime);
 		zephir_check_call_status();
 		if (ZEPHIR_IS_TRUE(_4)) {
 			RETURN_MM_BOOL(1);

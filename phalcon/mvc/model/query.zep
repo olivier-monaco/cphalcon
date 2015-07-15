@@ -3,7 +3,7 @@
  +------------------------------------------------------------------------+
  | Phalcon Framework                                                      |
  +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
+ | Copyright (c) 2011-2015 Phalcon Team (http://www.phalconphp.com)       |
  +------------------------------------------------------------------------+
  | This source file is subject to the New BSD License that is bundled     |
  | with this package in the file docs/LICENSE.txt.                        |
@@ -20,17 +20,22 @@
 
 namespace Phalcon\Mvc\Model;
 
+use Phalcon\Db\Column;
+use Phalcon\Db\RawValue;
 use Phalcon\DiInterface;
+use Phalcon\Mvc\Model\Row;
+use Phalcon\Mvc\ModelInterface;
 use Phalcon\Mvc\Model\Exception;
 use Phalcon\Mvc\Model\ManagerInterface;
 use Phalcon\Mvc\Model\QueryInterface;
+use Phalcon\Cache\BackendInterface;
 use Phalcon\Mvc\Model\Query\Status;
 use Phalcon\Mvc\Model\Resultset\Complex;
 use Phalcon\Mvc\Model\Query\StatusInterface;
 use Phalcon\Mvc\Model\ResultsetInterface;
-use Phalcon\Mvc\ModelInterface;
 use Phalcon\Mvc\Model\Resultset\Simple;
 use Phalcon\Di\InjectionAwareInterface;
+use Phalcon\Mvc\Model\RelationInterface;
 
 /**
  * Phalcon\Mvc\Model\Query
@@ -38,7 +43,6 @@ use Phalcon\Di\InjectionAwareInterface;
  * This class takes a PHQL intermediate representation and executes it.
  *
  *<code>
- *
  * $phql = "SELECT c.price*0.16 AS taxes, c.* FROM Cars AS c JOIN Brands AS b
  *          WHERE b.name = :name: ORDER BY c.name";
  *
@@ -47,11 +51,10 @@ use Phalcon\Di\InjectionAwareInterface;
  * ));
  *
  * foreach ($result as $row) {
- *   echo "Name: ", $row->cars->name, "\n";
+ *   echo "Name: ",  $row->cars->name, "\n";
  *   echo "Price: ", $row->cars->price, "\n";
  *   echo "Taxes: ", $row->taxes, "\n";
  * }
- *
  *</code>
  */
 class Query implements QueryInterface, InjectionAwareInterface
@@ -124,8 +127,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Sets the dependency injection container
-	 *
-	 * @param Phalcon\DiInterface dependencyInjector
 	 */
 	public function setDI(<DiInterface> dependencyInjector)
 	{
@@ -149,8 +150,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the dependency injection container
-	 *
-	 * @return Phalcon\DiInterface
 	 */
 	public function getDI() -> <DiInterface>
 	{
@@ -159,9 +158,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Tells to the query if only the first row in the resultset must be returned
-	 *
-	 * @param boolean uniqueRow
-	 * @return Phalcon\Mvc\Model\Query
 	 */
 	public function setUniqueRow(boolean uniqueRow) -> <Query>
 	{
@@ -171,8 +167,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Check if the query is programmed to get only the first row in the resultset
-	 *
-	 * @return boolean
 	 */
 	public function getUniqueRow() -> boolean
 	{
@@ -181,15 +175,12 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Replaces the model's name to its source name in a qualifed-name expression
-	 *
-	 * @param array expr
-	 * @return string
 	 */
-	protected final function _getQualified(array! expr)
+	protected final function _getQualified(array! expr) -> array
 	{
 		var columnName, sqlColumnAliases, metaData, sqlAliases,
 			source, sqlAliasesModelsInstances, realColumnName, columnDomain,
-			model, models, columnMap, hasModel;
+			model, models, columnMap, hasModel, className;
 		int number;
 
 		let columnName = expr["name"];
@@ -210,16 +201,15 @@ class Query implements QueryInterface, InjectionAwareInterface
 		/**
 		 * Check if the qualified name has a domain
 		 */
-		if isset expr["domain"] {
+		if fetch columnDomain, expr["domain"] {
 
 			let sqlAliases = this->_sqlAliases;
 
 			/**
-			 * The column has a domain, we need to check if it"s an alias
+			 * The column has a domain, we need to check if it's an alias
 			 */
-			let columnDomain = expr["domain"];
 			if !fetch source, sqlAliases[columnDomain] {
-				throw new Exception("Unknown model or alias '" . columnDomain . "' (1), when preparing: " . this->_phql);
+				throw new Exception("Unknown model or alias '" . columnDomain . "' (11), when preparing: " . this->_phql);
 			}
 
 			/**
@@ -233,7 +223,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 				let sqlAliasesModelsInstances = this->_sqlAliasesModelsInstances;
 
 				/**
-				 * We need to model instance to retrieve the reversed column map
+				 * We need the model instance to retrieve the reversed column map
 				 */
 				if !fetch model, sqlAliasesModelsInstances[columnDomain] {
 					throw new Exception("There is no model related to model or alias '" . columnDomain . "', when executing: " . this->_phql);
@@ -258,6 +248,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 			 * If the column IR doesn't have a domain, we must check for ambiguities
 			 */
 			let number = 0, hasModel = false;
+
 			for model in this->_modelsInstances {
 
 				/**
@@ -290,8 +281,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Obtain the model's source from the _models list
 			 */
-			if !fetch source, models[get_class(hasModel)] {
-				throw new Exception("Column '" . columnName . "' doesn't belong to any of the selected models (2), when preparing: " . this->_phql);
+			let className = get_class(hasModel);
+			if !fetch source, models[className] {
+				throw new Exception("Can't obtain model's source from models list: '" . className . "', when preparing: " . this->_phql);
 			}
 
 			/**
@@ -313,7 +305,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 			} else {
 				let realColumnName = columnName;
 			}
-
 		}
 
 		/**
@@ -329,13 +320,10 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Resolves a expression in a single call argument
-	 *
-	 * @param array argument
-	 * @return array
 	 */
 	protected final function _getCallArgument(array! argument) -> array
 	{
-		if argument["type"] == PHQL_T_ALL {
+		if argument["type"] == PHQL_T_STARALL {
 			return ["type": "all"];
 		}
 		return this->_getExpression(argument);
@@ -343,34 +331,74 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Resolves a expression in a single call argument
-	 *
-	 * @param array expr
-	 * @return array
+	 */
+	protected final function _getCaseExpression(array! expr) -> array
+	{
+		var whenClauses, whenExpr;
+
+		let whenClauses = [];
+		for whenExpr in expr["right"] {
+			if isset whenExpr["right"] {
+				let whenClauses[] = [
+					"type": "when",
+					"expr": this->_getExpression(whenExpr["left"]),
+					"then": this->_getExpression(whenExpr["right"])
+				];
+			} else {
+				let whenClauses[] = [
+					"type": "else",
+					"expr": this->_getExpression(whenExpr["left"])
+				];
+			}
+		}
+
+		return [
+			"type"        : "case",
+			"expr"        : this->_getExpression(expr["left"]),
+			"when-clauses": whenClauses
+		];
+	}
+
+	/**
+	 * Resolves a expression in a single call argument
 	 */
 	protected final function _getFunctionCall(array! expr) -> array
 	{
-		var arguments, argument, functionArgs;
+		var arguments, distinct, argument, functionArgs;
 
 		if fetch arguments, expr["arguments"] {
+
+			if isset expr["distinct"] {
+				let distinct = 1;
+			} else {
+				let distinct = 0;
+			}
+
 			if isset arguments[0] {
-				/**
-				 * There are more than one argument
-				 */
+				// There are more than one argument
 				let functionArgs = [];
 				for argument in arguments {
 					let functionArgs[] = this->_getCallArgument(argument);
 				}
 			} else {
-				/**
-				 * There is only one argument
-				 */
+				// There is only one argument
 				let functionArgs = [this->_getCallArgument(arguments)];
 			}
-			return [
-				"type"     : "functionCall",
-				"name"     : expr["name"],
-				"arguments": functionArgs
-			];
+
+			if distinct {
+				return [
+					"type"     : "functionCall",
+					"name"     : expr["name"],
+					"arguments": functionArgs,
+					"distinct" : distinct
+				];
+			} else {
+				return [
+					"type"     : "functionCall",
+					"name"     : expr["name"],
+					"arguments": functionArgs
+				];
+			}
 		}
 
 		return [
@@ -388,25 +416,29 @@ class Query implements QueryInterface, InjectionAwareInterface
 	 */
 	protected final function _getExpression(expr, boolean quoting = true) -> string
 	{
-		var exprType, exprLeft, exprRight, left, right, listItems, exprListItem,
-			exprReturn, tempNotQuoting, value, escapedValue, exprValue;
+		var exprType, exprLeft, exprRight, left = null, right = null, listItems, exprListItem,
+			exprReturn, tempNotQuoting, value, escapedValue, exprValue,
+			valueParts, name, bindType, bind;
 
 		if fetch exprType, expr["type"] {
 
 			let tempNotQuoting = true;
 
-			/**
-			 * Resolving the left part of the expression if any
-			 */
-			if fetch exprLeft, expr["left"] {
-				let left = this->_getExpression(exprLeft, tempNotQuoting);
-			}
+			if exprType != PHQL_T_CASE {
 
-			/**
-			 * Resolving the right part of the expression if any
-			 */
-			if fetch exprRight, expr["right"] {
-				let right = this->_getExpression(exprRight, tempNotQuoting);
+				/**
+				 * Resolving the left part of the expression if any
+				 */
+				if fetch exprLeft, expr["left"] {
+					let left = this->_getExpression(exprLeft, tempNotQuoting);
+				}
+
+				/**
+				 * Resolving the right part of the expression if any
+				 */
+				if fetch exprRight, expr["right"] {
+					let right = this->_getExpression(exprRight, tempNotQuoting);
+				}
 			}
 
 			/**
@@ -426,7 +458,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 					let exprReturn = ["type": "binary-op", "op": ">", "left": left, "right": right];
 					break;
 
-				case 270:
+				case PHQL_T_NOTEQUALS:
 					let exprReturn = ["type": "binary-op", "op": "<>", "left": left, "right": right];
 					break;
 
@@ -448,10 +480,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_QUALIFIED:
 					let exprReturn = this->_getQualified(expr);
-					break;
-
-				case 359:
-					//let exprReturn = this->_getAliased(expr);
 					break;
 
 				case PHQL_T_ADD:
@@ -483,6 +511,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 					break;
 
 				case PHQL_T_ENCLOSED:
+				case PHQL_T_SUBQUERY:
 					let exprReturn = ["type": "parentheses", "left": left];
 					break;
 
@@ -492,6 +521,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_INTEGER:
 				case PHQL_T_DOUBLE:
+				case PHQL_T_HINTEGER:
 					let exprReturn = ["type": "literal", "value": expr["value"]];
 					break;
 
@@ -527,6 +557,79 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_SPLACEHOLDER:
 					let exprReturn = ["type": "placeholder", "value": ":" . expr["value"]];
+					break;
+
+				case PHQL_T_BPLACEHOLDER:
+					let value = expr["value"];
+					if memstr(value, ":") {
+
+						let valueParts = explode(":", value),
+							name = valueParts[0],
+							bindType = valueParts[1];
+
+						switch bindType {
+
+							case "str":
+								let this->_bindTypes[name] = Column::BIND_PARAM_STR;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "int":
+								let this->_bindTypes[name] = Column::BIND_PARAM_INT;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "double":
+								let this->_bindTypes[name] = Column::BIND_PARAM_DECIMAL;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "bool":
+								let this->_bindTypes[name] = Column::BIND_PARAM_BOOL;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "blob":
+								let this->_bindTypes[name] = Column::BIND_PARAM_BLOB;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "null":
+								let this->_bindTypes[name] = Column::BIND_PARAM_NULL;
+								let exprReturn = ["type": "placeholder", "value": ":" . name];
+								break;
+
+							case "array":
+							case "array-str":
+							case "array-int":
+
+								if !fetch bind, this->_bindParams[name] {
+									throw new Exception("Bind value is required for array type placeholder: " . name);
+								}
+
+								if typeof bind != "array" {
+									throw new Exception("Bind type requires an array in placeholder: " . name);
+								}
+
+								if count(bind) < 1 {
+									throw new Exception("At least one value must be bound in placeholder: " . name);
+								}
+
+								let exprReturn = [
+									"type": "placeholder",
+									"value": ":" . name,
+									"rawValue": name, 
+									"times": count(bind)
+								];
+								break;
+
+							default:
+								throw new Exception("Unknown bind type: " . bindType);
+						}
+
+					} else {
+						let exprReturn = ["type": "placeholder", "value": ":" . value];
+					}
 					break;
 
 				case PHQL_T_NULL:
@@ -569,6 +672,10 @@ class Query implements QueryInterface, InjectionAwareInterface
 					let exprReturn = ["type": "binary-op", "op": "NOT IN", "left": left, "right": right];
 					break;
 
+				case PHQL_T_EXISTS:
+					let exprReturn = ["type": "unary-op", "op": "EXISTS", "right": right];
+					break;
+
 				case PHQL_T_DISTINCT:
 					let exprReturn = ["type": "unary-op", "op": "DISTINCT ", "right": right];
 					break;
@@ -595,6 +702,14 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_FCALL:
 					let exprReturn = this->_getFunctionCall(expr);
+					break;
+
+				case PHQL_T_CASE:
+					let exprReturn = this->_getCaseExpression(expr);
+					break;
+
+				case PHQL_T_SELECT:
+					let exprReturn = ["type": "select", "value": this->_prepareSelect(expr, true)];
 					break;
 
 				default:
@@ -627,7 +742,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Resolves a column from its intermediate representation into an array used to determine
-	 * if the resulset produced is simple or complex
+	 * if the resultset produced is simple or complex
 	 *
 	 * @param array column
 	 * @return array
@@ -635,8 +750,8 @@ class Query implements QueryInterface, InjectionAwareInterface
 	protected final function _getSelectColumn(array! column)
 	{
 		var sqlColumns, columnType, sqlAliases, modelName, source,
-			columnDomain, sqlColumnAlias, bestAlias, preparedAlias, sqlExprColumn,
-			sqlAliasesModels, sqlModelsAliases, sqlColumn, columnData, balias;
+			columnDomain, sqlColumnAlias, preparedAlias, sqlExprColumn,
+			sqlAliasesModels, sqlColumn, columnData, balias;
 
 		if !fetch columnType, column["type"] {
 			throw new Exception("Corrupted SELECT AST");
@@ -647,7 +762,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		/**
 		 * Check for select * (all)
 		 */
-		if columnType == PHQL_T_ALL {
+		if columnType == PHQL_T_STARALL {
 			for modelName, source in this->_models {
 				let sqlColumns[] = [
 					"type"  : "object",
@@ -663,7 +778,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		}
 
 		/**
-		 * Check if selected column is qualified.*
+		 * Check if selected column is qualified.*, ex: robots.*
 		 */
 		if columnType == PHQL_T_DOMAINALL {
 
@@ -690,18 +805,12 @@ class Query implements QueryInterface, InjectionAwareInterface
 				modelName = sqlAliasesModels[columnDomain];
 
 			/**
-			 * Get the best alias for the column
-			 */
-			let sqlModelsAliases = this->_sqlModelsAliases,
-				bestAlias = sqlModelsAliases[modelName];
-
-			/**
 			 * If the best alias is the model name we lowercase the first letter
 			 */
-			if bestAlias == modelName {
+			if columnDomain == modelName {
 				let preparedAlias = lcfirst(modelName);
 			} else {
-				let preparedAlias = bestAlias;
+				let preparedAlias = columnDomain;
 			}
 
 			/**
@@ -757,20 +866,19 @@ class Query implements QueryInterface, InjectionAwareInterface
 	{
 		var modelName, model, source, schema;
 
-		if fetch modelName, qualifiedName["name"] {
-
-			let model = manager->load(modelName),
-				source = model->getSource(),
-				schema = model->getSchema();
-
-			if schema {
-				return [schema, source];
-			}
-
-			return source;
+		if !fetch modelName, qualifiedName["name"] {
+			throw new Exception("Corrupted SELECT AST");
 		}
 
-		throw new Exception("Corrupted SELECT AST");
+		let model = manager->load(modelName),
+			source = model->getSource(),
+			schema = model->getSchema();
+
+		if schema {
+			return [schema, source];
+		}
+
+		return source;
 	}
 
 	/**
@@ -780,24 +888,31 @@ class Query implements QueryInterface, InjectionAwareInterface
 	 * @param array join
 	 * @return array
 	 */
-	protected final function _getJoin(<ManagerInterface> manager, join)
+	protected final function _getJoin(<ManagerInterface> manager, join) -> array
 	{
-
-		var qualified, modelName, source, model, schema;
+		var qualified, modelName, realModelName, nsAlias, source, model, schema;
 
 		if fetch qualified, join["qualified"] {
 
 			if qualified["type"] == 355 {
 
-				let modelName = qualified["name"],
-					model = manager->load(modelName),
+				let modelName = qualified["name"];
+
+				if memstr(modelName, ":") {
+					let nsAlias = explode(":", modelName);
+					let realModelName = manager->getNamespaceAlias(nsAlias[0]) . "\\" . nsAlias[1];
+				} else {
+					let realModelName = modelName;
+				}
+
+				let model = manager->load(realModelName, true),
 					source = model->getSource(),
 					schema = model->getSchema();
 
 				return [
 					"schema"   : schema,
 					"source"   : source,
-					"modelName": modelName,
+					"modelName": realModelName,
 					"model"    : model
 				];
 			}
@@ -851,8 +966,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 	 * @param Phalcon\Mvc\Model\RelationInterface relation
 	 * @return array
 	 */
-	protected final function _getSingleJoin(string! joinType, joinSource, modelAlias, joinAlias,
-		<\Phalcon\Mvc\Model\RelationInterface> relation)
+	protected final function _getSingleJoin(string! joinType, joinSource, modelAlias, joinAlias, <RelationInterface> relation) -> array
 	{
 		var fields, referencedFields, sqlJoinConditions = null,
 			sqlJoinPartialConditions, position, field, referencedField;
@@ -875,18 +989,20 @@ class Query implements QueryInterface, InjectionAwareInterface
 			 * Create the right part of the expression
 			 */
 			let sqlJoinConditions = [
-				"type"     : "binary-op",
-				"op"       : "=",
-				"left"     : this->_getQualified([
-					"type"   : 355,
-					"domain" : modelAlias,
-					"name"   : fields
-				]),
-				"right"    : this->_getQualified([
-					"type"   : "qualified",
-					"domain" : joinAlias,
-					"name"   : referencedFields
-				])
+				[
+					"type"     : "binary-op",
+					"op"       : "=",
+					"left"     : this->_getQualified([
+						"type"   : 355,
+						"domain" : modelAlias,
+						"name"   : fields
+					]),
+					"right"    : this->_getQualified([
+						"type"   : "qualified",
+						"domain" : joinAlias,
+						"name"   : referencedFields
+					])
+				]
 			];
 
 		} else {
@@ -947,8 +1063,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 	 * @param Phalcon\Mvc\Model\RelationInterface relation
 	 * @return array
 	 */
-	protected final function _getMultiJoin(joinType, joinSource, modelAlias, joinAlias,
-		<\Phalcon\Mvc\Model\RelationInterface> relation)
+	protected final function _getMultiJoin(joinType, joinSource, modelAlias, joinAlias, <RelationInterface> relation) -> array
 	{
 		var sqlJoins, fields, referencedFields,
 			intermediateModelName, intermediateModel, intermediateSource,
@@ -1018,6 +1133,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		let referencedModelName = relation->getReferencedModel();
 
 		if typeof fields == "array" {
+
 			for field, position in fields {
 
 				if !isset referencedFields[position] {
@@ -1120,9 +1236,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 		var models, sqlAliases, sqlAliasesModels, sqlModelsAliases, sqlAliasesModelsInstances,
 			modelsInstances, fromModels, sqlJoins, joinModels, joinSources, joinTypes, joinPreCondition,
 			joinPrepared, manager, selectJoins, joinItem, joins, joinData, schema, source, model,
-			modelName, completeSource, joinType, aliasExpr, alias, joinAliasName, joinExpr,
+			realModelName, completeSource, joinType, aliasExpr, alias, joinAliasName, joinExpr,
 			fromModelName, joinAlias, joinModel, joinSource, preCondition, modelNameAlias,
-			relation, relations, modelAlias, sqlJoin;
+			relation, relations, modelAlias, sqlJoin, sqlJoinItem;
 
 		let models = this->_models,
 			sqlAliases = this->_sqlAliases,
@@ -1157,7 +1273,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 				source = joinData["source"],
 				schema = joinData["schema"],
 				model = joinData["model"],
-				modelName = joinData["modelName"],
+				realModelName = joinData["modelName"],
 				completeSource = [source, schema];
 
 			/**
@@ -1197,17 +1313,17 @@ class Query implements QueryInterface, InjectionAwareInterface
 				/**
 				 * Update model: alias
 				 */
-				let joinModels[alias] = modelName;
+				let joinModels[alias] = realModelName;
 
 				/**
 				 * Update model: alias
 				 */
-				let sqlModelsAliases[modelName] = alias;
+				let sqlModelsAliases[realModelName] = alias;
 
 				/**
 				 * Update model: model
 				 */
-				let sqlAliasesModels[alias] = modelName;
+				let sqlAliasesModels[alias] = realModelName;
 
 				/**
 				 * Update alias: model
@@ -1217,7 +1333,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 				/**
 				 * Update model: alias
 				 */
-				let models[modelName] = alias;
+				let models[realModelName] = alias;
 
 				/**
 				 * Complete source related to a model
@@ -1234,57 +1350,57 @@ class Query implements QueryInterface, InjectionAwareInterface
 				/**
 				 * Check if alias is unique
 				 */
-				if isset joinModels[modelName] {
-					throw new Exception("Cannot use '" . modelName . "' as join alias because it was already used, when preparing: " . this->_phql);
+				if isset joinModels[realModelName] {
+					throw new Exception("Cannot use '" . realModelName . "' as join alias because it was already used, when preparing: " . this->_phql);
 				}
 
 				/**
 				 * Set the join type
 				 */
-				let joinTypes[modelName] = joinType;
+				let joinTypes[realModelName] = joinType;
 
 				/**
 				 * Update model: source
 				 */
-				let sqlAliases[modelName] = source;
+				let sqlAliases[realModelName] = source;
 
 				/**
 				 * Update model: source
 				 */
-				let joinModels[modelName] = source;
+				let joinModels[realModelName] = source;
 
 				/**
 				 * Update model: model
 				 */
-				let sqlModelsAliases[modelName] = modelName;
+				let sqlModelsAliases[realModelName] = realModelName;
 
 				/**
 				 * Update model: model
 				 */
-				let sqlAliasesModels[modelName] = modelName;
+				let sqlAliasesModels[realModelName] = realModelName;
 
 				/**
 				 * Update model: model instance
 				 */
-				let sqlAliasesModelsInstances[modelName] = model;
+				let sqlAliasesModelsInstances[realModelName] = model;
 
 				/**
 				 * Update model: source
 				 */
-				let models[modelName] = source;
+				let models[realModelName] = source;
 
 				/**
 				 * Complete source related to a model
 				 */
-				let joinSources[modelName] = completeSource;
+				let joinSources[realModelName] = completeSource;
 
 				/**
 				 * Complete source related to a model
 				 */
-				let joinPrepared[modelName] = joinItem;
+				let joinPrepared[realModelName] = joinItem;
 			}
 
-			let modelsInstances[modelName] = model;
+			let modelsInstances[realModelName] = model;
 		}
 
 		/**
@@ -1352,7 +1468,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 							 * More than one relation must throw an exception
 							 */
 							if count(relations) != 1 {
-								throw new Exception("There is more than one relation between models '" . modelName . "' and '" . joinModel . "', the join must be done using an alias, when preparing: " . this->_phql);
+								throw new Exception("There is more than one relation between models '" . fromModelName . "' and '" . joinModel . "', the join must be done using an alias, when preparing: " . this->_phql);
 							}
 
 							/**
@@ -1385,7 +1501,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 						 * Append or merge joins
 						 */
 						if isset sqlJoin[0] {
-							let sqlJoins = array_merge(sqlJoins, sqlJoin);
+							for sqlJoinItem in sqlJoin {
+								let sqlJoins[] = sqlJoinItem;
+							}
 						} else {
 							let sqlJoins[] = sqlJoin;
 						}
@@ -1462,11 +1580,8 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Returns a processed group clause for a SELECT statement
-	 *
-	 * @param array $group
-	 * @return array
 	 */
-	protected final function _getGroupClause(group) -> array
+	protected final function _getGroupClause(array! group) -> array
 	{
 		var groupItem, groupParts;
 
@@ -1485,23 +1600,49 @@ class Query implements QueryInterface, InjectionAwareInterface
 	}
 
 	/**
-	 * Analyzes a SELECT intermediate code and produces an array to be executed later
-	 *
-	 * @return array
+	 * Returns a processed limit clause for a SELECT statement
 	 */
-	protected final function _prepareSelect() -> array
+	protected final function _getLimitClause(array! limitClause) -> array
 	{
-		var ast, sqlModels, sqlTables, sqlAliases, sqlColumns, select, tables, columns,
+		var number, offset;
+		array limit = [];
+
+		if fetch number, limitClause["number"] {
+			let limit["number"] = this->_getExpression(number);
+		}
+
+		if fetch offset, limitClause["offset"] {
+			let limit["offset"] = this->_getExpression(offset);
+		}
+
+		return limit;
+	}
+
+	/**
+	 * Analyzes a SELECT intermediate code and produces an array to be executed later
+	 */
+	protected final function _prepareSelect(var ast = null, var merge = null) -> array
+	{
+		int position;
+		var sqlModels, sqlTables, sqlAliases, sqlColumns, select, tables, columns,
 			sqlAliasesModels, sqlModelsAliases, sqlAliasesModelsInstances,
 			models, modelsInstances, selectedModels, manager, metaData,
 			selectedModel, qualifiedName, modelName, nsAlias, realModelName, model,
 			schema, source, completeSource, alias, joins, sqlJoins, selectColumns,
-			sqlColumnAliases, column, sqlColumn, sqlSelect, having, where,
+			sqlColumnAliases, column, sqlColumn, sqlSelect, distinct, having, where,
 			groupBy, order, limit;
-		int position;
 
-		let ast = this->_ast,
-			select = ast["select"];
+		if empty ast {
+			let ast = this->_ast;
+		}
+
+		if typeof merge == "null" {
+			let merge = false;
+		}
+
+		if !fetch select, ast["select"] {
+			let select = ast;
+		}
 
 		if !fetch tables, select["tables"] {
 			throw new Exception("Corrupted SELECT AST");
@@ -1561,9 +1702,15 @@ class Query implements QueryInterface, InjectionAwareInterface
 		let manager = this->_manager,
 			metaData = this->_metaData;
 
-		/**
-		 * Processing selected columns
-		 */
+		if typeof manager != "object" {
+			throw new Exception("A models-manager is required to execute the query");
+		}
+
+		if typeof metaData != "object" {
+			throw new Exception("A meta-data is required to execute the query");
+		}
+
+		// Processing selected columns
 		for selectedModel in selectedModels {
 
 			let qualifiedName = selectedModel["qualifiedName"],
@@ -1572,14 +1719,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Check if the table have a namespace alias
 			 */
-			if fetch nsAlias, qualifiedName["ns-alias"] {
-
-				/**
-				 * Get the real namespace alias
-				 * Create the real namespaced name
-				 */
-				let realModelName = manager->getNamespaceAlias(nsAlias) . "\\" . modelName;
-
+			if memstr(modelName, ":") {
+				let nsAlias = explode(":", modelName);
+				let realModelName = manager->getNamespaceAlias(nsAlias[0]) . "\\" . nsAlias[1];
 			} else {
 				let realModelName = modelName;
 			}
@@ -1587,7 +1729,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Load a model instance from the models manager
 			 */
-			let model = manager->load(realModelName);
+			let model = manager->load(realModelName, true);
 
 			/**
 			 * Define a complete schema/source
@@ -1595,30 +1737,24 @@ class Query implements QueryInterface, InjectionAwareInterface
 			let schema = model->getSchema(),
 				source = model->getSource();
 
-			/**
-			 * Obtain the real source including the schema
-			 */
+			// Obtain the real source including the schema
 			if schema {
 				let completeSource = [source, schema];
 			} else {
 				let completeSource = source;
 			}
 
-			/**
-			 * If an alias is defined for a model the model cannot be referenced in the column list
-			 */
+			// If an alias is defined for a model the model cannot be referenced in the column list
 			if fetch alias, selectedModel["alias"] {
 
-				/**
-				 * Check that the alias hasn"t been used before
-				 */
+				// Check that the alias hasn't been used before
 				if isset sqlAliases[alias] {
 					throw new Exception("Alias '" . alias . "' is already used, when preparing: " . this->_phql);
 				}
 
 				let sqlAliases[alias] = alias,
-					sqlAliasesModels[alias] = modelName,
-					sqlModelsAliases[modelName] = alias,
+					sqlAliasesModels[alias] = realModelName,
+					sqlModelsAliases[realModelName] = alias,
 					sqlAliasesModelsInstances[alias] = model;
 
 				/**
@@ -1629,35 +1765,39 @@ class Query implements QueryInterface, InjectionAwareInterface
 				} else {
 					let completeSource = [source, null, alias];
 				}
-				let models[modelName] = alias;
+				let models[realModelName] = alias;
 
 			} else {
-				let sqlAliases[modelName] = source,
-					sqlAliasesModels[modelName] = modelName,
-					sqlModelsAliases[modelName] = modelName,
-					sqlAliasesModelsInstances[modelName] = model,
-					models[modelName] = source;
+				let sqlAliases[realModelName] = source,
+					sqlAliasesModels[realModelName] = realModelName,
+					sqlModelsAliases[realModelName] = realModelName,
+					sqlAliasesModelsInstances[realModelName] = model,
+					models[realModelName] = source;
 			}
 
-			let sqlModels[] = modelName,
+			let sqlModels[] = realModelName,
 				sqlTables[] = completeSource,
-				modelsInstances[modelName] = model;
+				modelsInstances[realModelName] = model;
 		}
 
-		/**
-		 * Assign Models/Tables information
-		 */
-		let this->_models = models,
-			this->_modelsInstances = modelsInstances,
-			this->_sqlAliases = sqlAliases,
-			this->_sqlAliasesModels = sqlAliasesModels,
-			this->_sqlModelsAliases = sqlModelsAliases,
-			this->_sqlAliasesModelsInstances = sqlAliasesModelsInstances,
-			this->_modelsInstances = modelsInstances;
+		// Assign Models/Tables information
+		if !merge {
+			let this->_models = models,
+				this->_modelsInstances = modelsInstances,
+				this->_sqlAliases = sqlAliases,
+				this->_sqlAliasesModels = sqlAliasesModels,
+				this->_sqlModelsAliases = sqlModelsAliases,
+				this->_sqlAliasesModelsInstances = sqlAliasesModelsInstances;
+		} else {
+			let this->_models = array_merge(this->_models, models),
+				this->_modelsInstances = array_merge(this->_modelsInstances, modelsInstances),
+				this->_sqlAliases = array_merge(this->_sqlAliases, sqlAliases),
+				this->_sqlAliasesModels = array_merge(this->_sqlAliasesModels, sqlAliasesModels),
+				this->_sqlModelsAliases = array_merge(this->_sqlModelsAliases, sqlModelsAliases),
+				this->_sqlAliasesModelsInstances = array_merge(this->_sqlAliasesModelsInstances, sqlAliasesModelsInstances);
+		}
 
-		/**
-		 * Processing joins
-		 */
+		// Processing joins
 		if fetch joins, select["joins"] {
 			if count(joins) {
 				let sqlJoins = this->_getJoins(select);
@@ -1668,18 +1808,14 @@ class Query implements QueryInterface, InjectionAwareInterface
 			let sqlJoins = [];
 		}
 
-		/**
-		 * Processing selected columns
-		 */
+		// Processing selected columns
 		if !isset columns[0] {
 			let selectColumns = [columns];
 		} else {
 			let selectColumns = columns;
 		}
 
-		/**
-		 * Resolve selected columns
-		 */
+		// Resolve selected columns
 		let position = 0,
 			sqlColumnAliases = [];
 
@@ -1720,52 +1856,49 @@ class Query implements QueryInterface, InjectionAwareInterface
 		}
 		let this->_sqlColumnAliases = sqlColumnAliases;
 
-		/**
-		 * sqlSelect is the final prepared SELECT
-		 */
+		// sqlSelect is the final prepared SELECT
 		let sqlSelect = [
 			"models" : sqlModels,
 			"tables" : sqlTables,
 			"columns": sqlColumns
 		];
 
+		if fetch distinct, select["distinct"] {
+			let sqlSelect["distinct"] = distinct;
+		}
+
 		if count(sqlJoins) {
 			let sqlSelect["joins"] = sqlJoins;
 		}
 
-		/**
-		 * Process WHERE clause if any
-		 */
+		// Process "WHERE" clause if any
 		if fetch where, ast["where"] {
 			let sqlSelect["where"] = this->_getExpression(where);
 		}
 
-		/**
-		 * Process GROUP BY clause if any
-		 */
+		// Process "GROUP BY" clause if any
 		if fetch groupBy, ast["groupBy"] {
 			let sqlSelect["group"] = this->_getGroupClause(groupBy);
 		}
 
-		/**
-		 * Process HAVING clause if any
-		 */
+		// Process "HAVING" clause if any
 		if fetch having , ast["having"] {
 			let sqlSelect["having"] = this->_getExpression(having);
 		}
 
-		/**
-		 * Process ORDER BY clause if any
-		 */
+		// Process "ORDER BY" clause if any
 		if fetch order, ast["orderBy"] {
 			let sqlSelect["order"] = this->_getOrderClause(order);
 		}
 
-		/**
-		 * Process LIMIT clause if any
-		 */
+		// Process "LIMIT" clause if any
 		if fetch limit, ast["limit"] {
-			let sqlSelect["limit"] = limit;
+			let sqlSelect["limit"] = this->_getLimitClause(limit);
+		}
+
+		// Process "FOR UPDATE" clause
+		if isset ast["forUpdate"] {
+			let sqlSelect["forUpdate"] = true;
 		}
 
 		return sqlSelect;
@@ -1773,14 +1906,12 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Analyzes an INSERT intermediate code and produces an array to be executed later
-	 *
-	 * @return array
 	 */
 	protected final function _prepareInsert() -> array
 	{
-		var ast, qualifiedName, manager, modelName, model, source, schema,
+		var ast, qualifiedName, nsAlias, manager, modelName, model, source, schema,
 			exprValues, exprValue, sqlInsert, metaData, fields,
-			sqlFields, field, name;
+			sqlFields, field, name, realModelName;
 		boolean notQuoting;
 
 		let ast = this->_ast;
@@ -1795,18 +1926,26 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 		let qualifiedName = ast["qualifiedName"];
 
-		/**
-		 * Check if the related model exists
-		 */
+		// Check if the related model exists
 		if !isset qualifiedName["name"] {
 			throw new Exception("Corrupted INSERT AST");
 		}
 
-		let manager = this->_manager, modelName = qualifiedName["name"];
+		let manager = this->_manager,
+			modelName = qualifiedName["name"];
 
-		let model = manager->load(modelName),
+		// Check if the table have a namespace alias
+		if memstr(modelName, ":") {
+			let nsAlias = explode(":", modelName);
+			let realModelName = manager->getNamespaceAlias(nsAlias[0]) . "\\" . nsAlias[1];
+		} else {
+			let realModelName = modelName;
+		}
+
+		let model = manager->load(realModelName, true),
 			source = model->getSource(),
 			schema = model->getSchema();
+
 		if schema {
 			let source = [schema, source];
 		}
@@ -1816,9 +1955,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 		for exprValue in ast["values"] {
 
-			/**
-			 * Resolve every expression in the "values" clause
-			 */
+			// Resolve every expression in the "values" clause
 			let exprValues[] = [
 				"type" : exprValue["type"],
 				"value": this->_getExpression(exprValue, notQuoting)
@@ -1838,16 +1975,12 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				let name = field["name"];
 
-				/**
-				 * Check that inserted fields are part of the model
-				 */
+				// Check that inserted fields are part of the model
 				if !metaData->hasAttribute(model, name) {
 					throw new Exception("The model '" . modelName . "' doesn't have the attribute '" . name . "', when preparing: " . this->_phql);
 				}
 
-				/**
-				 * Add the file to the insert list
-				 */
+				// Add the file to the insert list
 				let sqlFields[] = name;
 			}
 
@@ -1861,8 +1994,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Analyzes an UPDATE intermediate code and produces an array to be executed later
-	 *
-	 * @return array
 	 */
 	protected final function _prepareUpdate() -> array
 	{
@@ -1914,14 +2045,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Check if the table have a namespace alias
 			 */
-			if fetch nsAlias, qualifiedName["ns-alias"] {
-
-				/**
-				 * Get the real namespace alias
-				 * Create the real namespaced name
-				 */
-				let realModelName = manager->getNamespaceAlias(nsAlias) . "\\" . modelName;
-
+			if memstr(modelName, ":") {
+				let nsAlias = explode(":", modelName);
+				let realModelName = manager->getNamespaceAlias(nsAlias[0]) . "\\" . nsAlias[1];
 			} else {
 				let realModelName = modelName;
 			}
@@ -1929,7 +2055,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Load a model instance from the models manager
 			 */
-			let model = manager->load(realModelName),
+			let model = manager->load(realModelName, true),
 				source = model->getSource(),
 				schema = model->getSchema();
 
@@ -1950,16 +2076,16 @@ class Query implements QueryInterface, InjectionAwareInterface
 					completeSource[] = alias,
 					sqlTables[] = completeSource,
 					sqlAliasesModelsInstances[alias] = model,
-					models[alias] = modelName;
+					models[alias] = realModelName;
 			} else {
-				let sqlAliases[modelName] = source,
-					sqlAliasesModelsInstances[modelName] = model,
+				let sqlAliases[realModelName] = source,
+					sqlAliasesModelsInstances[realModelName] = model,
 					sqlTables[] = source,
-					models[modelName] = source;
+					models[realModelName] = source;
 			}
 
-			let sqlModels[] = modelName,
-				modelsInstances[modelName] = model;
+			let sqlModels[] = realModelName,
+				modelsInstances[realModelName] = model;
 		}
 
 		/**
@@ -2002,7 +2128,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		}
 
 		if fetch limit, ast["limit"] {
-			let sqlUpdate["limit"] = limit;
+			let sqlUpdate["limit"] = this->_getLimitClause(limit);
 		}
 
 		return sqlUpdate;
@@ -2010,8 +2136,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Analyzes a DELETE intermediate code and produces an array to be executed later
-	 *
-	 * @return array
 	 */
 	protected final function _prepareDelete() -> array
 	{
@@ -2056,14 +2180,12 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Check if the table have a namespace alias
 			 */
-			if fetch nsAlias, qualifiedName["ns-alias"] {
-
-				/**
-				 * Get the real namespace alias
-				 * Create the real namespaced name
-				 */
-				let realModelName = manager->getNamespaceAlias(nsAlias) . "\\" . modelName;
-
+			/**
+			 * Check if the table have a namespace alias
+			 */
+			if memstr(modelName, ":") {
+				let nsAlias = explode(":", modelName);
+				let realModelName = manager->getNamespaceAlias(nsAlias[0]) . "\\" . nsAlias[1];
 			} else {
 				let realModelName = modelName;
 			}
@@ -2071,7 +2193,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Load a model instance from the models manager
 			 */
-			let model = manager->load(realModelName),
+			let model = manager->load(realModelName, true),
 				source = model->getSource(),
 				schema = model->getSchema();
 
@@ -2086,16 +2208,16 @@ class Query implements QueryInterface, InjectionAwareInterface
 					completeSource[] = alias,
 					sqlTables[] = completeSource,
 					sqlAliasesModelsInstances[alias] = model,
-					models[alias] = modelName;
+					models[alias] = realModelName;
 			} else {
-				let sqlAliases[modelName] = source,
-					sqlAliasesModelsInstances[modelName] = model,
+				let sqlAliases[realModelName] = source,
+					sqlAliasesModelsInstances[realModelName] = model,
 					sqlTables[] = source,
-					models[modelName] = source;
+					models[realModelName] = source;
 			}
 
-			let sqlModels[] = modelName,
-				modelsInstances[modelName] = model;
+			let sqlModels[] = realModelName,
+				modelsInstances[realModelName] = model;
 		}
 
 		/**
@@ -2115,7 +2237,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		}
 
 		if fetch limit, ast["limit"] {
-			let sqlDelete["limit"] = limit;
+			let sqlDelete["limit"] = this->_getLimitClause(limit);
 		}
 
 		return sqlDelete;
@@ -2124,8 +2246,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 	/**
 	 * Parses the intermediate code produced by Phalcon\Mvc\Model\Query\Lang generating another
 	 * intermediate representation that could be executed by Phalcon\Mvc\Model\Query
-	 *
-	 * @return array
 	 */
 	public function parse() -> array
 	{
@@ -2209,92 +2329,58 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Returns the current cache backend instance
-	 *
-	 * @return Phalcon\Cache\BackendInterface
 	 */
-	public function getCache()
+	public function getCache() -> <BackendInterface>
 	{
 		return this->_cache;
 	}
 
 	/**
 	 * Executes the SELECT intermediate representation producing a Phalcon\Mvc\Model\Resultset
-	 *
-	 * @param array intermediate
-	 * @param array bindParams
-	 * @param array bindTypes
-	 * @return Phalcon\Mvc\Model\ResultsetInterface
 	 */
-	protected final function _executeSelect(var intermediate, var bindParams, var bindTypes) -> <ResultsetInterface>
+	protected final function _executeSelect(var intermediate, var bindParams, var bindTypes, boolean simulate = false) -> <ResultsetInterface> | array
 	{
 
-		var manager, modelName, models, model, connection, connections,
+		var manager, modelName, models, model, connection, connectionTypes,
 			columns, column, selectColumns, simpleColumnMap, metaData, aliasCopy,
 			sqlColumn, attributes, instance, columnMap, attribute,
-			columnAlias, sqlAlias, dialect, sqlSelect,
+			columnAlias, sqlAlias, dialect, sqlSelect, bindCounts,
 			processed, wildcard, value, processedTypes, typeWildcard, result,
-			resultData, cache, resultObject, columns1;
+			resultData, cache, resultObject, columns1, typesColumnMap, wildcardValue;
 		boolean haveObjects, haveScalars, isComplex, isSimpleStd, isKeepingSnapshots;
 		int numberObjects;
 
 		let manager = this->_manager;
 
+		/**
+		 * Get a database connection
+		 */
+		let connectionTypes = [];
 		let models = intermediate["models"];
 
-		if count(models) == 1 {
+		for modelName in models {
 
-			/**
-			 * Load first model if is not loaded
-			 */
-			let modelName = models[0];
+			// Load model if it is not loaded
 			if !fetch model, this->_modelsInstances[modelName] {
-				let model = manager->load(modelName),
+				let model = manager->load(modelName, true),
 					this->_modelsInstances[modelName] = model;
 			}
 
-			/**
-			 * The 'selectConnection' method could be implemented in a
-			 */
+			// Get database connection
 			if method_exists(model, "selectReadConnection") {
+				// use selectReadConnection() if implemented in extended Model class
 				let connection = model->selectReadConnection(intermediate, bindParams, bindTypes);
 				if typeof connection != "object" {
 					throw new Exception("'selectReadConnection' didn't return a valid connection");
 				}
 			} else {
-
-				/**
-				 * Get the current connection to the model
-				 */
 				let connection = model->getReadConnection();
 			}
 
-		} else {
-
-			/**
-			 * Check if all the models belongs to the same connection
-			 */
-			let connections = [];
-			for modelName in models {
-
-				if !fetch model, this->_modelsInstances[modelName] {
-					let model = manager->load(modelName),
-						this->_modelsInstances[modelName] = model;
-				}
-
-				/**
-				 * Get the models connection
-				 * Mark the type of connection in the connection flags
-				 */
-				let connection = model->getReadConnection(),
-					connections[connection->getType()] = true;
-
-				/**
-				 * More than one type of connection is not allowed
-				 */
-				if count(connections) == 2 {
-					throw new Exception("Cannot use models of different database systems in the same query");
-				}
-
+			// More than one type of connection is not allowed
+			let connectionTypes[connection->getType()] = true;
+			if count(connectionTypes) == 2 {
+				throw new Exception("Cannot use models of different database systems in the same query");
 			}
 		}
 
@@ -2304,11 +2390,10 @@ class Query implements QueryInterface, InjectionAwareInterface
 			haveScalars = false,
 			isComplex = false;
 
-		/**
-		 * Check if the resultset have objects and how many of them have
-		 */
+		// Check if the resultset have objects and how many of them have
 		let numberObjects = 0;
 		let columns1 = columns;
+
 		for column in columns {
 
 			if typeof column != "array" {
@@ -2325,9 +2410,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 			}
 		}
 
-		/**
-		 * Check if the resultset to return is complex or simple
-		 */
+		// Check if the resultset to return is complex or simple
 		if isComplex === false {
 			if haveObjects === true {
 				if haveScalars === true {
@@ -2344,10 +2427,9 @@ class Query implements QueryInterface, InjectionAwareInterface
 			}
 		}
 
-		/**
-		 * Processing selected columns
-		 */
-		let selectColumns = [],
+		// Processing selected columns
+		let instance = null,
+			selectColumns = [],
 			simpleColumnMap = [],
 			metaData = this->_metaData;
 
@@ -2355,9 +2437,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 			let sqlColumn = column["column"];
 
-			/**
-			 * Complete objects are treaded in a different way
-			 */
+			// Complete objects are treated in a different way
 			if column["type"] == "object" {
 
 				let modelName = column["model"];
@@ -2373,32 +2453,24 @@ class Query implements QueryInterface, InjectionAwareInterface
 				let attributes = metaData->getAttributes(instance);
 				if isComplex === true {
 
-					/**
-					 * If the resultset is complex we open every model into their columns
-					 */
+					// If the resultset is complex we open every model into their columns
 					if globals_get("orm.column_renaming") {
 						let columnMap = metaData->getColumnMap(instance);
 					} else {
 						let columnMap = null;
 					}
 
-					/**
-					 * Add every attribute in the model to the generated select
-					 */
+					// Add every attribute in the model to the generated select
 					for attribute in attributes {
 						let selectColumns[] = [attribute, sqlColumn, "_" . sqlColumn . "_" . attribute];
 					}
 
-					/**
-					 * We cache required meta-data to make its future access faster
-					 */
+					// We cache required meta-data to make its future access faster
 					let columns1[aliasCopy]["instance"] = instance,
 						columns1[aliasCopy]["attributes"] = attributes,
 						columns1[aliasCopy]["columnMap"] = columnMap;
 
-					/**
-					 * Check if the model keeps snapshots
-					 */
+					// Check if the model keeps snapshots
 					let isKeepingSnapshots = (boolean) manager->isKeepingSnapshots(instance);
 					if isKeepingSnapshots {
 						let columns1[aliasCopy]["keepSnapshots"] = isKeepingSnapshots;
@@ -2429,24 +2501,17 @@ class Query implements QueryInterface, InjectionAwareInterface
 			/**
 			 * Simulate a column map
 			 */
-			if isComplex === false {
-				if isSimpleStd === true {
-					if fetch sqlAlias, column["sqlAlias"] {
-						let simpleColumnMap[sqlAlias] = aliasCopy;
-					} else {
-						let simpleColumnMap[aliasCopy] = aliasCopy;
-					}
+			if isComplex === false && isSimpleStd === true {
+				if fetch sqlAlias, column["sqlAlias"] {
+					let simpleColumnMap[sqlAlias] = aliasCopy;
+				} else {
+					let simpleColumnMap[aliasCopy] = aliasCopy;
 				}
 			}
 		}
 
-		let intermediate["columns"] = selectColumns;
-
-		/**
-		 * The corresponding SQL dialect generates the SQL statement based accordingly with the database system
-		 */
-		let dialect = connection->getDialect(),
-			sqlSelect = dialect->select(intermediate);
+		let bindCounts = [],
+			intermediate["columns"] = selectColumns;
 
 		/**
 		 * Replace the placeholders
@@ -2454,10 +2519,16 @@ class Query implements QueryInterface, InjectionAwareInterface
 		if typeof bindParams == "array" {
 			let processed = [];
 			for wildcard, value in bindParams {
+
 				if typeof wildcard == "integer" {
-					let processed[":" . wildcard] = value;
+					let wildcardValue = ":" . wildcard;
 				} else {
-					let processed[wildcard] = value;
+					let wildcardValue = wildcard;
+				}
+
+				let processed[wildcardValue] = value;
+				if typeof value == "array" {
+					let bindCounts[wildcardValue] = count(value);
 				}
 			}
 		} else {
@@ -2470,7 +2541,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		if typeof bindTypes == "array" {
 			let processedTypes = [];
 			for typeWildcard, value in bindTypes {
-				if typeof wildcard == "integer" {
+				if typeof typeWildcard == "integer" {
 					let processedTypes[":" . typeWildcard] = value;
 				} else {
 					let processedTypes[typeWildcard] = value;
@@ -2478,6 +2549,27 @@ class Query implements QueryInterface, InjectionAwareInterface
 			}
 		} else {
 			let processedTypes = bindTypes;
+		}
+
+		if count(bindCounts) {
+			let intermediate["bindCounts"] = bindCounts;
+		}
+
+		/**
+		 * The corresponding SQL dialect generates the SQL statement based accordingly with the database system
+		 */
+		let dialect = connection->getDialect(),
+			sqlSelect = dialect->select(intermediate);
+
+		/**
+		 * Return the SQL to be executed instead of execute it
+		 */
+		if simulate {
+			return [
+				"sql"       : sqlSelect,
+				"bind"      : processed,
+				"bindTypes" : processedTypes
+			];
 		}
 
 		/**
@@ -2508,7 +2600,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 				/**
 				 * If the result is a simple standard object use an Phalcon\Mvc\Model\Row as base
 				 */
-				let resultObject = new \Phalcon\Mvc\Model\Row();
+				let resultObject = new Row();
 
 				/**
 				 * Standard objects can"t keep snapshots
@@ -2517,12 +2609,34 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 			} else {
 
-				let resultObject = model;
+				if typeof instance == "object" {
+					let resultObject = instance;
+				} else {
+					let resultObject = model;
+				}
 
 				/**
 				 * Get the column map
 				 */
-				let simpleColumnMap = metaData->getColumnMap(model);
+				if !globals_get("orm.cast_on_hydrate") {
+					let simpleColumnMap = metaData->getColumnMap(model);
+				} else {
+
+					let columnMap = metaData->getColumnMap(model),
+						typesColumnMap = metaData->getDataTypes(model);
+
+					if typeof columnMap === "null" {
+						let simpleColumnMap = [];
+						for attribute in metaData->getAttributes(model) {
+							let simpleColumnMap[attribute] = [attribute, typesColumnMap[attribute]];
+						}
+					} else {
+						let simpleColumnMap = [];
+						for column, attribute in columnMap {
+							let simpleColumnMap[column] = [attribute, typesColumnMap[column]];
+						}
+					}
+				}
 
 				/**
 				 * Check if the model keeps snapshots
@@ -2562,7 +2676,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 		let manager = this->_manager;
 		if !fetch model, this->_modelsInstances[modelName] {
-			let model = manager->load(modelName);
+			let model = manager->load(modelName, true);
 		}
 
 		/**
@@ -2626,6 +2740,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_NPLACEHOLDER:
 				case PHQL_T_SPLACEHOLDER:
+				case PHQL_T_BPLACEHOLDER:
 
 					if typeof bindParams != "array" {
 						throw new Exception("Bound parameter cannot be replaced because placeholders is not an array");
@@ -2639,14 +2754,14 @@ class Query implements QueryInterface, InjectionAwareInterface
 					break;
 
 				default:
-					let insertValue = new \Phalcon\Db\RawValue(dialect->getSqlExpression(exprValue));
+					let insertValue = new RawValue(dialect->getSqlExpression(exprValue));
 					break;
 			}
 
 			let fieldName = fields[number];
 
 			/**
-			 * If the user didn't defined a column list we assume all the model's attributes as columns
+			 * If the user didn't define a column list we assume all the model's attributes as columns
 			 */
 			if automaticFields === true {
 				if typeof columnMap == "array" {
@@ -2733,9 +2848,14 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 		for number, field in fields {
 
-			let fieldName = field["name"],
-				value = values[number],
+			let value = values[number],
 				exprValue = value["value"];
+
+			if isset field["balias"] {
+				let fieldName = field["balias"];
+			} else {
+				let fieldName = field["name"];
+			}
 
 			switch value["type"] {
 
@@ -2751,6 +2871,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				case PHQL_T_NPLACEHOLDER:
 				case PHQL_T_SPLACEHOLDER:
+				case PHQL_T_BPLACEHOLDER:
 
 					if typeof bindParams != "array" {
 						throw new Exception("Bound parameter cannot be replaced because placeholders is not an array");
@@ -2765,8 +2886,11 @@ class Query implements QueryInterface, InjectionAwareInterface
 					}
 					break;
 
+				case PHQL_T_BPLACEHOLDER:
+					throw new Exception("Not supported");
+
 				default:
-					let updateValue = new \Phalcon\Db\RawValue(dialect->getSqlExpression(exprValue));
+					let updateValue = new RawValue(dialect->getSqlExpression(exprValue));
 					break;
 			}
 
@@ -2890,7 +3014,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 				return new Status(false, record);
 			}
-
 		}
 
 		/**
@@ -2939,7 +3062,7 @@ class Query implements QueryInterface, InjectionAwareInterface
 		}
 
 		/**
-		 * Check if a WHERE clause was especified
+		 * Check if a LIMIT clause was especified
 		 */
 		if fetch limitConditions, intermediate["limit"] {
 			let selectIr["limit"] = limitConditions;
@@ -3061,6 +3184,14 @@ class Query implements QueryInterface, InjectionAwareInterface
 			let mergedTypes = bindTypes;
 		}
 
+		if typeof mergedParams != "null" && typeof mergedParams != "array" {
+			throw new Exception("Bound parameters must be an array");
+		}
+
+		if typeof mergedTypes != "null" && typeof mergedTypes != "array" {
+			throw new Exception("Bound parameter types must be an array");
+		}
+
 		let type = this->_type;
 		switch type {
 
@@ -3120,7 +3251,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 	 */
 	public function getSingleResult(var bindParams = null, var bindTypes = null)
 	{
-
 		/**
 		 * The query is already programmed to return just one row
 		 */
@@ -3133,9 +3263,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Sets the type of PHQL statement to be executed
-	 *
-	 * @param int type
-	 * @return Phalcon\Mvc\Model\Query
 	 */
 	public function setType(int type) -> <Query>
 	{
@@ -3145,8 +3272,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Gets the type of PHQL statement executed
-	 *
-	 * @return int
 	 */
 	public function getType() -> int
 	{
@@ -3155,13 +3280,22 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Set default bind parameters
-	 *
-	 * @param array bindParams
-	 * @return Phalcon\Mvc\Model\Query
 	 */
-	public function setBindParams(array! bindParams) -> <Query>
+	public function setBindParams(array! bindParams, boolean merge = false) -> <Query>
 	{
-		let this->_bindParams = bindParams;
+		var currentBindParams;
+
+		if merge {
+			let currentBindParams = this->_bindParams;
+			if typeof currentBindParams == "array" {
+				let this->_bindParams = currentBindParams + bindParams;
+			} else {
+				let this->_bindParams = bindParams;
+			}
+		} else {
+			let this->_bindParams = bindParams;
+		}
+
 		return this;
 	}
 
@@ -3177,13 +3311,22 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Set default bind parameters
-	 *
-	 * @param array bindTypes
-	 * @return Phalcon\Mvc\Model\Query
 	 */
-	public function setBindTypes(array! bindTypes)
+	public function setBindTypes(array! bindTypes, boolean merge = false) -> <Query>
 	{
-		let this->_bindTypes = bindTypes;
+		var currentBindTypes;
+
+		if merge {
+			let currentBindTypes = this->_bindTypes;
+			if typeof currentBindTypes == "array" {
+				let this->_bindTypes = currentBindTypes + bindTypes;
+			} else {
+				let this->_bindTypes = bindTypes;
+			}
+		} else {
+			let this->_bindTypes = bindTypes;
+		}
+
 		return this;
 	}
 
@@ -3199,9 +3342,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Allows to set the IR to be executed
-	 *
-	 * @param array intermediate
-	 * @return Phalcon\Mvc\Model\Query
 	 */
 	public function setIntermediate(array! intermediate) -> <Query>
 	{
@@ -3221,9 +3361,6 @@ class Query implements QueryInterface, InjectionAwareInterface
 
 	/**
 	 * Sets the cache parameters of the query
-	 *
-	 * @param array cacheOptions
-	 * @return Phalcon\Mvc\Model\Query
 	 */
 	public function cache(cacheOptions) -> <Query>
 	{
@@ -3241,4 +3378,22 @@ class Query implements QueryInterface, InjectionAwareInterface
 		return this->_cacheOptions;
 	}
 
+	/**
+	 * Returns the SQL to be generated by the internal PHQL (only works in SELECT statements)
+	 */
+	public function getSql() -> array
+	{
+		var intermediate;
+
+		/**
+		 * The statement is parsed from its PHQL string or a previously processed IR
+		 */
+		let intermediate = this->parse();
+
+		if this->_type == PHQL_T_SELECT {
+			return this->_executeSelect(intermediate, this->_bindParams, this->_bindTypes, true);
+		}
+
+		throw new Exception("This type of statement generates multiple SQL statements");
+	}
 }

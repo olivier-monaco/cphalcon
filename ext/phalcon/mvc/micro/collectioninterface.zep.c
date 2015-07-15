@@ -12,23 +12,6 @@
 #include "kernel/main.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Mvc\Micro\CollectionInterface
  *
@@ -44,16 +27,11 @@ ZEPHIR_INIT_CLASS(Phalcon_Mvc_Micro_CollectionInterface) {
 
 /**
  * Sets a prefix for all routes added to the collection
- *
- * @param string prefix
- * @return Phalcon\Mvc\Micro\Collection
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Micro_CollectionInterface, setPrefix);
 
 /**
  * Returns the collection prefix if any
- *
- * @return string
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Micro_CollectionInterface, getPrefix);
 
@@ -75,16 +53,11 @@ ZEPHIR_DOC_METHOD(Phalcon_Mvc_Micro_CollectionInterface, setHandler);
 
 /**
  * Sets if the main handler must be lazy loaded
- *
- * @param boolean lazy
- * @return Phalcon\Mvc\Micro\Collection
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Micro_CollectionInterface, setLazy);
 
 /**
  * Returns if the main handler must be lazy loaded
- *
- * @return boolean
  */
 ZEPHIR_DOC_METHOD(Phalcon_Mvc_Micro_CollectionInterface, isLazy);
 

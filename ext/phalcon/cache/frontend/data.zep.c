@@ -18,23 +18,6 @@
 #include "kernel/fcall.h"
 
 
-/*
- +------------------------------------------------------------------------+
- | Phalcon Framework                                                      |
- +------------------------------------------------------------------------+
- | Copyright (c) 2011-2014 Phalcon Team (http://www.phalconphp.com)       |
- +------------------------------------------------------------------------+
- | This source file is subject to the New BSD License that is bundled     |
- | with this package in the file docs/LICENSE.txt.                        |
- |                                                                        |
- | If you did not receive a copy of the license and are unable to         |
- | obtain it through the world-wide-web, please send an email             |
- | to license@phalconphp.com so we can send you a copy immediately.       |
- +------------------------------------------------------------------------+
- | Authors: Andres Gutierrez <andres@phalconphp.com>                      |
- |          Eduar Carvajal <eduar@phalconphp.com>                         |
- +------------------------------------------------------------------------+
- */
 /**
  * Phalcon\Cache\Frontend\Data
  *
@@ -107,8 +90,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Data, __construct) {
 
 /**
  * Returns the cache lifetime
- *
- * @return integer
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Data, getLifetime) {
 
@@ -127,8 +108,6 @@ PHP_METHOD(Phalcon_Cache_Frontend_Data, getLifetime) {
 
 /**
  * Check whether if frontend is buffering output
- *
- * @return boolean
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Data, isBuffering) {
 
@@ -169,14 +148,10 @@ PHP_METHOD(Phalcon_Cache_Frontend_Data, stop) {
 
 /**
  * Serializes data before storing them
- *
- * @param mixed data
- * @return string
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Data, beforeStore) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 	zval *data;
 
 	ZEPHIR_MM_GROW();
@@ -184,22 +159,18 @@ PHP_METHOD(Phalcon_Cache_Frontend_Data, beforeStore) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("serialize", &_0, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("serialize", NULL, 71, data);
 	zephir_check_call_status();
 	RETURN_MM();
 
 }
 
 /**
- * Unserializes data after retrieval
- *
- * @param mixed data
- * @return mixed
+ * Unserializes data after retrieval	 
  */
 PHP_METHOD(Phalcon_Cache_Frontend_Data, afterRetrieve) {
 
 	int ZEPHIR_LAST_CALL_STATUS;
-	zephir_nts_static zephir_fcall_cache_entry *_0 = NULL;
 	zval *data;
 
 	ZEPHIR_MM_GROW();
@@ -207,7 +178,7 @@ PHP_METHOD(Phalcon_Cache_Frontend_Data, afterRetrieve) {
 
 
 
-	ZEPHIR_RETURN_CALL_FUNCTION("unserialize", &_0, data);
+	ZEPHIR_RETURN_CALL_FUNCTION("unserialize", NULL, 72, data);
 	zephir_check_call_status();
 	RETURN_MM();
 
