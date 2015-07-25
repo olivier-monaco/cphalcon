@@ -513,6 +513,7 @@ class Compiler implements InjectionAwareInterface
 						"text_field": true,
 						"email_field": true,
 						"date_field": true,
+						"tel_field": true,
 						"numeric_field": true,
 						"image_input": true
 					];
@@ -1460,7 +1461,7 @@ class Compiler implements InjectionAwareInterface
 		}
 
 		/**
-		 * Update the forelse var if it"s iterated at least one time
+		 * Update the forelse var if it's iterated at least one time
 		 */
 		if typeof forElse == "string" {
 			let compilation .= "<?php $" . forElse . "iterated = true; ?>";
@@ -1831,7 +1832,7 @@ class Compiler implements InjectionAwareInterface
 				/**
 				 * Clone the original compiler
 				 * Perform a subcompilation of the included file
-				 * If the compilation doesn"t return anything we include the compiled path
+				 * If the compilation doesn't return anything we include the compiled path
 				 */
 				let subCompiler = clone this;
 				let compilation = subCompiler->compile(finalPath, false);
@@ -2022,7 +2023,7 @@ class Compiler implements InjectionAwareInterface
 			let type = statement["type"];
 
 			/**
-			 * Compile the statement according to the statement"s type
+			 * Compile the statement according to the statement's type
 			 */
 			switch type {
 
@@ -2110,7 +2111,7 @@ class Compiler implements InjectionAwareInterface
 					let tempCompilation = subCompiler->compile(finalPath, extended);
 
 					/**
-					 * If the compilation doesn"t return anything we include the compiled path
+					 * If the compilation doesn't return anything we include the compiled path
 					 */
 					if typeof tempCompilation == "null" {
 						let tempCompilation = file_get_contents(subCompiler->getCompiledTemplatePath());

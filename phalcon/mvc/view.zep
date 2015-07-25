@@ -64,7 +64,7 @@ class View extends Injectable implements ViewInterface
 	const LEVEL_AFTER_TEMPLATE = 4;
 
 	/**
-	 * Render Level: Hasta el layout del controlador
+	 * Render Level: To the controller layout
 	 *
 	 */
 	const LEVEL_LAYOUT = 3;
@@ -88,7 +88,6 @@ class View extends Injectable implements ViewInterface
 
 	/**
 	 * Cache Mode
-	 *
 	 */
 	const CACHE_MODE_NONE = 0;
 	const CACHE_MODE_INVERSE = 1;
@@ -121,6 +120,9 @@ class View extends Injectable implements ViewInterface
 
 	protected _engines = false;
 
+	/**
+	 * @var array
+	 */
 	protected _registeredEngines { get };
 
 	protected _mainView = "index";
@@ -241,7 +243,7 @@ class View extends Injectable implements ViewInterface
 	 *
 	 * <code>
 	 * 	//Render the view related to the controller only
-	 * 	$this->view->setRenderLevel(View::LEVEL_VIEW);
+	 * 	$this->view->setRenderLevel(View::LEVEL_LAYOUT);
 	 * </code>
 	 */
 	public function setRenderLevel(int level) -> <View>
@@ -565,7 +567,7 @@ class View extends Injectable implements ViewInterface
 	 * @param string viewPath
 	 * @param boolean silence
 	 * @param boolean mustClean
-	 * @param Phalcon\Cache\BackendInterface $cache
+	 * @param \Phalcon\Cache\BackendInterface $cache
 	 */
 	protected function _engineRender(engines, string viewPath, boolean silence, boolean mustClean, <BackendInterface> cache = null)
 	{

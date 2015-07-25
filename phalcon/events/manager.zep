@@ -199,7 +199,7 @@ class Manager implements ManagerInterface
 	 * Internal handler to call a queue of events
 	 *
 	 * @param \SplPriorityQueue|array queue
-	 * @param Phalcon\Events\Event event
+	 * @param \Phalcon\Events\Event event
 	 * @return mixed
 	 */
 	public final function fireQueue(var queue, <Event> event)
@@ -367,7 +367,7 @@ class Manager implements ManagerInterface
 	}
 
 	/**
-	 * Fires an event in the events manager causing that active listeners be notified about it
+	 * Fires an event in the events manager causing the active listeners to be notified about it
 	 *
 	 *<code>
 	 *	$eventsManager->fire('db', $connection);

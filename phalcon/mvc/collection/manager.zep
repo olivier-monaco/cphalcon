@@ -106,7 +106,7 @@ class Manager implements InjectionAwareInterface, EventsAwareInterface
 	/**
 	 * Returns a custom events manager related to a model
 	 *
-	 * @param Phalcon\Mvc\CollectionInterface $model
+	 * @param \Phalcon\Mvc\CollectionInterface $model
  	 * @return Phalcon\Events\ManagerInterface
 	 */
 	public function getCustomEventsManager(<CollectionInterface> model) //-> <\Phalcon\Events\ManagerInterface>
@@ -209,7 +209,7 @@ class Manager implements InjectionAwareInterface, EventsAwareInterface
 	/**
 	 * Returns the connection related to a model
 	 *
-	 * @param Phalcon\Mvc\CollectionInterface $model
+	 * @param \Phalcon\Mvc\CollectionInterface $model
 	 * @return \Mongo
 	 */
 	public function getConnection(<CollectionInterface> model)
@@ -286,7 +286,7 @@ class Manager implements InjectionAwareInterface, EventsAwareInterface
 		let customEventsManager = this->_customEventsManager;
 		if typeof customEventsManager == "array" {
 			if isset customEventsManager[get_class_lower(model)] {
-				let status = customEventsManager->fire("collection:". eventName, model);
+				let status = customEventsManager->fire("collection:" . eventName, model);
 				if !status {
 					return status;
 				}

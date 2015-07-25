@@ -33,7 +33,7 @@ class Builder
 	/**
 	 * Resolves a constructor/call parameter
 	 *
-	 * @param Phalcon\DiInterface dependencyInjector
+	 * @param \Phalcon\DiInterface dependencyInjector
 	 * @param int position
 	 * @param array argument
 	 * @return mixed
@@ -122,7 +122,7 @@ class Builder
 	/**
 	 * Builds a service using a complex service definition
 	 *
-	 * @param Phalcon\DiInterface dependencyInjector
+	 * @param \Phalcon\DiInterface dependencyInjector
 	 * @param array definition
 	 * @param array parameters
 	 * @return mixed
@@ -164,7 +164,7 @@ class Builder
 				let instance = create_instance_params(className, this->_buildParameters(dependencyInjector, arguments));
 
 			} else {
-				let instance = create_instance(className);				
+				let instance = create_instance(className);
 			}
 		}
 
